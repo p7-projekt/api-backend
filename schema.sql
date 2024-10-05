@@ -1,6 +1,7 @@
 CREATE TABLE
     exercise (
         exercise_id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
         description TEXT,
         solution TEXT NOT NULL
     );
@@ -51,17 +52,20 @@ CREATE TABLE
 
 -- Insert dummy data into the exercise table
 INSERT INTO
-    exercise (description, solution)
+    exercise (title, description, solution)
 VALUES
     (
+        'Reverse a string',
         'Write a function to reverse a string',
         'reverseString :: String -> String\nreverseString s = reverse s'
     ),
     (
+        'Is Prime',
         'Write a function to check if a number is prime',
         'isPrime :: Int -> Bool\nisPrime n = n > 1 && all (\\i -> n `mod` i /= 0) [2..floor (sqrt (fromIntegral n))]'
     ),
     (
+        'Factorial Number',
         'Write a function to compute the factorial of a number',
         'factorial :: Int -> Int\nfactorial 0 = 1\nfactorial n = n * factorial (n-1)'
     );
