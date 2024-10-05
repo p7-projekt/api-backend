@@ -147,3 +147,35 @@ VALUES
     (3, 1, 'integer', '120', TRUE);
 
 -- Expected output for factorial
+
+
+POST på vores API
+{
+  "status": "failure",
+  "message": "One or more test cases failed.",
+  "details": {
+    "execution_time": "0.3s",
+    "memory_usage": "12MB",
+    "test_cases": [
+      {
+        "test_case": 1,
+        "input": "2, 3",
+        "expected_output": "5",
+        "user_output": "5",
+        "status": "passed"
+      },
+      {
+        "test_case": 2,
+        "input": "-1, 1",
+        "expected_output": "0",
+        "user_output": "-2",
+        "status": "failed"
+      }
+    ]
+  }
+}
+
+
+
+namespace xd;
+
