@@ -11,8 +11,8 @@
       db:
         condition: service_healthy
     environment:
-      - ASPNETCORE_ENVIRONMENT=value
-      # - con string...
+      ASPNETCORE_ENVIRONMENT: Production
+      CONNECTIONSTRING: Host=${POSTGRES_HOST};Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};
   db:
     container_name: p7-api-db
     image: postgres:16
