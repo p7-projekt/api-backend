@@ -1,0 +1,11 @@
+services:
+  db:
+    container_name: p7-api-db-dev
+    image: postgres:16
+    restart: on-failure
+    environment:
+      POSTGRES_DB: api-dev
+      POSTGRES_USER: api-user
+      POSTGRES_PASSWORD: api-pass
+    ports:
+      - 5200:5432

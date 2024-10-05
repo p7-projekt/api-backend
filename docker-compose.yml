@@ -4,3 +4,5 @@
     build:
       context: .
       dockerfile: API/Dockerfile
+    ports:
+      - 5100:8080
