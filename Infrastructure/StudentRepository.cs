@@ -1,7 +1,7 @@
 using System.Data;
 using Core;
-using Core.Shared.Contracts;
 using Dapper;
+using Infrastructure.Persistence.Contracts;
 
 namespace Infrastructure;
 

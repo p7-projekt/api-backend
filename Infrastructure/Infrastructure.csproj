@@ -10,9 +10,14 @@
     <ItemGroup>
       <ProjectReference Include="..\Core\Core.csproj" />
     </ItemGroup>
+    
+    <ItemGroup>
+        <EmbeddedResource Include="Persistence/Scripts/*.sql"/>
+    </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Dapper" Version="2.1.35" />
+      <PackageReference Include="dbup-postgresql" Version="5.0.40" />
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
       <PackageReference Include="Npgsql" Version="8.0.4" />

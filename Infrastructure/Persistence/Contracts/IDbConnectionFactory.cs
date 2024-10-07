@@ -1,6 +1,6 @@
 using System.Data;
 
-namespace Core.Shared.Contracts;
+namespace Infrastructure.Persistence.Contracts;
 
 public interface IDbConnectionFactory
 {

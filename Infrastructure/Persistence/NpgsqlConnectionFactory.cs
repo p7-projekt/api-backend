@@ -1,5 +1,5 @@
 using System.Data;
-using Core.Shared.Contracts;
+using Infrastructure.Persistence.Contracts;
 using Npgsql;
 
 namespace Infrastructure.Persistence;
