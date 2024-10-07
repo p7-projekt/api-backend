@@ -1,23 +1,29 @@
 using System.Data;
 using Core;
-using Npgsql;
+using Core.Shared.Contracts;
+using Dapper;
 
 namespace Infrastructure;
 
 public class StudentRepository : IStudentRepository
 {
-    public Task<string> GetStudentsAsync()
+    private readonly IDbConnectionFactory _connection;
+
+    public StudentRepository(IDbConnectionFactory connection)
+    {
+        _connection = connection;
+    }
+
+    public async Task<string> GetStudentsAsync()
     {
         // check connection can be done on prod 
-        var con = new NpgsqlConnection(Environment.GetEnvironmentVariable("CONNECTIONSTRING"));
-        con.Open();
+        using var con = await _connection.CreateConnectionAsync();
         if (con.State == ConnectionState.Open)
         {
             Console.WriteLine("Connection established");
         }
-        con.Close();
         // noget postgres connection select * students og return 
         Console.WriteLine("Get students is triggerd");
-        return Task.FromResult("Hello");
+        return "Hello";
     }
 }
