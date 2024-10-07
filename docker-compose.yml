@@ -1,6 +1,33 @@
 ﻿services:
   api:
+    container_name: p7-api
     image: api
     build:
       context: .
       dockerfile: API/Dockerfile
+    ports:
+      - ${API_PORT}:8080
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      CONNECTIONSTRING: Host=${POSTGRES_HOST};Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};
+  db:
+    container_name: p7-api-db
+    image: postgres:16
+    restart: on-failure
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}"]
+      interval: 1s
+      retries: 120
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - db:/var/lib/postgresql/data
+volumes:
+  db:
