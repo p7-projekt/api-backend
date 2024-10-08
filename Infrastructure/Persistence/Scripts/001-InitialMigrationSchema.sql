@@ -24,7 +24,7 @@ CREATE TABLE
 CREATE TABLE
     student (
         student_id SERIAL PRIMARY KEY,
-        session_id INTEGER REFERENCES session (session_id) NOT NULL
+        session_id INTEGER REFERENCES session (session_id) ON DELETE CASCADE NOT NULL
     );
 
 CREATE TABLE
@@ -37,7 +37,8 @@ CREATE TABLE
 CREATE TABLE
     testcase (
         testcase_id SERIAL PRIMARY KEY,
-        exercise_id INTEGER REFERENCES exercise (exercise_id) ON DELETE CASCADE NOT NULL
+        exercise_id INTEGER REFERENCES exercise (exercise_id) ON DELETE CASCADE NOT NULL,
+        testcase_no INTEGER NOT NULL
     );
 
 CREATE TABLE
