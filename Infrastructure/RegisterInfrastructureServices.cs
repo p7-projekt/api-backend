@@ -16,9 +16,8 @@ public static class RegisterInfrastructureServices
         // Register the Npgsqlconnectionfactory
         string connectionString = GetConnectionString(configuration);
         services.AddSingleton<IDbConnectionFactory>(_ => new NpgsqlConnectionFactory(connectionString));
+        // Migrate schema
         EnsureMigration(connectionString);
-        
-        
         
         services.AddScoped<IStudentRepository, StudentRepository>();
         return services;
