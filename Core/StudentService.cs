@@ -13,7 +13,7 @@ public class StudentService
     }
 
 
-    public Task HentNogleStudents()
+    public async Task HentNogleStudents()
     {
         var url = "http://127.0.0.1:8080/submit";
         using var client = new HttpClient();
