@@ -1,5 +1,6 @@
 using Core;
 using Infrastructure;
+using Infrastructure.Persistence;
 
 namespace API;
 
@@ -8,11 +9,13 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        builder.Logging.AddConsole();
         
         // Add services to the container.
         builder.Services.AddAuthorization();
         builder.Services.AddCoreServices();
-        builder.Services.AddInfrastructure();
+        builder.Services.AddInfrastructure(builder.Configuration);
         
         
         // API Configuration
@@ -33,7 +36,8 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-
+        
+        app.Services.DevelopmentSeed();
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
