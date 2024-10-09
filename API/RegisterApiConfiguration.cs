@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using API.Configuration;
 using Asp.Versioning;
 
@@ -22,7 +21,7 @@ public static class RegisterApiConfiguration
             options.GroupNameFormat = "'v'V";
             options.SubstituteApiVersionInUrl = true;
         });
-
+      
         // Global exception handling
         services.AddExceptionHandler<GlobalExceptionHandler>();
 

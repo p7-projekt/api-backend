@@ -15,6 +15,10 @@ public class Program
         // Add services to the container.
         builder.Services.AddAuthorization();
         builder.Services.AddCoreServices();
+        
+        
+        // API Configuration
+        builder.Services.AddApiConfiguration();
         builder.Services.AddInfrastructure(builder.Configuration);
         
         
