@@ -21,7 +21,7 @@ public static class RegisterApiConfiguration
             options.GroupNameFormat = "'v'V";
             options.SubstituteApiVersionInUrl = true;
         });
-      
+
         // Global exception handling
         services.AddExceptionHandler<GlobalExceptionHandler>();
 
