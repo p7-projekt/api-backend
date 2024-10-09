@@ -22,10 +22,31 @@ public static class RegisterApiConfiguration
             options.SubstituteApiVersionInUrl = true;
         });
 
-        
         // Global exception handling
         services.AddExceptionHandler<GlobalExceptionHandler>();
 
+
+        // CORS
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(
+                policy =>
+                {
+                    if (string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Development",
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                    }
+                    else
+                    {
+                        policy.WithOrigins("localhost:5173")
+                            .WithMethods(HttpMethods.Get, HttpMethods.Patch, HttpMethods.Delete, HttpMethods.Post)
+                            .AllowAnyHeader();
+                    }
+                }
+                );
+        });
+        
         return services;
     }
 }
