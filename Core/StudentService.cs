@@ -11,8 +11,9 @@ public class StudentService
     }
 
 
-    public async Task HentNogleStudents()
+    public Task HentNogleStudents()
     {
-        await _studentRepository.GetStudentsAsync();
+        throw new Exception("test");
+        // await _studentRepository.GetStudentsAsync();
     }
 }
