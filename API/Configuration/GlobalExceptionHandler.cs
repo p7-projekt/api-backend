@@ -16,7 +16,7 @@ public class GlobalExceptionHandler : IExceptionHandler
         var internalServerError = HttpStatusCode.InternalServerError;
         var path = httpContext.Request.Path;
         ProblemDetails errorResponse = new ProblemDetails();
-        Console.WriteLine("Hello  324 342342 ");
+        _logger.LogError("Exception happend at {path} for connection id: {id}, exception trace: {type}  Message: {exception}.", path, httpContext.Connection.Id, exception.StackTrace, exception.Message);
         switch (exception)
         {
             default:

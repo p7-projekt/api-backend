@@ -13,7 +13,7 @@ public class StudentService
 
     public Task HentNogleStudents()
     {
-        throw new Exception("test");
+        throw new ArgumentException("test");
         // await _studentRepository.GetStudentsAsync();
     }
 }
