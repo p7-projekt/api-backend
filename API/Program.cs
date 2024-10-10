@@ -1,3 +1,4 @@
+using API.Configuration;
 using Core;
 using Infrastructure;
 using Infrastructure.Persistence;
@@ -15,16 +16,13 @@ public class Program
         // Add services to the container.
         builder.Services.AddAuthorization();
         builder.Services.AddCoreServices();
-        
-        
-        // API Configuration
-        builder.Services.AddApiConfiguration();
         builder.Services.AddInfrastructure(builder.Configuration);
         
         
         // API Configuration
         builder.Services.AddApiConfiguration();
         builder.Services.AddProblemDetails();
+        
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -32,22 +30,21 @@ public class Program
 
         var app = builder.Build();
         
-        app.UseExceptionHandler();
-        
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
             app.UseSwaggerUI();
+            app.Services.DevelopmentSeed();
         }
         
-        app.Services.DevelopmentSeed();
+        app.UseExceptionHandler();
         app.UseHttpsRedirection();
-
         app.UseAuthorization();
-
-        app.UseStudentEndpoints();
         app.UseCors();
+
+        // Endpoints
+        app.UseStudentEndpoints();
 
         app.Run();
     }

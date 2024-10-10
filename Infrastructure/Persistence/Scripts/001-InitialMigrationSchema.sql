@@ -1,18 +1,18 @@
 CREATE TABLE
+    instructor (
+        instructor_id SERIAL PRIMARY KEY,
+        email VARCHAR(50) NOT NULL,
+        password VARCHAR(100) NOT NULL,
+        name VARCHAR(100) NOT NULL
+    );
+
+CREATE TABLE
     exercise (
         exercise_id SERIAL PRIMARY KEY,
         author_id INTEGER REFERENCES instructor (instructor_id) ON DELETE CASCADE NOT NULL,
         title TEXT NOT NULL,
         description TEXT,
         solution TEXT NOT NULL
-    );
-
-CREATE TABLE
-    instructor (
-        instructor_id SERIAL PRIMARY,
-        email VARCHAR(50) NOT NULL,
-        password VARCHAR(100) NOT NULL,
-        name VARCHAR(100) NOT NULL
     );
 
 CREATE TABLE
