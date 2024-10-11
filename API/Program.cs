@@ -2,6 +2,7 @@ using API.Configuration;
 using Core;
 using Infrastructure;
 using Infrastructure.Persistence;
+using Serilog;
 
 namespace API;
 
@@ -10,8 +11,10 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
-        builder.Logging.AddConsole();
+        builder.Host.UseSerilog((context, configuration) =>
+        {
+            configuration.ReadFrom.Configuration(context.Configuration);
+        });
         
         // Add services to the container.
         builder.Services.AddAuthorization();
@@ -42,6 +45,7 @@ public class Program
         app.UseHttpsRedirection();
         app.UseAuthorization();
         app.UseCors();
+        app.UseSerilogRequestLogging();
 
         // Endpoints
         app.UseStudentEndpoints();
