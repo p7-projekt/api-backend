@@ -25,7 +25,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./TestResults
+      run: dotnet test --no-build --collect:"XPlat Code Coverage" --results-directory ./TestResults
     - name: Publish Test Results
       uses: actions/upload-artifact@v4 #Changed to v4 here; chat
       with:
