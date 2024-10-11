@@ -19,6 +19,15 @@ public class GlobalExceptionHandler : IExceptionHandler
         _logger.LogError("Exception happend at {path} for connection id: {id}, exception trace: {type}  Message: {exception}.", path, httpContext.Connection.Id, exception.StackTrace, exception.Message);
         switch (exception)
         {
+            case BadHttpRequestException:
+                var validationResponse = new ValidationProblemDetails();
+                validationResponse.Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1";
+                validationResponse.Title = "One or more validation errors occurred.";
+                validationResponse.Status = (int)HttpStatusCode.BadRequest;
+                validationResponse.Errors.Add("Error", new []{"Invalid request object"});
+                httpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                await httpContext.Response.WriteAsJsonAsync(validationResponse, cancellationToken);
+                return true;
             default:
                 errorResponse.Type = "https://datatracker.ietf.org/doc/html/rfc9110#section-15.6.1";
                 errorResponse.Title = nameof(HttpStatusCode.InternalServerError);

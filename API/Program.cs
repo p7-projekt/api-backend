@@ -1,5 +1,6 @@
 using API.Configuration;
 using Core;
+using FluentValidation;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Serilog;
@@ -49,6 +50,7 @@ public class Program
 
         // Endpoints
         app.UseStudentEndpoints();
+        app.UseExampleEndpoints();
 
         app.Run();
     }

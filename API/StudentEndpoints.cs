@@ -22,7 +22,11 @@ public static class StudentEndpoints
             await s.HentNogleStudents();
             return TypedResults.Ok("hello");
         });
-        
+
+        studentsV1.MapPost("/", () =>
+        {
+
+        });
         
         studentsV1.MapGet("/hello", () =>
         {
