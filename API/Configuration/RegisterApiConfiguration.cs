@@ -1,7 +1,6 @@
-using API.Configuration;
 using Asp.Versioning;
 
-namespace API;
+namespace API.Configuration;
 
 public static class RegisterApiConfiguration
 {
