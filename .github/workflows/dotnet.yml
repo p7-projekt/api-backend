@@ -38,9 +38,10 @@ jobs:
     - name: Deploy to GitHub Pages
       if: success()  # Only deploy if the tests pass
       run: |
-        git config --global user.name "github-actions"
-        git config --global user.email "github-actions@github.com"
-        git checkout --orphan gh-pages
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git fetch origin
+        git checkout gh-pages || git checkout --orphan gh-pages
         git reset --hard
         cp -r ./coverage/* ./
         git add .
