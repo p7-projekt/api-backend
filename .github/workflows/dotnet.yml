@@ -47,3 +47,5 @@ jobs:
         git add .
         git commit -m "Deploy code coverage report"
         git push --force origin gh-pages
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
