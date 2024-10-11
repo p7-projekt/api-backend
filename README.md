@@ -10,3 +10,7 @@ POSTGRES_USER=xx
 POSTGRES_PASSWORD=xx
 POSTGRES_PORT=xx
 ```
+
+
+To access the most recent test-coverage report, go to: https://p7-projekt.github.io/api-backend/
+

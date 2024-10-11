@@ -47,6 +47,3 @@ jobs:
         git add .
         git commit -m "Deploy code coverage report"
         git push --force origin gh-pages
-    - name: Display Report URL
-      run: |
-        echo "Coverage report is available at:"
