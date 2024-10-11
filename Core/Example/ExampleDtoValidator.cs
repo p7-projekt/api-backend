@@ -18,13 +18,19 @@ public class ExampleDtoValidator : AbstractValidator<ExampleDto>
 
     }
 
-    public bool ExampleDtoValidationFilter(ExampleDto dto)
+    public bool ExampleDtoValidationFilter(ExampleDto dto, out Dictionary<string, string[]> errors)
     {
+        errors = new Dictionary<string, string[]>();
+        var firstnameErrors = new List<string>();
         if (string.IsNullOrWhiteSpace(dto.Name))
         {
-            return false;
+            firstnameErrors.Add("Name is required");
         }
+        if(firstnameErrors.Any()) errors.Add(nameof(dto.Name), firstnameErrors.ToArray());
         // ....
+        
+        if(errors.Any()) return false;
+        
         return true;
     }
 }
