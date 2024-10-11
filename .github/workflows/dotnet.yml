@@ -5,7 +5,7 @@ name: .NET
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "feature/22" ]
   pull_request:
     branches: [ "master" ]
 
@@ -25,4 +25,18 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --results-directory ./TestResults
+    - name: Publish Test Results
+      uses: actions/upload-artifact@v4 #Changed to v4 here; chat
+      with:
+        name: test-results
+        path: ./TestResults
+    - name: Generate Coverage Report (Cobertura Format)
+      run: |
+        dotnet tool install --global dotnet-reportgenerator-globaltool
+        reportgenerator "-reports:./TestResults/*/coverage.cobertura.xml" "-targetdir:./coverage" -reporttypes:Html
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: code-coverage-report
+        path: ./coverage
