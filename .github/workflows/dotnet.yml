@@ -5,7 +5,7 @@ name: .NET
 
 on:
   push:
-    branches: [ "master", "feature/22" ]
+    branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 
@@ -47,8 +47,6 @@ jobs:
         git add .
         git commit -m "Deploy code coverage report"
         git push --force origin gh-pages
-      # env:
-      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
     - name: Display Report URL
       run: |
         echo "Coverage report is available at:"
