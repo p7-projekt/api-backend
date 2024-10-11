@@ -25,4 +25,25 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --collect:"XPlat Code Coverage" --results-directory ./TestResults
+    - name: Publish Test Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: ./TestResults
+    - name: Generate Coverage Report (Cobertura Format)
+      run: |
+        dotnet tool install --global dotnet-reportgenerator-globaltool
+        reportgenerator "-reports:./TestResults/*/coverage.cobertura.xml" "-targetdir:./coverage" -reporttypes:Html
+    - name: Deploy to GitHub Pages
+      if: success()  # Only deploy if the tests pass
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git fetch origin
+        git checkout gh-pages || git checkout --orphan gh-pages
+        git reset --hard
+        cp -r ./coverage/* ./
+        git add .
+        git commit -m "Deploy code coverage report"
+        git push --force origin gh-pages
