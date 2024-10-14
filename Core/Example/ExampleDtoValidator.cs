@@ -17,20 +17,4 @@ public class ExampleDtoValidator : AbstractValidator<ExampleDto>
         RuleFor(x => x.Surname).MinimumLength(1).MaximumLength(100).WithMessage("Name must be between 1 and 100 characters");
 
     }
-
-    public bool ExampleDtoValidationFilter(ExampleDto dto, out Dictionary<string, string[]> errors)
-    {
-        errors = new Dictionary<string, string[]>();
-        var firstnameErrors = new List<string>();
-        if (string.IsNullOrWhiteSpace(dto.Name))
-        {
-            firstnameErrors.Add("Name is required");
-        }
-        if(firstnameErrors.Any()) errors.Add(nameof(dto.Name), firstnameErrors.ToArray());
-        // ....
-        
-        if(errors.Any()) return false;
-        
-        return true;
-    }
 }

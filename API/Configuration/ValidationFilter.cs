@@ -11,7 +11,6 @@ public class ValidationFilter<TModel> : IEndpointFilter
     {
         _logger = logger;
         _validationFilter = validationFilter;
-
     }
 
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
@@ -20,6 +19,7 @@ public class ValidationFilter<TModel> : IEndpointFilter
         var result = await _validationFilter.ValidateAsync(request, context.HttpContext.RequestAborted);
         if (!result.IsValid)
         {
+            _logger.LogInformation("Validation error occured for {connectionId}", context.HttpContext.Connection.Id);
             return TypedResults.ValidationProblem(result.ToDictionary());
         }
 

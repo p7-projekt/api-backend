@@ -1,6 +1,5 @@
 using API.Configuration;
 using Core;
-using FluentValidation;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Serilog;
