@@ -33,9 +33,9 @@ public class UserRepository
 		var query = """
 					SELECT COUNT(email) FROM users WHERE email = @email;
 					""";
+		_logger.LogInformation("Checking if email {email} is available", email);
 		var result = await con.QueryAsync<int>(query, new { email = email });
-
-		return !result.Any();
+		return result.First() == 0;
 	}
 
 	public async Task<bool> CreateUserAsync(User user, Roles role)

@@ -1,3 +1,3 @@
 namespace Infrastructure.Authentication.Models;
 
-public record CreateUserDto(string Email, string Password);
+public record CreateUserDto(string Email, string Password, string ConfirmPassword);

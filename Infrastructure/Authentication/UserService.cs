@@ -26,6 +26,4 @@ public class UserService
 		var createUser = await _userRepository.CreateUserAsync(user, Roles.Instructor);
 		_logger.LogInformation("User created: {email} with role: {role}", user.Email, Roles.Instructor);
 	}
-	
-	
 }

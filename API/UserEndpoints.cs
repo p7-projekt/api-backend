@@ -1,3 +1,4 @@
+using API.Configuration;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
 using Infrastructure.Authentication;
@@ -20,7 +21,7 @@ public static class UserEndpoints
 		usersV1.MapPost("/", async ([FromBody] CreateUserDto userDto, UserService service) =>
 		{
 			await service.CreateUser(userDto.Email, userDto.Password);
-		});
+		}).WithRequestValidation<CreateUserDto>();
 
 		return app;
 	}

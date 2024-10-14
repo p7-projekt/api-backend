@@ -1,6 +1,7 @@
 using System.Reflection;
 using Core;
 using DbUp;
+using FluentValidation;
 using Infrastructure.Authentication;
 using Infrastructure.Authentication.Models;
 using Infrastructure.Persistence;
@@ -25,6 +26,7 @@ public static class RegisterInfrastructureServices
         services.AddScoped<IStudentRepository, StudentRepository>();
         
         // Authentication - Authorization
+        services.AddValidatorsFromAssemblies(new [] {Assembly.GetExecutingAssembly() });
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<UserRepository>();
         services.AddScoped<UserService>();
