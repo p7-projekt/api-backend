@@ -1,8 +1,11 @@
 using System.Reflection;
 using Core;
 using DbUp;
+using Infrastructure.Authentication;
+using Infrastructure.Authentication.Models;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Contracts;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,6 +23,11 @@ public static class RegisterInfrastructureServices
         EnsureMigration(connectionString);
         
         services.AddScoped<IStudentRepository, StudentRepository>();
+        
+        // Authentication - Authorization
+        services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+        services.AddScoped<UserRepository>();
+        services.AddScoped<UserService>();
         return services;
     }
 

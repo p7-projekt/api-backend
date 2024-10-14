@@ -50,6 +50,7 @@ public class Program
         // Endpoints
         app.UseStudentEndpoints();
         app.UseExampleEndpoints();
+        app.UseUserEndpoints();
 
         app.Run();
     }
