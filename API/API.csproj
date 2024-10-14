@@ -11,9 +11,11 @@
     <ItemGroup>
         <PackageReference Include="Asp.Versioning.Http" Version="8.1.0" />
         <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
+        <PackageReference Include="FluentValidation" Version="11.10.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8"/>
         <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
+        <PackageReference Include="System.Text.Json" Version="9.0.0-rc.2.24473.5" />
     </ItemGroup>
 
     <ItemGroup>
