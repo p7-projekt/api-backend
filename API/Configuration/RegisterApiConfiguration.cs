@@ -1,5 +1,6 @@
 using System.Text;
 using Asp.Versioning;
+using Infrastructure.Authentication;
 using Infrastructure.Authentication.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -55,6 +56,7 @@ public static class RegisterApiConfiguration
         services.AddAuthorization(opt =>
         {
             opt.AddPolicy(nameof(Roles.Instructor), policy => policy.RequireRole(nameof(Roles.Instructor)));
+            opt.AddPolicy(nameof(Roles.AnonymousUser), policy => policy.RequireRole(nameof(Roles.Instructor), nameof(Roles.AnonymousUser)));
         });
         services.AddAuthentication(opt =>
         {
@@ -69,9 +71,10 @@ public static class RegisterApiConfiguration
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = "Backenden",
-                ValidAudience = "Frontend",
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY")!))
+                ValidIssuer = AuthConstants.Issuer,
+                ValidAudience = AuthConstants.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable(AuthConstants.JwtSecret)!))
             };
         });
         

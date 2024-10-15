@@ -14,27 +14,47 @@ public class TokenService
     {
         _logger = logger;
     }
-    public string GenerateJwt()
+    public string GenerateJwt(int userId, Roles role)
     {
-        var key = Environment.GetEnvironmentVariable("JWT_KEY");
+        var token = new JwtSecurityToken(
+            issuer: AuthConstants.Issuer,
+            audience: AuthConstants.Audience,
+            claims: new List<Claim>
+            {
+                new Claim(ClaimTypes.UserData, userId.ToString()),
+                new Claim(ClaimTypes.Role, role.ToString())
+            },
+            expires: DateTime.Now.AddMinutes(AuthConstants.JwtExpirationInMinutes),
+            signingCredentials: GetSigningCredentials()
+            );
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public string GenerateAnonymousUserJwt(int sessionLength)
+    {
+        var token = new JwtSecurityToken(
+            issuer: AuthConstants.Issuer,
+            audience: AuthConstants.Audience,
+            claims: new List<Claim>
+            {
+                new Claim(ClaimTypes.UserData, AuthConstants.AnonymousUserId.ToString()),
+                new Claim(ClaimTypes.Role, nameof(Roles.AnonymousUser))
+            },
+            expires: DateTime.Now.AddMinutes(sessionLength),
+            signingCredentials: GetSigningCredentials()
+        );
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private SigningCredentials GetSigningCredentials()
+    {
+        var key = Environment.GetEnvironmentVariable(AuthConstants.JwtSecret);
         if (key == null)
         {
             _logger.LogWarning("No jwt key environment variable found!");
         }
         var securityKey =
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-        var token = new JwtSecurityToken(
-            issuer: "Backenden",
-            audience: "Frontend",
-            claims: new List<Claim>
-            {
-                new Claim(ClaimTypes.UserData, "1"),
-                new Claim(ClaimTypes.Role, nameof(Roles.AnonymousUser))
-            },
-            expires: DateTime.Now.AddMinutes(30),
-            signingCredentials: credentials
-            );
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
     }
 }

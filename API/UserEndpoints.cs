@@ -27,15 +27,19 @@ public static class UserEndpoints
 
 		usersV1.MapGet("/token", (TokenService service) =>
 		{
-			return service.GenerateJwt();
+			return service.GenerateJwt(1, Roles.Instructor);
+		});
+
+		usersV1.MapGet("/anonToken", (TokenService service) =>
+		{
+			return service.GenerateAnonymousUserJwt(25);
 		});
 
 		usersV1.MapGet("/secret", (ClaimsPrincipal user) =>
 		{
 			foreach (var claim in user.Claims)
 			{
-				Console.WriteLine(claim.Subject);
-				Console.WriteLine(claim.Value);
+				Console.WriteLine(claim.Subject + " " + claim.Value);
 			}
 			return $"Hello {user.Identity!.Name}, {user.IsInRole(nameof(Roles.Instructor))}";
 		}).RequireAuthorization(nameof(Roles.Instructor));
