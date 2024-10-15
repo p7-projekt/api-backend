@@ -26,6 +26,7 @@ public static class RegisterInfrastructureServices
         services.AddScoped<IStudentRepository, StudentRepository>();
         
         // Authentication - Authorization
+        services.AddSingleton<TokenService>();
         services.AddValidatorsFromAssemblies(new [] {Assembly.GetExecutingAssembly() });
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<UserRepository>();

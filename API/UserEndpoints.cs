@@ -23,6 +23,12 @@ public static class UserEndpoints
 			await service.CreateUser(userDto.Email, userDto.Password);
 		}).WithRequestValidation<CreateUserDto>();
 
+
+		usersV1.MapGet("/token", (TokenService service) =>
+		{
+			return service.GenerateJwt();
+		});
+		
 		return app;
 	}
 }

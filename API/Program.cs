@@ -17,7 +17,6 @@ public class Program
         });
         
         // Add services to the container.
-        builder.Services.AddAuthorization();
         builder.Services.AddCoreServices();
         builder.Services.AddInfrastructure(builder.Configuration);
         
