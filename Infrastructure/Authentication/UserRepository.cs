@@ -27,6 +27,19 @@ public class UserRepository
 		return user.FirstOrDefault();
 	}
 
+	public async Task<User?> GetUserByEmailAsync(string email)
+	{
+		using var con = await _connection.CreateConnectionAsync();
+		var query = """
+					SELECT users.id, users.email, users.password_hash AS passwordhash, role.name FROM users
+						JOIN user_role ON users.id = user_role.user_id
+						JOIN role ON user_role.role_id = role.id
+					    WHERE email = @email;
+					""";
+		var user = await con.QuerySingleAsync<User>(query, new { email });
+		return user;
+	}
+
 	public async Task<bool> IsEmailAvailableAsync(string email)
 	{
 		using var con = await _connection.CreateConnectionAsync();
