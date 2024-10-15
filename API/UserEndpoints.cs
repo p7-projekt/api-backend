@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using API.Configuration;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
@@ -28,6 +29,16 @@ public static class UserEndpoints
 		{
 			return service.GenerateJwt();
 		});
+
+		usersV1.MapGet("/secret", (ClaimsPrincipal user) =>
+		{
+			foreach (var claim in user.Claims)
+			{
+				Console.WriteLine(claim.Subject);
+				Console.WriteLine(claim.Value);
+			}
+			return $"Hello {user.Identity!.Name}, {user.IsInRole(nameof(Roles.Instructor))}";
+		}).RequireAuthorization(nameof(Roles.Instructor));
 		
 		return app;
 	}

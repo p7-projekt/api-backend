@@ -29,7 +29,8 @@ public class TokenService
             audience: "Frontend",
             claims: new List<Claim>
             {
-                new Claim(ClaimTypes.Role, nameof(Roles.Instructor))
+                new Claim(ClaimTypes.UserData, "1"),
+                new Claim(ClaimTypes.Role, nameof(Roles.AnonymousUser))
             },
             expires: DateTime.Now.AddMinutes(30),
             signingCredentials: credentials

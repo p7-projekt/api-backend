@@ -1,6 +1,8 @@
 using System.Text;
 using Asp.Versioning;
+using Infrastructure.Authentication.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 
 namespace API.Configuration;
@@ -50,7 +52,10 @@ public static class RegisterApiConfiguration
         });
         
         // authentication - Authorization
-        services.AddAuthorization();
+        services.AddAuthorization(opt =>
+        {
+            opt.AddPolicy(nameof(Roles.Instructor), policy => policy.RequireRole(nameof(Roles.Instructor)));
+        });
         services.AddAuthentication(opt =>
         {
             opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

@@ -42,6 +42,7 @@ public class Program
         
         app.UseExceptionHandler();
         app.UseHttpsRedirection();
+        app.UseAuthentication();
         app.UseAuthorization();
         app.UseCors();
         app.UseSerilogRequestLogging();
