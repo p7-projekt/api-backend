@@ -1,5 +1,6 @@
 using System.Data;
 using Dapper;
+using FluentResults;
 using FluentValidation.Validators;
 using Infrastructure.Authentication.Models;
 using Infrastructure.Persistence.Contracts;
@@ -11,6 +12,7 @@ public class UserRepository
 {
 	private readonly IDbConnectionFactory _connection;
 	private readonly ILogger<UserRepository> _logger;
+	
 	public UserRepository(IDbConnectionFactory connection, ILogger<UserRepository> logger)
 	{
 		_connection = connection;
@@ -27,11 +29,11 @@ public class UserRepository
 		return user.FirstOrDefault();
 	}
 
-	public async Task<User?> GetUserByEmailAsync(string email)
+	public async Task<User?> GetUserDetailsByEmailAsync(string email)
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
-					SELECT users.id, users.email, users.password_hash AS passwordhash, role.name FROM users
+					SELECT users.id, users.email, users.password_hash AS passwordhash, role.name AS rolestr FROM users
 						JOIN user_role ON users.id = user_role.user_id
 						JOIN role ON user_role.role_id = role.id
 					    WHERE email = @email;
@@ -51,7 +53,7 @@ public class UserRepository
 		return result.First() == 0;
 	}
 
-	public async Task<bool> CreateUserAsync(User user, Roles role)
+	public async Task<Result> CreateUserAsync(User user, Roles role)
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		using var transaction = con.BeginTransaction();
@@ -77,10 +79,10 @@ public class UserRepository
 		{
 			_logger.LogInformation("Creating user with email: {email} failed", user.Email);
 			transaction.Rollback();
-			throw;
+			return Result.Fail("Failed to create user");
 		}
 
-		return true;
+		return Result.Ok();
 	}
 	
 }

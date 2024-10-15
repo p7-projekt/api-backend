@@ -32,7 +32,7 @@ public class UserService
 
 	public async Task<Result<string>> LoginAsync(LoginDto loginDto)
 	{
-		var user = await _userRepository.GetUserByEmailAsync(loginDto.Email);
+		var user = await _userRepository.GetUserDetailsByEmailAsync(loginDto.Email);
 		if (user == null)
 		{
 			_logger.LogInformation("User with email {email} not found", loginDto.Email);
