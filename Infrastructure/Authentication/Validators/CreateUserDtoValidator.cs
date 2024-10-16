@@ -1,12 +1,13 @@
 using FluentValidation;
+using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Models;
 
 namespace Infrastructure.Authentication.Validators;
 
 public class CreateUserDtoValidator : AbstractValidator<CreateUserDto>
 {
-	private readonly UserRepository _userRepository;
-	public CreateUserDtoValidator(UserRepository userRepository)
+	private readonly IUserRepository _userRepository;
+	public CreateUserDtoValidator(IUserRepository userRepository)
 	{
 		_userRepository = userRepository;
 		RuleFor(x => x.Email).Cascade(CascadeMode.Stop).NotEmpty().EmailAddress().WithMessage("Email is required")

@@ -2,13 +2,14 @@ using System.Data;
 using Dapper;
 using FluentResults;
 using FluentValidation.Validators;
+using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Models;
 using Infrastructure.Persistence.Contracts;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Authentication;
 
-public class UserRepository
+public class UserRepository : IUserRepository
 {
 	private readonly IDbConnectionFactory _connection;
 	private readonly ILogger<UserRepository> _logger;
@@ -29,17 +30,28 @@ public class UserRepository
 		return user.FirstOrDefault();
 	}
 
-	public async Task<User?> GetUserDetailsByEmailAsync(string email)
+	public async Task<User?> GetUserByEmailAsync(string email)
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
-					SELECT users.id, users.email, users.password_hash AS passwordhash, role.name AS rolestr FROM users
-						JOIN user_role ON users.id = user_role.user_id
-						JOIN role ON user_role.role_id = role.id
+					SELECT id, email, password_hash AS passwordhash, created_at AS createdat FROM users
+
 					    WHERE email = @email;
 					""";
 		var user = await con.QuerySingleAsync<User>(query, new { email });
 		return user;
+	}
+	
+	public async Task<IEnumerable<Role>> GetRolesByUserIdAsync(int userId)
+	{
+		using var con = await _connection.CreateConnectionAsync();
+		var query = """
+		            SELECT role.name as rolename FROM user_role
+		            JOIN role ON user_role.role_id = role.id AND user_role.user_id = @userId
+		            """;
+		_logger.LogInformation("Selecting roles for userid: {userid}", userId);
+		var roles = await con.QueryAsync<Role>(query, new { userId = userId });
+		return roles;
 	}
 
 	public async Task<bool> IsEmailAvailableAsync(string email)
@@ -60,10 +72,10 @@ public class UserRepository
 		try
 		{
 			var insertQuery = """
-			                 INSERT INTO users (email, password_hash) VALUES (@email, @password_hash) RETURNING id;
+			                 INSERT INTO users (email, password_hash, created_at) VALUES (@email, @password_hash, @created_at) RETURNING id;
 			                 """;
 			_logger.LogInformation("Inserting user into transaction: {query}", insertQuery);
-			var userId = await con.ExecuteScalarAsync<int>(insertQuery, new {email = user.Email, password_hash = user.PasswordHash}, transaction);
+			var userId = await con.ExecuteScalarAsync<int>(insertQuery, new {email = user.Email, password_hash = user.PasswordHash, created_at = user.CreatedAt}, transaction);
 			
 			var createRoleQuery = """
 			                      INSERT INTO user_role (user_id, role_id)

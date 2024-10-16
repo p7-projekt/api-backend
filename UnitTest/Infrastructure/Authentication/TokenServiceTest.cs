@@ -20,7 +20,7 @@ public class TokenServiceTest
 		var _loggerSubstitute = Substitute.For<ILogger<TokenService>>();
 		var service = new TokenService(_loggerSubstitute);
 		var userId = 1;
-		var role = Roles.Instructor;
+		var role = new List<Roles>{Roles.Instructor};
 		var handler = new JwtSecurityTokenHandler();
 
 		// Act
@@ -32,7 +32,32 @@ public class TokenServiceTest
 		
 		// Assert
 		Assert.Equal(userId.ToString(), userIdClaim!.Value);
-		Assert.Equal(role.ToString(), roleClaim!.Value);
+		Assert.Equal(role.First().ToString(), roleClaim!.Value);
+	}
+	
+	[Fact]
+	public void GenerateValidJWT_ShouldReturn_ValidJWTTokenWithMultipleRoles()
+	{
+		// Arrange
+		var _loggerSubstitute = Substitute.For<ILogger<TokenService>>();
+		var service = new TokenService(_loggerSubstitute);
+		var userId = 1;
+		var roles = new List<Roles>{Roles.Instructor, Roles.AnonymousUser};
+		var handler = new JwtSecurityTokenHandler();
+
+		// Act
+		var result = service.GenerateJwt(userId, roles);
+		var token = handler.ReadJwtToken(result);
+		
+		var userIdClaim = token.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.UserData);
+		var roleClaim = token.Claims.Where(claim => claim.Type == ClaimTypes.Role).Select(x => x.Value).ToList();
+		
+		// Assert
+		Assert.Equal(userId.ToString(), userIdClaim!.Value);
+		for (int i = 0; i < roles.Count; i++)
+		{
+			Assert.Equal(roles[i].ToString(), roleClaim![i]);
+		}
 	}
 
 	[Fact]

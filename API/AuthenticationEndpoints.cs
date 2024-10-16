@@ -1,6 +1,7 @@
 using System.Net;
+using System.Security.Claims;
 using API.Configuration;
-using Infrastructure.Authentication;
+using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ public static class AuthenticationEndpoints
 		
 		var authGroup = app.MapGroup("").WithTags("Authentication");
 
-		authGroup.MapPost("/login", async Task<Results<Ok<string>, BadRequest<ValidationProblemDetails>>> ([FromBody] LoginDto loginDto, UserService service) =>
+		authGroup.MapPost("/login", async Task<Results<Ok<string>, BadRequest<ValidationProblemDetails>>> ([FromBody] LoginDto loginDto, IUserService service) =>
 		{
 			var result = await service.LoginAsync(loginDto);
 			if (result.IsFailed)
@@ -32,11 +33,24 @@ public static class AuthenticationEndpoints
 			}
 			return TypedResults.Ok(result.Value);
 		});
-		
-		// authGroup.MapPost("/register", async ([FromBody] CreateUserDto userDto, UserService service) =>
-		// {
-		// 	await service.CreateUser(userDto.Email, userDto.Password);
-		// }).WithRequestValidation<CreateUserDto>();
+		// For showcase ####################################################################################
+		authGroup.MapGet("/secret",  Ok<string> (ClaimsPrincipal claimsPrincipal) =>
+		{
+			var user = claimsPrincipal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+			var roles = claimsPrincipal.Claims.First(c => c.Type == ClaimTypes.Role).Value;
+			return TypedResults.Ok($"Hello user: {user} with role {roles}");
+		}).RequireAuthorization(nameof(Roles.Instructor));
+
+		authGroup.MapGet("/anontoken", Ok<string> (ITokenService service) =>
+		{
+			var token = service.GenerateAnonymousUserJwt(5);
+			return TypedResults.Ok(token);
+		});
+		//###################################################################################################
+		authGroup.MapPost("/register", async ([FromBody] CreateUserDto userDto, IUserService service) =>
+		{
+			await service.CreateUserAsync(userDto.Email, userDto.Password);
+		}).WithRequestValidation<CreateUserDto>();
 
 		return app;
 	}

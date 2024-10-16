@@ -1,17 +1,18 @@
 using FluentResults;
+using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Authentication;
 
-public class UserService
+public class UserService : IUserService
 {
 	private readonly IPasswordHasher<User> _passwordHasher;
-	private readonly UserRepository _userRepository;
-	private readonly TokenService _tokenService;
+	private readonly IUserRepository _userRepository;
+	private readonly ITokenService _tokenService;
 	private readonly ILogger<UserService> _logger;
-	public UserService(IPasswordHasher<User> passwordHasher, UserRepository userRepository, ILogger<UserService> logger, TokenService tokenService)
+	public UserService(IPasswordHasher<User> passwordHasher, IUserRepository userRepository, ILogger<UserService> logger, ITokenService tokenService)
 	{
 		_passwordHasher = passwordHasher;
 		_userRepository = userRepository;
@@ -19,9 +20,10 @@ public class UserService
 		_tokenService = tokenService;
 	}
 
-	public async Task CreateUser(string email, string password)
+	public async Task CreateUserAsync(string email, string password)
 	{
 		var user = new User();
+		user.CreatedAt = DateTime.UtcNow;
 		user.Email = email;
 		var passwordHash = _passwordHasher.HashPassword(user, password);
 		user.PasswordHash = passwordHash;
@@ -32,19 +34,23 @@ public class UserService
 
 	public async Task<Result<string>> LoginAsync(LoginDto loginDto)
 	{
-		var user = await _userRepository.GetUserDetailsByEmailAsync(loginDto.Email);
+		var user = await _userRepository.GetUserByEmailAsync(loginDto.Email);
 		if (user == null)
 		{
 			_logger.LogInformation("User with email {email} not found", loginDto.Email);
 			return Result.Fail($"Failed to login user with email {loginDto.Email}");
 		}
-		var correctPassword = _passwordHasher.VerifyHashedPassword(new User{Email = loginDto.Email}, user.PasswordHash, loginDto.Password);
+		var correctPassword = _passwordHasher.VerifyHashedPassword(new User{Email = loginDto.Email, CreatedAt = user.CreatedAt}, user.PasswordHash, loginDto.Password);
 		if (correctPassword == PasswordVerificationResult.Failed)
 		{
 			_logger.LogDebug("Password verification failed for user {email}", loginDto.Email);
 			return Result.Fail($"Failed to login user with email {loginDto.Email}");
 		}
-		_logger.LogInformation("Generating JWT for {id} {email} with role {role}", user.Id, user.Email, user.Role.ToString());
-		return _tokenService.GenerateJwt(user.Id, user.Role);
+		var userRoles = await _userRepository.GetRolesByUserIdAsync(user.Id);
+		var strUserRoles = string.Concat(userRoles.Select(x => x.RoleName));
+		var roles = userRoles.Select(x => RolesConvert.Convert(x.RoleName)).ToList();
+		
+		_logger.LogInformation("Generating JWT for {id} {email} with role {role}", user.Id, user.Email, strUserRoles);
+		return _tokenService.GenerateJwt(user.Id, roles);
 	}
 }

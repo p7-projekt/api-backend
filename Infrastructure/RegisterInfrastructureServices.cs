@@ -3,6 +3,7 @@ using Core;
 using DbUp;
 using FluentValidation;
 using Infrastructure.Authentication;
+using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Models;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Contracts;
@@ -26,11 +27,11 @@ public static class RegisterInfrastructureServices
         services.AddScoped<IStudentRepository, StudentRepository>();
         
         // Authentication - Authorization
-        services.AddSingleton<TokenService>();
+        services.AddSingleton<ITokenService, TokenService>();
         services.AddValidatorsFromAssemblies(new [] {Assembly.GetExecutingAssembly() });
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-        services.AddScoped<UserRepository>();
-        services.AddScoped<UserService>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserService, UserService>();
         return services;
     }
 

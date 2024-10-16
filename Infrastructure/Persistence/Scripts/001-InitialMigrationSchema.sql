@@ -64,7 +64,8 @@ CREATE TABLE
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(50) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL
 );
 -- Consider created at / last login 
 
@@ -73,6 +74,7 @@ CREATE TABLE role (
     name VARCHAR(50) UNIQUE NOT NULL
 );
 -- Important to seed roles to ensure they exist
+INSERT INTO role (name) VALUES ('Instructor'); -- maybe this should be handled elsewhere?
 
 CREATE TABLE user_role (
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
