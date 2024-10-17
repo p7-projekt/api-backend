@@ -17,7 +17,6 @@ public class Program
         });
         
         // Add services to the container.
-        builder.Services.AddAuthorization();
         builder.Services.AddCoreServices();
         builder.Services.AddInfrastructure(builder.Configuration);
         
@@ -43,6 +42,7 @@ public class Program
         
         app.UseExceptionHandler();
         app.UseHttpsRedirection();
+        app.UseAuthentication();
         app.UseAuthorization();
         app.UseCors();
         app.UseSerilogRequestLogging();
@@ -50,6 +50,7 @@ public class Program
         // Endpoints
         app.UseStudentEndpoints();
         app.UseExampleEndpoints();
+        app.UseAuthenticationEndpoints();
 
         app.Run();
     }

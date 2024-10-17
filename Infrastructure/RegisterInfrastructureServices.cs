@@ -1,8 +1,13 @@
 using System.Reflection;
 using Core;
 using DbUp;
+using FluentValidation;
+using Infrastructure.Authentication;
+using Infrastructure.Authentication.Contracts;
+using Infrastructure.Authentication.Models;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Contracts;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,6 +25,14 @@ public static class RegisterInfrastructureServices
         EnsureMigration(connectionString);
         
         services.AddScoped<IStudentRepository, StudentRepository>();
+        
+        // Authentication - Authorization
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddValidatorsFromAssemblies(new [] {Assembly.GetExecutingAssembly() });
+        services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ITokenRepository, TokenRepository>();
         return services;
     }
 

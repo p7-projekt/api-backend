@@ -1,4 +1,10 @@
+using System.Text;
 using Asp.Versioning;
+using Infrastructure.Authentication;
+using Infrastructure.Authentication.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
 
 namespace API.Configuration;
 
@@ -44,6 +50,32 @@ public static class RegisterApiConfiguration
                     }
                 }
                 );
+        });
+        
+        // authentication - Authorization
+        services.AddAuthorization(opt =>
+        {
+            opt.AddPolicy(nameof(Roles.Instructor), policy => policy.RequireRole(nameof(Roles.Instructor)));
+            opt.AddPolicy(nameof(Roles.AnonymousUser), policy => policy.RequireRole(nameof(Roles.Instructor), nameof(Roles.AnonymousUser)));
+        });
+        services.AddAuthentication(opt =>
+        {
+            opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(opt =>
+        {
+            opt.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = AuthConstants.Issuer,
+                ValidAudience = AuthConstants.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable(AuthConstants.JwtSecret)!))
+            };
         });
         
         return services;
