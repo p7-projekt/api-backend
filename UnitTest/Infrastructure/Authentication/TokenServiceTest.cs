@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Infrastructure.Authentication;
+using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -18,7 +19,9 @@ public class TokenServiceTest
 	{
 		// Arrange
 		var _loggerSubstitute = Substitute.For<ILogger<TokenService>>();
-		var service = new TokenService(_loggerSubstitute);
+		var _userRepoSubstitute = Substitute.For<IUserRepository>();
+		var _tokenRepoSubstitute = Substitute.For<ITokenRepository>();
+		var service = new TokenService(_loggerSubstitute, _tokenRepoSubstitute, _userRepoSubstitute);
 		var userId = 1;
 		var role = new List<Roles>{Roles.Instructor};
 		var handler = new JwtSecurityTokenHandler();
@@ -40,7 +43,9 @@ public class TokenServiceTest
 	{
 		// Arrange
 		var _loggerSubstitute = Substitute.For<ILogger<TokenService>>();
-		var service = new TokenService(_loggerSubstitute);
+		var _userRepoSubstitute = Substitute.For<IUserRepository>();
+		var _tokenRepoSubstitute = Substitute.For<ITokenRepository>();
+		var service = new TokenService(_loggerSubstitute, _tokenRepoSubstitute, _userRepoSubstitute);
 		var userId = 1;
 		var roles = new List<Roles>{Roles.Instructor, Roles.AnonymousUser};
 		var handler = new JwtSecurityTokenHandler();
@@ -65,7 +70,9 @@ public class TokenServiceTest
 	{
 		// Arrange
 		var _loggerSubstitute = Substitute.For<ILogger<TokenService>>();
-		var service = new TokenService(_loggerSubstitute);
+		var _userRepoSubstitute = Substitute.For<IUserRepository>();
+		var _tokenRepoSubstitute = Substitute.For<ITokenRepository>();
+		var service = new TokenService(_loggerSubstitute, _tokenRepoSubstitute, _userRepoSubstitute);
 		var userId = -1;
 		var role = Roles.AnonymousUser;
 		var sessionLengthInMinutes = 5;
