@@ -90,11 +90,9 @@ public class TokenService : ITokenService
     private string CreateRefreshToken()
     {
         var randomNumber = new byte[32];
-        using (var rng = RandomNumberGenerator.Create())
-        {
-            rng.GetBytes(randomNumber);
-            return Convert.ToBase64String(randomNumber);
-        }
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return string.Concat(Convert.ToBase64String(randomNumber), Convert.ToBase64String(Guid.NewGuid().ToByteArray()));
     }
 
     public async Task<Result<LoginResponse>> GenerateJwtFromRefreshToken(RefreshDto refreshToken)
