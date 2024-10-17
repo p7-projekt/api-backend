@@ -32,7 +32,7 @@ public class UserService : IUserService
 		_logger.LogInformation("User created: {email} with role: {role}", user.Email, Roles.Instructor);
 	}
 
-	public async Task<Result<string>> LoginAsync(LoginDto loginDto)
+	public async Task<Result<LoginResponse>> LoginAsync(LoginDto loginDto)
 	{
 		var user = await _userRepository.GetUserByEmailAsync(loginDto.Email);
 		if (user == null)
@@ -51,6 +51,8 @@ public class UserService : IUserService
 		var roles = userRoles.Select(x => RolesConvert.Convert(x.RoleName)).ToList();
 		
 		_logger.LogInformation("Generating JWT for {id} {email} with role {role}", user.Id, user.Email, strUserRoles);
-		return _tokenService.GenerateJwt(user.Id, roles);
+		var jwtToken = _tokenService.GenerateJwt(user.Id, roles);
+		var refresToken = await _tokenService.GenerateRefreshToken(user.Id);
+		return new LoginResponse(jwtToken, refresToken.Value.Token, refresToken.Value.Expires);
 	}
 }

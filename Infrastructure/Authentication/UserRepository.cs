@@ -96,5 +96,4 @@ public class UserRepository : IUserRepository
 
 		return Result.Ok();
 	}
-	
 }

@@ -15,7 +15,26 @@ public static class AuthenticationEndpoints
 		
 		var authGroup = app.MapGroup("").WithTags("Authentication");
 
-		authGroup.MapPost("/login", async Task<Results<Ok<string>, BadRequest<ValidationProblemDetails>>> ([FromBody] LoginDto loginDto, IUserService service) =>
+		authGroup.MapPost("/refresh", async Task<Results<Ok<LoginResponse>, BadRequest<ValidationProblemDetails>>> ([FromBody] RefreshDto refreshDto, ITokenService service) =>
+		{
+			var result = await service.GenerateJwtFromRefreshToken(refreshDto);
+			if (result.IsFailed)
+			{
+				var errors = result.Errors.Select(e => e.Message).ToArray();
+				var errorDict = new Dictionary<string, string[]>(); 
+				errorDict.Add("error", errors);
+				return TypedResults.BadRequest(new ValidationProblemDetails
+				{
+					Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+					Title = "Authentication error",
+					Status = (int)HttpStatusCode.BadRequest,
+					Errors = errorDict,
+				});
+			}
+			return TypedResults.Ok(result.Value);
+		});
+		
+		authGroup.MapPost("/login", async Task<Results<Ok<LoginResponse>, BadRequest<ValidationProblemDetails>>> ([FromBody] LoginDto loginDto, IUserService service) =>
 		{
 			var result = await service.LoginAsync(loginDto);
 			if (result.IsFailed)

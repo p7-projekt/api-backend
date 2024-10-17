@@ -81,3 +81,12 @@ CREATE TABLE user_role (
     role_id INTEGER REFERENCES role(id) ON DELETE CASCADE NOT NULL,
     PRIMARY KEY (user_id, role_id)
 );
+
+CREATE TABLE refresh_token(
+    id SERIAL PRIMARY KEY,
+    token TEXT UNIQUE NOT NULL,
+    expires TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL
+);
+

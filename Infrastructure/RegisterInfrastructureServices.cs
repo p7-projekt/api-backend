@@ -27,11 +27,12 @@ public static class RegisterInfrastructureServices
         services.AddScoped<IStudentRepository, StudentRepository>();
         
         // Authentication - Authorization
-        services.AddSingleton<ITokenService, TokenService>();
+        services.AddScoped<ITokenService, TokenService>();
         services.AddValidatorsFromAssemblies(new [] {Assembly.GetExecutingAssembly() });
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ITokenRepository, TokenRepository>();
         return services;
     }
 
