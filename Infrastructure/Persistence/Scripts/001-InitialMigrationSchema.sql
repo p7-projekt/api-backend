@@ -1,15 +1,14 @@
-CREATE TABLE
-    instructor (
-        instructor_id SERIAL PRIMARY KEY,
-        email VARCHAR(50) NOT NULL,
-        password VARCHAR(100) NOT NULL,
-        name VARCHAR(100) NOT NULL
-    );
+CREATE TABLE users (
+   id SERIAL PRIMARY KEY,
+   email VARCHAR(50) UNIQUE NOT NULL,
+   password_hash VARCHAR(255) NOT NULL,
+   created_at TIMESTAMP NOT NULL
+);
 
 CREATE TABLE
     exercise (
         exercise_id SERIAL PRIMARY KEY,
-        author_id INTEGER REFERENCES instructor (instructor_id) ON DELETE CASCADE NOT NULL,
+        author_id INTEGER REFERENCES users (id) ON DELETE CASCADE NOT NULL,
         title TEXT NOT NULL,
         description TEXT,
         solution TEXT NOT NULL
@@ -59,3 +58,27 @@ CREATE TABLE
         parameter_value VARCHAR(255) NOT NULL,
         is_output BOOLEAN NOT NULL
     );
+
+-- Handle auth
+
+CREATE TABLE role (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL
+);
+-- Important to seed roles to ensure they exist
+INSERT INTO role (name) VALUES ('Instructor'); 
+INSERT INTO role (name) VALUES ('AnonymousUser');
+CREATE TABLE user_role (
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    role_id INTEGER REFERENCES role(id) ON DELETE CASCADE NOT NULL,
+    PRIMARY KEY (user_id, role_id)
+);
+
+CREATE TABLE refresh_token(
+    id SERIAL PRIMARY KEY,
+    token TEXT UNIQUE NOT NULL,
+    expires TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL
+);
+
