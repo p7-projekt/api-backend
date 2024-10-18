@@ -1,5 +1,6 @@
 using System.Reflection;
 using Core;
+using Core.Sessions.Contracts;
 using DbUp;
 using FluentValidation;
 using Infrastructure.Authentication;
@@ -33,6 +34,7 @@ public static class RegisterInfrastructureServices
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ITokenRepository, TokenRepository>();
+        services.AddScoped<ISessionRepository, SessionRepository>();
         return services;
     }
 

@@ -1,4 +1,6 @@
 using System.Reflection;
+using Core.Sessions;
+using Core.Sessions.Contracts;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +12,7 @@ public static class RegisterCoreServices
     {
         services.AddValidatorsFromAssemblies(new [] {Assembly.GetExecutingAssembly() });
         services.AddScoped<StudentService>();
+        services.AddScoped<ISessionService, SessionService>();
 
 
         return services;

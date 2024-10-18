@@ -19,7 +19,9 @@ CREATE TABLE
         session_id SERIAL PRIMARY KEY,
         title VARCHAR(50) NOT NULL,
         description TEXT,
-        expirationtime_utc TIMESTAMP NOT NULL
+        author_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+        expirationtime_utc TIMESTAMP NOT NULL,
+        session_code VARCHAR(10) NOT NULL
     );
 
 CREATE TABLE

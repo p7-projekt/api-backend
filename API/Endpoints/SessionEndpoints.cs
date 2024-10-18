@@ -24,13 +24,13 @@ public static class SessionEndpoints
         // Create session
         sessionV1Group.MapPost("/", () =>
         {
-
+            
         });
         
         // Join session
         sessionV1Group.MapPost("/{id:int}/students", () =>
         {
-
+            
         });
         return app;
     }
