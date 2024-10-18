@@ -6,7 +6,7 @@ using Infrastructure.Authentication.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API;
+namespace API.Endpoints;
 
 public static class AuthenticationEndpoints
 {
