@@ -1,21 +1,36 @@
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
 using FluentResults;
+using Microsoft.Extensions.Logging;
 
 namespace Core.Sessions;
 
 public class SessionService : ISessionService
 {
     private readonly ISessionRepository _sessionRepository;
+    private readonly ILogger<SessionService> _logger;
 
-    public SessionService(ISessionRepository sessionRepository)
+    public SessionService(ISessionRepository sessionRepository, ILogger<SessionService> logger)
     {
         _sessionRepository = sessionRepository;
+        _logger = logger;
     }
 
-    public async Task<Result<CreateSessionDto>> CreateSessionAsync(CreateSessionDto sessionDto)
+    public async Task<Result<CreateSessionResponseDto>> CreateSessionAsync(CreateSessionDto sessionDto, int authorId)
     {
-        
+        var sessionCode = GenerateSessionCode();
+        var session = sessionDto.ConvertToSession();
+        session.AuthorId = authorId;
+        session.SessionCode = sessionCode;
+
+        var sessionId = await _sessionRepository.InsertSessionAsync(session);
+        if (sessionId == 0)
+        {
+            _logger.LogInformation("Failed to create session for {userid}", authorId);
+            return Result.Fail("Error creating exercise!");
+        }
+
+        return new CreateSessionResponseDto(sessionId, sessionCode);
     }
 
 

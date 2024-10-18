@@ -6,7 +6,7 @@ public class Session
 
     public string Title { get; set; } = string.Empty;
 
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
 
     public int AuthorId { get; set; }
     
@@ -15,4 +15,19 @@ public class Session
     public string SessionCode { get; set; } = string.Empty;
 
     public List<int> Exercises { get; set; } = new (); // this needs to be changed when exercises are available
+    
+}
+
+public static class SessionMapper
+{
+    public static Session ConvertToSession(this CreateSessionDto dto)
+    {
+        return new Session
+        {
+            Title = dto.Title,
+            Description = dto.Description,
+            ExpirationTimeUtc = DateTime.UtcNow.AddHours(dto.ExpiresInHours),
+            Exercises = dto.ExerciseIds
+        };
+    }
 }
