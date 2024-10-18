@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using FluentResults;
 using Infrastructure.Authentication.Contracts;
+using Infrastructure.Authentication.Exceptions;
 using Infrastructure.Authentication.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -62,6 +63,7 @@ public class TokenService : ITokenService
         if (key == null)
         {
             _logger.LogWarning("No jwt key environment variable found!");
+            throw new MissingJwtKeyException("No jwt key environment variable found!");
         }
         var securityKey =
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!));

@@ -1,4 +1,5 @@
 using System.Net;
+using Infrastructure.Authentication.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 

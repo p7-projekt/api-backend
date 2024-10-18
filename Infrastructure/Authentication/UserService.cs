@@ -52,7 +52,7 @@ public class UserService : IUserService
 		
 		_logger.LogInformation("Generating JWT for {id} {email} with role {role}", user.Id, user.Email, strUserRoles);
 		var jwtToken = _tokenService.GenerateJwt(user.Id, roles);
-		var refresToken = await _tokenService.GenerateRefreshToken(user.Id);
-		return new LoginResponse(jwtToken, refresToken.Value.Token, refresToken.Value.Expires);
+		var refreshToken = await _tokenService.GenerateRefreshToken(user.Id);
+		return new LoginResponse(jwtToken, refreshToken.Value.Token, refreshToken.Value.Expires);
 	}
 }
