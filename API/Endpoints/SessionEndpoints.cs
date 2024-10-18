@@ -44,10 +44,10 @@ public static class SessionEndpoints
 
             return TypedResults.Created("", result.Value);
 
-        }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<CreateUserDto>();
+        }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<CreateSessionDto>();
         
         // Join session
-        sessionV1Group.MapPost("/{id:int}/students", () =>
+        sessionV1Group.MapPost("/{id:int}/participants", () =>
         {
             
         });

@@ -3,6 +3,7 @@ using Core.Sessions.Models;
 using Dapper;
 using Infrastructure.Persistence.Contracts;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace Infrastructure;
 
@@ -41,19 +42,35 @@ public class SessionRepository : ISessionRepository
                                 """;
             foreach (var exercise in session.Exercises)
             {
-                await con.ExecuteAsync(exerciseQuery, new { ExerciseId = exercise, SessionId = sessionId }, transaction);
+                await con.ExecuteAsync(exerciseQuery, new { ExerciseId = exercise, SessionId = sessionId },
+                    transaction);
             }
-            
+
             transaction.Commit();
             _logger.LogInformation("User: {userid} created Session: {sessionid}.", session.AuthorId, sessionId);
             return sessionId;
+        }
+        catch (PostgresException e) when (e.SqlState == "23505")
+        {
+            transaction.Rollback();
+            _logger.LogWarning("Session code not unique!");
+            return 0;
         }
         catch (Exception e)
         {
             transaction.Rollback();
             _logger.LogWarning("Exception happend: {exception}, session not created!", e.Message);
+            throw;
         }
-
-        return 0;
     }
+
+    // public async Task<bool> CheckSessionCodeIsValid(string sessionCode)
+    // {
+    //     using var con = await _connection.CreateConnectionAsync();
+    //     var query = """
+    //                 SELECT COUNT(*) FROM session WHERE session_code = @SessionCode;
+    //                 """;
+    //     var result = await con.ExecuteScalarAsync<int>(query, new { sessionCode });
+    //     return result == 0;
+    // }
 }

@@ -26,13 +26,28 @@ public class SessionService : ISessionService
         var sessionId = await _sessionRepository.InsertSessionAsync(session);
         if (sessionId == 0)
         {
-            _logger.LogInformation("Failed to create session for {userid}", authorId);
-            return Result.Fail("Error creating exercise!");
+            // sessionCode not unique
+            _logger.LogInformation("Session code {sessionCode} is already in use!", sessionCode);
+            sessionCode = GenerateSessionCode();
+            session.SessionCode = sessionCode;
+            var limit = 10;
+            while (await _sessionRepository.InsertSessionAsync(session) == 0 && limit > 0)
+            {
+                sessionCode = GenerateSessionCode();
+                session.SessionCode = sessionCode;
+                limit--;
+            }
+
+            if (limit == 0)
+            {
+                _logger.LogInformation("Failed to create session for {userid}", authorId);
+                return Result.Fail("Error creating session");
+            }
+            _logger.LogInformation("Succesfully created a unique a unqiue session code: {sessionCode}", sessionCode);
         }
 
         return new CreateSessionResponseDto(sessionId, sessionCode);
     }
-
 
     public string GenerateSessionCode()
     {
