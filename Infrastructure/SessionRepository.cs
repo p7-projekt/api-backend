@@ -40,21 +40,25 @@ public class SessionRepository : ISessionRepository
             var exerciseQuery = """
                                 INSERT INTO exercise_in_session (exercise_id, session_id) VALUES (@ExerciseId, @SessionId);
                                 """;
-            foreach (var exercise in session.Exercises)
-            {
-                await con.ExecuteAsync(exerciseQuery, new { ExerciseId = exercise, SessionId = sessionId },
-                    transaction);
-            }
+            await con.ExecuteAsync(exerciseQuery,
+                session.Exercises.Select(x => new { ExerciseId = x, SessionId = sessionId }).ToList(),
+                transaction);
 
             transaction.Commit();
             _logger.LogInformation("User: {userid} created Session: {sessionid}.", session.AuthorId, sessionId);
             return sessionId;
         }
-        catch (PostgresException e) when (e.SqlState == "23505")
+        catch (PostgresException e) when (e.SqlState == "23505") // unqiue constraint violation
         {
             transaction.Rollback();
             _logger.LogWarning("Session code not unique!");
             return 0;
+        }
+        catch (PostgresException e) when (e.SqlState == "23503") // foreign key constraint violation
+        {
+            transaction.Rollback();
+            _logger.LogWarning("Exercises id's doesnt exist!");
+            throw;
         }
         catch (Exception e)
         {
