@@ -20,15 +20,16 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         RuleFor(x => x.Solution).NotEmpty().WithMessage("A proposed solution is required");
         RuleFor(x => x.Solution).MaximumLength(10000).WithMessage("The proposed solution is too long");
         RuleFor(x => x.InputParameterType).NotEmpty().WithMessage("Type of input parameter must be provided");
-        RuleFor(x => x.InputParameterType).Must(CheckType).WithMessage("Input parameter must be of a valid type");
+        RuleFor(x => x.InputParameterType).Must(ParametersAreValidType).WithMessage("Input parameter must be of a valid type");
         RuleFor(x => x.OutputParamaterType).NotEmpty().WithMessage("Type of output parameter must be provided");
-        RuleFor(x => x.OutputParamaterType).Must(CheckType).WithMessage("Output parameter must be of a valid type");
-        RuleFor(x => x.Testcases).Must(CheckTupleContent).WithMessage("All testcases must have both input and output");
-        RuleFor(x => x.Testcases).Must(CheckParameterAmount).WithMessage("All testcases must have the same amount of parameters");
-        RuleFor(x => x).Must()
+        RuleFor(x => x.OutputParamaterType).Must(ParametersAreValidType).WithMessage("Output parameter must be of a valid type");
+        RuleFor(x => x.Testcases).NotEmpty().WithMessage("Test cases must be provided");
+        RuleFor(x => x.Testcases).Must(HaveAllParameters).WithMessage("All testcases must have both input and output");
+        RuleFor(x => x.Testcases).Must(HasSameParameterAmount).WithMessage("All testcases must have the same amount of parameters");
+        RuleFor(x => x).Must(ParametersValuesHaveCorrectTypes).WithMessage("All testcase parameters must be of correct type");
     }
 
-    private bool CheckType(string[] parameters)
+    private bool ParametersAreValidType(string[] parameters)
     {
         foreach (var type in parameters)
         {
@@ -37,7 +38,6 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                 case "bool": break;
                 case "int": break;
                 case "float": break;
-                case "double": break;
                 case "string": break;
                 case "char": break;
                 default: return false;
@@ -46,7 +46,7 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         return true;
     }
 
-    private bool CheckTupleContent(List<(string[], string[])> testcases)
+    private bool HaveAllParameters(List<(string[], string[])> testcases)
     {
         foreach (var testcase in testcases)
         {
@@ -62,7 +62,7 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         return true;
     }
 
-    private bool CheckParameterAmount(List<(string[], string[])> testcases)
+    private bool HasSameParameterAmount(List<(string[], string[])> testcases)
     {
         var temp = testcases.First();
         var inputParams = temp.Item1.Length;
@@ -77,9 +77,46 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         return true;
     }
 
-    private bool CheckTestParameterType(ExerciseDto dto)
+    private bool ParametersValuesHaveCorrectTypes(ExerciseDto dto)
     {
-        
+        foreach(var testcase in dto.Testcases)
+        {
+            for(int i = 0; i < dto.InputParameterType.Length; i++)
+            {
+                try
+                {
+                    switch (dto.InputParameterType[i])
+                    {
+                        case "bool": var tempInBool = bool.Parse(testcase.Item1[i]); break;
+                        case "int": var tempInInt = int.Parse(testcase.Item1[i]); break;
+                        case "float": var tempInFloat = float.Parse(testcase.Item1[i]);  break;
+                        case "string": break;
+                        case "char": var tempInChar = char.Parse(testcase.Item1[i]); break;
+                        default: return false;
+                    }
+
+                    switch (dto.OutputParamaterType[i])
+                    {
+                        case "bool": var tempOutBool = bool.Parse(testcase.Item1[i]); break;
+                        case "int": var tempOutInt = int.Parse(testcase.Item1[i]); break;
+                        case "float": var tempOutFloat = float.Parse(testcase.Item1[i]); break;
+                        case "string": break;
+                        case "char": var tempOutChar = char.Parse(testcase.Item1[i]); break;
+                        default: return false;
+                    }
+                }
+                catch(FormatException)
+                {
+                    return false;
+                }
+                catch
+                {
+                    // Log error.
+                    throw;
+                }
+            }
+        }
+        return true;
     }
 }
 
