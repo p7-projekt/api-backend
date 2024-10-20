@@ -19,11 +19,11 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         RuleFor(x => x.Description).MaximumLength(10000).WithMessage("The description is too long");
         RuleFor(x => x.Solution).NotEmpty().WithMessage("A proposed solution is required");
         RuleFor(x => x.Solution).MaximumLength(10000).WithMessage("The proposed solution is too long");
-        RuleFor(x => x.InputParameterType).NotEmpty().WithMessage("Type of input parameter must be provided");
+        RuleFor(x => x.InputParameterType).NotEmpty().NotNull().WithMessage("Type of input parameter must be provided");
         RuleFor(x => x.InputParameterType).Must(ParametersAreValidType).WithMessage("Input parameter must be of a valid type");
-        RuleFor(x => x.OutputParamaterType).NotEmpty().WithMessage("Type of output parameter must be provided");
+        RuleFor(x => x.OutputParamaterType).NotEmpty().NotNull().WithMessage("Type of output parameter must be provided");
         RuleFor(x => x.OutputParamaterType).Must(ParametersAreValidType).WithMessage("Output parameter must be of a valid type");
-        RuleFor(x => x.Testcases).NotEmpty().WithMessage("Test cases must be provided");
+        RuleFor(x => x.Testcases).NotEmpty().NotNull().WithMessage("Test cases must be provided");
         RuleFor(x => x.Testcases).Must(HaveAllParameters).WithMessage("All testcases must have both input and output");
         RuleFor(x => x.Testcases).Must(HasSameParameterAmount).WithMessage("All testcases must have the same amount of parameters");
         RuleFor(x => x).Must(ParametersValuesHaveCorrectTypes).WithMessage("All testcase parameters must be of correct type");
@@ -31,17 +31,24 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
 
     private bool ParametersAreValidType(string[] parameters)
     {
-        foreach (var type in parameters)
+        try
         {
-            switch (type.ToLower())
+            foreach (var type in parameters)
             {
-                case "bool": break;
-                case "int": break;
-                case "float": break;
-                case "string": break;
-                case "char": break;
-                default: return false;
+                switch (type.ToLower())
+                {
+                    case "bool": break;
+                    case "int": break;
+                    case "float": break;
+                    case "string": break;
+                    case "char": break;
+                    default: Console.WriteLine("Invalid parameter type"); return false;
+                }
             }
+        }
+        catch (NullReferenceException)
+        {
+            return false;
         }
         return true;
     }
@@ -52,10 +59,12 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         {
             if (testcase.Item1 == null || testcase.Item1.Length == 0)
             {
+                Console.WriteLine("Empty paramter");
                 return false;
             }
             if (testcase.Item2 == null || testcase.Item2.Length == 0)
             {
+                Console.WriteLine("Empty paramter");
                 return false;
             }
         }
@@ -71,6 +80,7 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         {
             if (testcase.Item1.Length != inputParams || testcase.Item2.Length != outputParams)
             {
+                Console.WriteLine("Inconsistency in parameter amount across test cases");
                 return false;
             }
         }
@@ -81,39 +91,47 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
     {
         foreach(var testcase in dto.Testcases)
         {
-            for(int i = 0; i < dto.InputParameterType.Length; i++)
+
+            try
             {
-                try
+                for (int i = 0; i < dto.InputParameterType.Length; i++)
                 {
                     switch (dto.InputParameterType[i])
                     {
                         case "bool": var tempInBool = bool.Parse(testcase.Item1[i]); break;
                         case "int": var tempInInt = int.Parse(testcase.Item1[i]); break;
-                        case "float": var tempInFloat = float.Parse(testcase.Item1[i]);  break;
+                        case "float": var tempInFloat = float.Parse(testcase.Item1[i]); break;
                         case "string": break;
-                        case "char": var tempInChar = char.Parse(testcase.Item1[i]); break;
-                        default: return false;
+                        case "char": if(testcase.Item1[i].Length != 1) { return false; }; break;
+                        default: Console.WriteLine("Invalid input"); return false;
                     }
-
+                }
+                for (int i = 0; i < dto.OutputParamaterType.Length; i++)
+                {
                     switch (dto.OutputParamaterType[i])
                     {
-                        case "bool": var tempOutBool = bool.Parse(testcase.Item1[i]); break;
-                        case "int": var tempOutInt = int.Parse(testcase.Item1[i]); break;
-                        case "float": var tempOutFloat = float.Parse(testcase.Item1[i]); break;
+                        case "bool": var tempOutBool = bool.Parse(testcase.Item2[i]); break;
+                        case "int": var tempOutInt = int.Parse(testcase.Item2[i]); break;
+                        case "float": var tempOutFloat = float.Parse(testcase.Item2[i]); break;
                         case "string": break;
-                        case "char": var tempOutChar = char.Parse(testcase.Item1[i]); break;
-                        default: return false;
+                        case "char": if (testcase.Item2[i].Length != 1) { return false; }; break;
+                        default: Console.WriteLine("Invalid output"); return false;
                     }
                 }
-                catch(FormatException)
-                {
-                    return false;
-                }
-                catch
-                {
-                    // Log error.
-                    throw;
-                }
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine("Invalid format");
+                return false;
+            }
+            catch (NullReferenceException)
+            {
+                return false;
+            }
+            catch
+            {
+                // Log error.
+                throw;
             }
         }
         return true;
