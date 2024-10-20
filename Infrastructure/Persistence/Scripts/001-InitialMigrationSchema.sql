@@ -21,7 +21,7 @@ CREATE TABLE
         description TEXT,
         author_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
         expirationtime_utc TIMESTAMP NOT NULL,
-        session_code VARCHAR(10) UNIQUE NOT NULL
+        session_code VARCHAR(6) UNIQUE NOT NULL
     );
 
 CREATE TABLE

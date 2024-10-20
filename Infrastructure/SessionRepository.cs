@@ -48,13 +48,13 @@ public class SessionRepository : ISessionRepository
             _logger.LogInformation("User: {userid} created Session: {sessionid}.", session.AuthorId, sessionId);
             return sessionId;
         }
-        catch (PostgresException e) when (e.SqlState == "23505") // unqiue constraint violation
+        catch (PostgresException e) when (e.SqlState == PostgresExceptions.UniqueConstraintViolation.ToString())
         {
             transaction.Rollback();
             _logger.LogWarning("Session code not unique!");
             return 0;
         }
-        catch (PostgresException e) when (e.SqlState == "23503") // foreign key constraint violation
+        catch (PostgresException e) when (e.SqlState == PostgresExceptions.ForeignKeyViolation.ToString())
         {
             transaction.Rollback();
             _logger.LogWarning("Exercises id's doesnt exist!");
@@ -68,13 +68,34 @@ public class SessionRepository : ISessionRepository
         }
     }
 
-    // public async Task<bool> CheckSessionCodeIsValid(string sessionCode)
-    // {
-    //     using var con = await _connection.CreateConnectionAsync();
-    //     var query = """
-    //                 SELECT COUNT(*) FROM session WHERE session_code = @SessionCode;
-    //                 """;
-    //     var result = await con.ExecuteScalarAsync<int>(query, new { sessionCode });
-    //     return result == 0;
-    // }
+    public async Task<int> CreateAnonUser(int sessionId)
+    {
+        var query = """
+                    INSERT INTO student (session_id) VALUES (@Sessionid) RETURNING student_id;
+                    """;
+        using var con = await _connection.CreateConnectionAsync();
+        var studentId = await  con.ExecuteScalarAsync<int>(query, new { sessionId });
+        return studentId;
+    }
+
+    public async Task<Session?> GetSessionByIdAsync(int sessionId)
+    {
+        var query = """
+                    SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc FROM session WHERE session_id = @SessionId;
+                    """;
+        using var con = await _connection.CreateConnectionAsync();
+        var session = await con.QueryFirstOrDefaultAsync<Session>(query, new { sessionId });
+        return session;
+    }
+
+    public async Task<bool> CheckSessionCodeIsValid(string sessionCode, int sessionId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var query = """
+                    SELECT COUNT(*) FROM session WHERE session_code = @SessionCode AND session_id = @SessionId;
+                    """;
+        var result = await con.ExecuteScalarAsync<int>(query, new { SessionCode = sessionCode, SessionId = sessionId });
+        _logger.LogInformation("Requesting check on session id {sessionid} with session code {sessioncode}", sessionId, sessionCode);
+        return result == 1;
+    }
 }

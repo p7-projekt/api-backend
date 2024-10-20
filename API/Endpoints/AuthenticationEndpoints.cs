@@ -62,7 +62,7 @@ public static class AuthenticationEndpoints
 
 		authGroup.MapGet("/anontoken", Ok<string> (ITokenService service) =>
 		{
-			var token = service.GenerateAnonymousUserJwt(5);
+			var token = service.GenerateAnonymousUserJwt(5, 1);
 			return TypedResults.Ok(token);
 		});
 		//###################################################################################################

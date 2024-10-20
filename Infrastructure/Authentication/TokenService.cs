@@ -26,6 +26,7 @@ public class TokenService : ITokenService
     {
         var claims = new List<Claim>();
         claims.Add(new Claim(ClaimTypes.UserData, userId.ToString()));
+        claims.Add(new Claim(AuthConstants.AnonymousUser, "false"));
         foreach (var role in roles)
         {
             claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
@@ -40,16 +41,16 @@ public class TokenService : ITokenService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public string GenerateAnonymousUserJwt(int sessionLength)
+    public string GenerateAnonymousUserJwt(int sessionLength, int userId)
     {
         var token = new JwtSecurityToken(
             issuer: AuthConstants.Issuer,
             audience: AuthConstants.Audience,
             claims: new List<Claim>
             {
-                new Claim(ClaimTypes.UserData, AuthConstants.AnonymousUserId.ToString()),
+                new Claim(ClaimTypes.UserData, userId.ToString()),
+                new Claim(AuthConstants.AnonymousUser, "true"),
                 new Claim(ClaimTypes.Role, nameof(Roles.AnonymousUser))
-                // new Claim("session_id", "1231")
             },
             expires: DateTime.Now.AddMinutes(sessionLength),
             signingCredentials: GetSigningCredentials()

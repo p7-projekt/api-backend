@@ -6,11 +6,11 @@ namespace API.Endpoints.Shared;
 
 public class CreateBadRequest
 {
-    public static ValidationProblemDetails CreateValidationProblemDetails(List<IError> errorsInput, string title)
+    public static ValidationProblemDetails CreateValidationProblemDetails(List<IError> errorsInput, string title, string errorTitle)
     {
         var errors = errorsInput.Select(e => e.Message).ToArray();
         var errorDict = new Dictionary<string, string[]>(); 
-        errorDict.Add("error", errors);
+        errorDict.Add(errorTitle, errors);
         return new ValidationProblemDetails
         {
             Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
