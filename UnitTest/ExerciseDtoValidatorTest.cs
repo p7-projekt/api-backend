@@ -7,11 +7,11 @@ namespace ExerciseDtoValidatorTest;
 public class ExerciseDtoValidatorTest
 {
     [Theory]
-    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int" }, new string[] { "int" }, new string[] { "2", "2" }, new string[] { "4" }, new string[] { "10", "10" }, new string[] { "20" })]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "INT", "int" }, new string[] { "int" }, new string[] { "2", "2" }, new string[] { "4" }, new string[] { "10", "10" }, new string[] { "20" })]
     [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "string", "string" }, new string[] { "int" }, new string[] { "This is a string", "This is another string" }, new string[] { "4" }, new string[] { "Second case 1", "Second case 2" }, new string[] { "20" })]
     [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "float", "int" }, new string[] { "string" }, new string[] { "3.14", "14" }, new string[] { "correct" }, new string[] { "5.01", "0" }, new string[] { "Also Correct" })]
     [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "bool", "char" }, new string[] { "char" }, new string[] { "false", "b" }, new string[] { "h" }, new string[] { "true", "u" }, new string[] { "l" })]
-    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "string", "float" }, new string[] { "bool" }, new string[] { "This is a string", "4.20" }, new string[] { "true" }, new string[] { "Second testcase", "100100.5" }, new string[] { "false" })]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "string", "float" }, new string[] { "bOOl" }, new string[] { "This is a string", "4.20" }, new string[] { "true" }, new string[] { "Second testcase", "100100.5" }, new string[] { "false" })]
     public void ExerciseDtoValidatorTest_ShouldBe_Valid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam,  string[] testcase2InParam, string[] testcase2OutParam)
     {
         var validator = new ExerciseDtoValidator();
@@ -137,10 +137,48 @@ public class ExerciseDtoValidatorTest
     [Theory]
     [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int" }, new string[] { "int" }, new string[] { "2", "2" }, new string[] { "4" }, new string[] { "10", "10" }, new string[] { })]
     [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int" }, new string[] { "int" }, new string[] { }, new string[] { "4" }, new string[] { "10", "10" }, new string[] { "20" })]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int" }, new string[] { "int" }, new string[] { }, new string[] { "4" }, new string[] { "10", "10" }, new string[] { null })]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int" }, new string[] { "int" }, new string[] { }, new string[] { null }, new string[] { "10", "10" }, new string[] { "20" })]
     public void ExerciseDtoValidatorTest_MissingTestcaseParameter_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam, string[] testcase2InParam, string[] testcase2OutParam)
     {
         var validator = new ExerciseDtoValidator();
         var testcases = new List<(string[], string[])> { (testcase1InParam, testcase1OutParam), (testcase2InParam, testcase2OutParam) };
+        var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
+
+        var result = validator.Validate(dto);
+
+        Assert.False(result.IsValid);
+    }
+
+    [Theory]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int", "int" }, new string[] { "int", "bool" }, new string[] { "2", "2", "5" }, new string[] { "4", "false" }, new string[] { "10", "10", "20" }, new string[] { "20" }, new string[] {"1", "2", "3"}, new string[] {"5", "false"})]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int", "int" }, new string[] { "int", "bool" }, new string[] { "2", "2", "5" }, new string[] { "4", "false" }, new string[] { "20" }, new string[] { "20", "true" }, new string[] {"1", "2", "3"}, new string[] {"5", "false"})]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int", "int" }, new string[] { "int", "bool" }, new string[] { "2", "2", "5" }, new string[] { "false" }, new string[] { "10", "10", "20" }, new string[] { "20", "true" }, new string[] {"1", "2"}, new string[] {"5"})]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int", "int" }, new string[] { "int", "bool" }, new string[] { "2", "2"}, new string[] { "4", "false" }, new string[] { "10", "10", "20" }, new string[] { "20", "true" }, new string[] {"1", "2", "3"}, new string[] {"5", "false"})]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int", "int" }, new string[] { "int", "bool" }, new string[] { "2", "2", "5" }, new string[] { "4", "false" }, new string[] { "10", "10", "20" }, new string[] { "20", "true" }, new string[] {"1", "2", "3", "4"}, new string[] {"5", "false"})]
+    public void ExerciseDtoValidatorTest_InconsistentParameterAmount_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam, string[] testcase2InParam, string[] testcase2OutParam, string[] testcase3InParam, string[] testcase3OutParam)
+    {
+        var validator = new ExerciseDtoValidator();
+        var testcases = new List<(string[], string[])> { (testcase1InParam, testcase1OutParam), (testcase2InParam, testcase2OutParam), (testcase3InParam, testcase3OutParam)};
+        var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
+
+        var result = validator.Validate(dto);
+
+        Assert.False(result.IsValid);
+    }
+
+    [Theory]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int" }, new string[] { "int" }, new string[] { "2.0", "2" }, new string[] { "4" })]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int" }, new string[] { "bool" }, new string[] { "2", "2" }, new string[] { "4" })]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "char" }, new string[] { "int" }, new string[] { "2", "notchar" }, new string[] { "4" })]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "float", "int" }, new string[] { "int" }, new string[] { "notfloat", "2" }, new string[] { "4" })]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int" }, new string[] { "int" }, new string[] { "2", "not int" }, new string[] { "4" })]
+
+
+    public void ExerciseDtoValidatorTest_ParameterValueDoesNotMatchDeclaredType_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam)
+    {
+        var validator = new ExerciseDtoValidator();
+        var testcases = new List<(string[], string[])> { (testcase1InParam, testcase1OutParam) };
         var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
 
         var result = validator.Validate(dto);

@@ -73,16 +73,29 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
 
     private bool HasSameParameterAmount(List<(string[], string[])> testcases)
     {
-        var temp = testcases.First();
-        var inputParams = temp.Item1.Length;
-        var outputParams = temp.Item2.Length;
-        foreach (var testcase in testcases)
+        try
         {
-            if (testcase.Item1.Length != inputParams || testcase.Item2.Length != outputParams)
+            var temp = testcases.First();
+            var inputParams = temp.Item1.Length;
+            var outputParams = temp.Item2.Length;
+            foreach (var testcase in testcases)
             {
-                Console.WriteLine("Inconsistency in parameter amount across test cases");
-                return false;
+                if (testcase.Item1.Length != inputParams || testcase.Item2.Length != outputParams)
+                {
+                    Console.WriteLine("Inconsistency in parameter amount across test cases");
+                    return false;
+                }
             }
+        }
+        catch (InvalidOperationException)
+        {
+            Console.WriteLine("Missing testcases");
+            return false;
+        }
+        catch (NullReferenceException)
+        {
+            Console.WriteLine("Missing testcases");
+            return false;
         }
         return true;
     }
@@ -91,12 +104,11 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
     {
         foreach(var testcase in dto.Testcases)
         {
-
             try
             {
                 for (int i = 0; i < dto.InputParameterType.Length; i++)
                 {
-                    switch (dto.InputParameterType[i])
+                    switch (dto.InputParameterType[i].ToLower())
                     {
                         case "bool": var tempInBool = bool.Parse(testcase.Item1[i]); break;
                         case "int": var tempInInt = int.Parse(testcase.Item1[i]); break;
@@ -108,7 +120,7 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                 }
                 for (int i = 0; i < dto.OutputParamaterType.Length; i++)
                 {
-                    switch (dto.OutputParamaterType[i])
+                    switch (dto.OutputParamaterType[i].ToLower())
                     {
                         case "bool": var tempOutBool = bool.Parse(testcase.Item2[i]); break;
                         case "int": var tempOutInt = int.Parse(testcase.Item2[i]); break;
@@ -121,11 +133,16 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
             }
             catch (FormatException)
             {
-                Console.WriteLine("Invalid format");
+                Console.WriteLine("Invalid parameter format");
                 return false;
             }
             catch (NullReferenceException)
             {
+                return false;
+            }
+            catch (IndexOutOfRangeException)
+            {
+                Console.WriteLine("Missing parameter");
                 return false;
             }
             catch
