@@ -1,4 +1,5 @@
 using System.Reflection;
+using Core.Services;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +11,7 @@ public static class RegisterCoreServices
     {
         services.AddValidatorsFromAssemblies(new [] {Assembly.GetExecutingAssembly() });
         services.AddScoped<StudentService>();
+        services.AddScoped<SolutionRunnnerService>();
 
 
         return services;

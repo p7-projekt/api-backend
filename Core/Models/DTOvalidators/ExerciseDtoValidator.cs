@@ -1,5 +1,5 @@
-﻿using Core.DTOs;
-using Core.Example;
+﻿using Core.Example;
+using Core.Models.DTOs;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Core.DTOvalidators;
+namespace Core.Models.DTOvalidators;
 public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
 {
     public ExerciseDtoValidator()
@@ -102,7 +102,7 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
 
     private bool ParametersValuesHaveCorrectTypes(ExerciseDto dto)
     {
-        foreach(var testcase in dto.Testcases)
+        foreach (var testcase in dto.Testcases)
         {
             try
             {
@@ -114,7 +114,7 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                         case "int": var tempInInt = int.Parse(testcase.Item1[i]); break;
                         case "float": var tempInFloat = float.Parse(testcase.Item1[i]); break;
                         case "string": break;
-                        case "char": if(testcase.Item1[i].Length != 1) { return false; }; break;
+                        case "char": if (testcase.Item1[i].Length != 1) { return false; }; break;
                         default: Console.WriteLine("Invalid input"); return false;
                     }
                 }
