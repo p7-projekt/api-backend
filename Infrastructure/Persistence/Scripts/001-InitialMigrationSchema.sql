@@ -4,6 +4,15 @@ CREATE TABLE
         created_at TIMESTAMP NOT NULL
 );
 
+CREATE TABLE
+    session (
+        session_id SERIAL PRIMARY KEY,
+        title VARCHAR(50) NOT NULL,
+        description TEXT,
+        author_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+        expirationtime_utc TIMESTAMP NOT NULL,
+        session_code VARCHAR(6) UNIQUE NOT NULL
+);
 
 CREATE TABLE 
     app_users (
@@ -14,7 +23,8 @@ CREATE TABLE
 
 CREATE TABLE 
     anon_users (
-        user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE
+        user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        sesssion_id INTEGER REFERENCES session(session_id) ON DELETE CASCADE NOT NULL
 );
 
 CREATE TABLE
@@ -26,15 +36,7 @@ CREATE TABLE
         solution TEXT NOT NULL
     );
 
-CREATE TABLE
-    session (
-        session_id SERIAL PRIMARY KEY,
-        title VARCHAR(50) NOT NULL,
-        description TEXT,
-        author_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-        expirationtime_utc TIMESTAMP NOT NULL,
-        session_code VARCHAR(6) UNIQUE NOT NULL
-    );
+
 
 CREATE TABLE
     exercise_in_session (
@@ -44,16 +46,10 @@ CREATE TABLE
     );
 
 CREATE TABLE
-    student (
-        student_id SERIAL PRIMARY KEY,
-        session_id INTEGER REFERENCES session (session_id) ON DELETE CASCADE NOT NULL
-    );
-
-CREATE TABLE
     solved (
-        student_id INTEGER REFERENCES student (student_id) ON DELETE CASCADE,
+        user_id INTEGER REFERENCES users (id) ON DELETE CASCADE,
         exercise_id INTEGER REFERENCES exercise (exercise_id) ON DELETE CASCADE,
-        PRIMARY KEY (student_id, exercise_id)
+        PRIMARY KEY (user_id, exercise_id)
     );
 
 CREATE TABLE

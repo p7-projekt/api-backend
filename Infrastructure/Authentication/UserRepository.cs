@@ -34,9 +34,11 @@ public class UserRepository : IUserRepository
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
-					SELECT id, email, password_hash AS passwordhash, created_at AS createdat FROM users
-
-					    WHERE email = @email;
+					SELECT u.id, au.email, au.password_hash AS passwordhash, u.created_at AS createdat
+					FROM users AS u
+					         JOIN app_users AS au
+					              ON u.id = au.user_id
+					WHERE email = @Email;
 					""";
 		var user = await con.QuerySingleAsync<User>(query, new { email });
 		return user;
@@ -58,7 +60,11 @@ public class UserRepository : IUserRepository
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
-					SELECT COUNT(email) FROM users WHERE email = @email;
+					SELECT COUNT(email) 
+					FROM users AS u
+					JOIN app_users AS au
+						ON u.id = au.user_id
+					WHERE email = @email;
 					""";
 		_logger.LogInformation("Checking if email {email} is available", email);
 		var result = await con.QueryAsync<int>(query, new { email = email });
@@ -71,11 +77,20 @@ public class UserRepository : IUserRepository
 		using var transaction = con.BeginTransaction();
 		try
 		{
-			var insertQuery = """
-			                 INSERT INTO users (email, password_hash, created_at) VALUES (@email, @password_hash, @created_at) RETURNING id;
+			var userInsertQuery = """
+			                      INSERT INTO users (created_at) VALUES (@CreatedAt) 
+			                      RETURNING id;
+			                      """;
+			_logger.LogInformation("Inserting user into transaction: {query}", userInsertQuery);
+			var userId = await con.ExecuteScalarAsync<int>(userInsertQuery, new {user.CreatedAt}, transaction);
+			var createAppUser = """
+			                 INSERT INTO app_users 
+			                     (user_id, email, password_hash) 
+			                 VALUES 
+			                     (@UserId, @email, @password_hash);
 			                 """;
-			_logger.LogInformation("Inserting user into transaction: {query}", insertQuery);
-			var userId = await con.ExecuteScalarAsync<int>(insertQuery, new {email = user.Email, password_hash = user.PasswordHash, created_at = user.CreatedAt}, transaction);
+			_logger.LogInformation("Inserting app user into transaction: {query}", createAppUser);
+			await con.ExecuteAsync(createAppUser, new {userId = userId, password_hash = user.PasswordHash}, transaction);
 			
 			var createRoleQuery = """
 			                      INSERT INTO user_role (user_id, role_id)
