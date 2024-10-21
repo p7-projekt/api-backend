@@ -78,7 +78,7 @@ public class TokenServiceTest
 		Environment.SetEnvironmentVariable(AuthConstants.JwtSecret, null);
 		
 		// Act + Assert
-		Assert.Throws<MissingJwtKeyException>(() => service.GenerateAnonymousUserJwt(5));
+		Assert.Throws<MissingJwtKeyException>(() => service.GenerateAnonymousUserJwt(5, -1));
 	}
 
 	[Fact]
@@ -97,7 +97,7 @@ public class TokenServiceTest
 		var currentTime = DateTime.UtcNow;
 
 		// Act
-		var result = service.GenerateAnonymousUserJwt(sessionLengthInMinutes);
+		var result = service.GenerateAnonymousUserJwt(sessionLengthInMinutes, userId);
 		var token = handler.ReadJwtToken(result);
 		
 		var userIdClaim = token.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.UserData);

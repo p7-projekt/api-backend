@@ -4,7 +4,7 @@ using Asp.Versioning.Builder;
 using Core.Example;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API;
+namespace API.Endpoints;
 
 public static class ExampleEndpoint
 {

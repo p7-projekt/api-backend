@@ -6,7 +6,7 @@ using Infrastructure.Authentication.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API;
+namespace API.Endpoints;
 
 public static class AuthenticationEndpoints
 {
@@ -62,13 +62,13 @@ public static class AuthenticationEndpoints
 
 		authGroup.MapGet("/anontoken", Ok<string> (ITokenService service) =>
 		{
-			var token = service.GenerateAnonymousUserJwt(5);
+			var token = service.GenerateAnonymousUserJwt(5, 1);
 			return TypedResults.Ok(token);
 		});
 		//###################################################################################################
 		authGroup.MapPost("/register", async ([FromBody] CreateUserDto userDto, IUserService service) =>
 		{
-			await service.CreateUserAsync(userDto.Email, userDto.Password);
+			await service.CreateUserAsync(userDto);
 		}).WithRequestValidation<CreateUserDto>();
 
 		return app;
