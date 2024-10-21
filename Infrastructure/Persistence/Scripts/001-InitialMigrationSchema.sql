@@ -24,7 +24,7 @@ CREATE TABLE
 CREATE TABLE 
     anon_users (
         user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-        sesssion_id INTEGER REFERENCES session(session_id) ON DELETE CASCADE NOT NULL
+        session_id INTEGER REFERENCES session(session_id) ON DELETE CASCADE NOT NULL
 );
 
 CREATE TABLE

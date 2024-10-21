@@ -28,7 +28,7 @@ public class UserService : IUserService
 		var passwordHash = _passwordHasher.HashPassword(user, password);
 		user.PasswordHash = passwordHash;
 
-		var createUser = await _userRepository.CreateUserAsync(user, Roles.Instructor);
+		var createUser = await _userRepository.CreateAppUserAsync(user, Roles.Instructor);
 		_logger.LogInformation("User created: {email} with role: {role}", user.Email, Roles.Instructor);
 	}
 

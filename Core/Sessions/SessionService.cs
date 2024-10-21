@@ -68,6 +68,7 @@ public class SessionService : ISessionService
             return Result.Fail("Invalid session");
         }
         var student = await _sessionRepository.CreateAnonUser(sessionId);
+        
         var timeOffset = session.ExpirationTimeUtc - DateTime.UtcNow;
         
         var createToken = _tokenService.GenerateAnonymousUserJwt((int)Math.Ceiling(timeOffset.TotalMinutes), student);

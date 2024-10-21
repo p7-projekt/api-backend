@@ -1,6 +1,7 @@
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
 using Dapper;
+using Infrastructure.Authentication.Contracts;
 using Infrastructure.Persistence.Contracts;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -11,11 +12,13 @@ public class SessionRepository : ISessionRepository
 {
     private readonly IDbConnectionFactory _connection;
     private readonly ILogger<SessionRepository> _logger;
+    private readonly IUserRepository _userRepository;
 
-    public SessionRepository(IDbConnectionFactory connection, ILogger<SessionRepository> logger)
+    public SessionRepository(IDbConnectionFactory connection, ILogger<SessionRepository> logger, IUserRepository userRepository)
     {
         _connection = connection;
         _logger = logger;
+        _userRepository = userRepository;
     }
 
     public async Task<int> InsertSessionAsync(Session session)
@@ -70,12 +73,12 @@ public class SessionRepository : ISessionRepository
 
     public async Task<int> CreateAnonUser(int sessionId)
     {
-        var query = """
-                    INSERT INTO student (session_id) VALUES (@Sessionid) RETURNING student_id;
-                    """;
-        using var con = await _connection.CreateConnectionAsync();
-        var studentId = await  con.ExecuteScalarAsync<int>(query, new { sessionId });
-        return studentId;
+        var result = await _userRepository.CreateAnonUserAsync(sessionId);
+        if (result.IsFailed)
+        {
+            return 0;
+        }
+        return result.Value;
     }
 
     public async Task<Session?> GetSessionByIdAsync(int sessionId)
