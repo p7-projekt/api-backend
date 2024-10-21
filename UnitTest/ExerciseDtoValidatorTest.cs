@@ -1,5 +1,5 @@
-using Core.DTOs;
-using Core.DTOvalidators;
+using Core.Models.DTOs;
+using Core.Models.DTOvalidators;
 using System.ComponentModel;
 
 namespace ExerciseDtoValidatorTest;

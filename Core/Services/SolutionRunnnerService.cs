@@ -12,14 +12,14 @@ using Core.Models.DTOs;
 
 namespace Core.Services;
 
-public class SolutionRunnnerService : ISolutoinRunnerService
+public class SolutionRunnnerService : ISolutionRunnerService
 {
-    public async Task SubmitSolution(ExerciseDto dto)
+    public async Task SubmitSolutionAsync(ExerciseDto dto)
     {
         var url = "http://127.0.0.1:8080/submit";
         using var client = new HttpClient();
 
-        var submission = JsonSerializer.Serialize(new SubmissionEntity(dto));
+        var submission = JsonSerializer.Serialize(new Submission(dto));
 
         var content = new StringContent(submission, Encoding.UTF8, "application/json");
         var response = await client.PostAsync(url, content);

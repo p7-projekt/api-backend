@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Core.Models
 {
-    public record SubmissionEntity
+    public record Submission
     {
         [JsonPropertyName("solution")]
         public string Solution { get; }
@@ -17,7 +17,7 @@ namespace Core.Models
         [JsonPropertyName("testCases")]
         public List<TestCase> TestCases { get; }
 
-        public SubmissionEntity(ExerciseDto exerciseDto)
+        public Submission(ExerciseDto exerciseDto)
         {
             Solution = exerciseDto.Solution;
             TestCases = new List<TestCase>();

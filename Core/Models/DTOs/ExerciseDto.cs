@@ -12,5 +12,7 @@ namespace Core.Models.DTOs
         string Solution,
         string[] InputParameterType,
         string[] OutputParamaterType,
-        List<(string[], string[])> Testcases);
+        List<Testcase> Testcases);
+
+    public record Testcase(string[] inputParams, string[] outputParams);
 }
