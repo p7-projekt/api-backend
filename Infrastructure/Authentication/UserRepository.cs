@@ -18,14 +18,17 @@ public class UserRepository : IUserRepository
 		_logger = logger;
 	}
 
-	public async Task<User?> GetUserByIdAsync(int userId)
+	public async Task<User?> GetAppUserByIdAsync(int userId)
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
-		            SELECT * FROM users WHERE id = @id;
+		            SELECT au.email, au.name 
+		            FROM users AS u
+		            JOIN app_users AS au ON u.id = au.user_id
+		            WHERE id = @id;
 		            """;
-		var user = await con.QueryAsync<User>(query, new { id = userId });
-		return user.FirstOrDefault();
+		var user = await con.QuerySingleAsync<User>(query, new { id = userId });
+		return user;
 	}
 
 	public async Task<User?> GetUserByEmailAsync(string email)
@@ -84,12 +87,12 @@ public class UserRepository : IUserRepository
 			_logger.LogDebug("UserID created in transaction: {userid}", userId);			
 			var createAppUser = """
 			                 INSERT INTO app_users 
-			                     (user_id, email, password_hash) 
+			                     (user_id, email, name, password_hash) 
 			                 VALUES 
-			                     (@UserId, @email, @password_hash);
+			                     (@UserId, @email, @Name, @password_hash);
 			                 """;
 			_logger.LogInformation("Inserting app user into transaction: {query}", createAppUser);
-			await con.ExecuteAsync(createAppUser, new {UserId = userId, email = user.Email, password_hash = user.PasswordHash}, transaction);
+			await con.ExecuteAsync(createAppUser, new {UserId = userId, email = user.Email, Name = user.Name, password_hash = user.PasswordHash}, transaction);
 			
 			var createRoleQuery = """
 			                      INSERT INTO user_role (user_id, role_id)

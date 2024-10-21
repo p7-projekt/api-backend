@@ -68,7 +68,7 @@ public static class AuthenticationEndpoints
 		//###################################################################################################
 		authGroup.MapPost("/register", async ([FromBody] CreateUserDto userDto, IUserService service) =>
 		{
-			await service.CreateUserAsync(userDto.Email, userDto.Password);
+			await service.CreateUserAsync(userDto);
 		}).WithRequestValidation<CreateUserDto>();
 
 		return app;

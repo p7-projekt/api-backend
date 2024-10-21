@@ -81,6 +81,18 @@ public class SessionRepository : ISessionRepository
         return result.Value;
     }
 
+    // public async Task<bool> VerifyParticipantAccess(int userId)
+    // {
+    //     using var con = await _connection.CreateConnectionAsync();
+    //     var query = """
+    //                 SELECT COUNT(*) 
+    //                 FROM app_users
+    //                 JOIN session
+    //                 ON session.user_id = app_users.user_id
+    //                 WHERE app_users.user_id = @UserId;
+    //                 """;
+    // }
+    
     public async Task<Session?> GetSessionByIdAsync(int sessionId)
     {
         var query = """

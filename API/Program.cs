@@ -53,6 +53,7 @@ public class Program
         app.UseExampleEndpoints();
         app.UseAuthenticationEndpoints();
         app.UseSessionEndpoints();
+        app.UseUserEndpoints();
 
         app.Run();
     }

@@ -20,16 +20,29 @@ public class UserService : IUserService
 		_tokenService = tokenService;
 	}
 
-	public async Task CreateUserAsync(string email, string password)
+	public async Task CreateUserAsync(CreateUserDto dto)
 	{
 		var user = new User();
 		user.CreatedAt = DateTime.UtcNow;
-		user.Email = email;
-		var passwordHash = _passwordHasher.HashPassword(user, password);
+		user.Email = dto.Email;
+		user.Name = dto.Name;
+		var passwordHash = _passwordHasher.HashPassword(user, dto.Password);
 		user.PasswordHash = passwordHash;
 
 		var createUser = await _userRepository.CreateAppUserAsync(user, Roles.Instructor);
 		_logger.LogInformation("User created: {email} with role: {role}", user.Email, Roles.Instructor);
+	}
+
+	public async Task<Result<GetUserResponseDto>> GetAppUserByIdAsync(int id)
+	{
+		var result = await _userRepository.GetAppUserByIdAsync(id);
+		_logger.LogInformation("Selecting user with userid: {userid}", id);
+		if (result == null)
+		{
+			return Result.Fail("User not found");
+		}
+
+		return Result.Ok(new GetUserResponseDto(result.Email, result.Name));
 	}
 
 	public async Task<Result<LoginResponse>> LoginAsync(LoginDto loginDto)

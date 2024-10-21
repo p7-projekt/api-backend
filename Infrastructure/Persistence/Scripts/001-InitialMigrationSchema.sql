@@ -18,6 +18,7 @@ CREATE TABLE
     app_users (
         user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
         email VARCHAR(50) UNIQUE NOT NULL,
+        name VARCHAR(100) NOT NULL,
         password_hash VARCHAR(255) NOT NULL
 );
 

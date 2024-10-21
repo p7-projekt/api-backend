@@ -5,6 +5,7 @@ namespace Infrastructure.Authentication.Contracts;
 
 public interface IUserService
 {
-	Task CreateUserAsync(string email, string password);
+	Task CreateUserAsync(CreateUserDto dto);
 	Task<Result<LoginResponse>> LoginAsync(LoginDto loginDto);
+	Task<Result<GetUserResponseDto>> GetAppUserByIdAsync(int id);
 }
