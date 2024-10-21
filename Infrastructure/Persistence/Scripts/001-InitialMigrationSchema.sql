@@ -1,8 +1,20 @@
-CREATE TABLE users (
-   id SERIAL PRIMARY KEY,
-   email VARCHAR(50) UNIQUE NOT NULL,
-   password_hash VARCHAR(255) NOT NULL,
-   created_at TIMESTAMP NOT NULL
+CREATE TABLE 
+    users (
+        id SERIAL PRIMARY KEY,
+        created_at TIMESTAMP NOT NULL
+);
+
+
+CREATE TABLE 
+    app_users (
+        user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        email VARCHAR(50) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE 
+    anon_users (
+        user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE
