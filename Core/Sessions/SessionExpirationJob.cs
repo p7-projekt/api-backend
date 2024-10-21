@@ -19,6 +19,7 @@ public class SessionExpirationJob : IJob
     public async Task Execute(IJobExecutionContext context)
     {
         await _sessionRepository.DeleteExpiredSessions();
+        _logger.LogInformation("Executed {job}", nameof(SessionExpirationJob));
     }
     
     

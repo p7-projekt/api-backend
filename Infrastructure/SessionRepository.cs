@@ -28,7 +28,6 @@ public class SessionRepository : ISessionRepository
                     DELETE FROM session WHERE expirationtime_utc <= NOW();
                     """;
         await con.ExecuteAsync(query);
-        _logger.LogInformation("Executed {query}", query);
     }
 
     public async Task<int> InsertSessionAsync(Session session)

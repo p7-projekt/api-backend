@@ -26,11 +26,13 @@ public static class SessionEndpoints
         // Get session
         sessionV1Group.MapGet("/{id:int}", (ClaimsPrincipal principal) =>
         {
-            // verify the anon user token is associated to current session:
-            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
-            // need to get the role, such that we can act accordingly as instructors can only be verified access through the users table, and for anon users in the student table.
-            var role = principal.Claims.First(c => c.Type == ClaimTypes.Role).Value;
+            // Verify session id exists
             
+            // verify the anon user token is associated to current session:
+            var userId = principal.FindFirst( ClaimTypes.UserData)?.Value;
+            // verify anon_user have session 
+            
+            // return session object with exercise titles.
             
             
             return "get session";
