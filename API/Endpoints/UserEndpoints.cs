@@ -33,7 +33,7 @@ public static class UserEndpoints
 				if (user.IsFailed)
 				{
 					return TypedResults.NotFound();
-				}
+				} 
 
 				return TypedResults.Ok(user.Value);
 			}).RequireAuthorization(nameof(Roles.Instructor));
