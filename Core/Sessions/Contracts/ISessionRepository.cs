@@ -8,5 +8,6 @@ public interface ISessionRepository
     Task<bool> CheckSessionCodeIsValid(string sessionCode, int sessionId);
     Task<int> CreateAnonUser(int sessionId);
     Task<Session?> GetSessionByIdAsync(int sessionId);
+    Task<bool> VerifyParticipantAccess(int userId, int sessionId);
     Task DeleteExpiredSessions();
 }

@@ -9,6 +9,8 @@ public class Session
     public string? Description { get; set; }
 
     public int AuthorId { get; set; }
+
+    public string AuthorName { get; set; } = string.Empty;
     
     public DateTime ExpirationTimeUtc { get; set; }
 
@@ -29,5 +31,11 @@ public static class SessionMapper
             ExpirationTimeUtc = DateTime.UtcNow.AddHours(dto.ExpiresInHours),
             Exercises = dto.ExerciseIds
         };
+    }
+
+    public static GetSessionResponseDto ConvertToGetResponse(this Session session)
+    {
+        return new GetSessionResponseDto(session.Title, session.Description, session.AuthorName,
+            session.ExpirationTimeUtc);
     }
 }

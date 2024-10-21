@@ -79,7 +79,7 @@ public class SessionRepository : ISessionRepository
             throw;
         }
     }
-
+    
     public async Task<int> CreateAnonUser(int sessionId)
     {
         var result = await _userRepository.CreateAnonUserAsync(sessionId);
@@ -90,22 +90,26 @@ public class SessionRepository : ISessionRepository
         return result.Value;
     }
 
-    // public async Task<bool> VerifyParticipantAccess(int userId)
-    // {
-    //     using var con = await _connection.CreateConnectionAsync();
-    //     var query = """
-    //                 SELECT COUNT(*) 
-    //                 FROM app_users
-    //                 JOIN session
-    //                 ON session.user_id = app_users.user_id
-    //                 WHERE app_users.user_id = @UserId;
-    //                 """;
-    // }
+    public async Task<bool> VerifyParticipantAccess(int userId, int sessionId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var query = """
+                    SELECT COUNT(*) FROM anon_users
+                    JOIN session 
+                        ON session.session_id = anon_users.session_id
+                    WHERE anon_users.user_id = @UserId AND session.session_id = @SessionId;
+                    """;
+        var result = await con.ExecuteScalarAsync<int>(query, new { UserId = userId, SessionId = sessionId });
+        return result == 1;
+    }
     
     public async Task<Session?> GetSessionByIdAsync(int sessionId)
     {
         var query = """
-                    SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc FROM session WHERE session_id = @SessionId;
+                    SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc, app_users.name AS authorname  
+                    FROM session
+                    JOIN app_users ON app_users.user_id = session.author_id
+                    WHERE session_id = @SessionId;
                     """;
         using var con = await _connection.CreateConnectionAsync();
         var session = await con.QueryFirstOrDefaultAsync<Session>(query, new { sessionId });

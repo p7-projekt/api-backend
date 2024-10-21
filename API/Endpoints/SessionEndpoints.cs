@@ -24,18 +24,19 @@ public static class SessionEndpoints
             .WithTags("Sessions");
         
         // Get session
-        sessionV1Group.MapGet("/{id:int}", (ClaimsPrincipal principal) =>
+        sessionV1Group.MapGet("/{id:int}", async Task<Results<Ok<GetSessionResponseDto>, NotFound>>(int id, ClaimsPrincipal principal, ISessionService service) =>
         {
-            // Verify session id exists
-            
-            // verify the anon user token is associated to current session:
+
             var userId = principal.FindFirst( ClaimTypes.UserData)?.Value;
-            // verify anon_user have session 
+
+            var result = await service.GetSessionByIdAsync(id, Convert.ToInt32(userId));
+            if (result.IsFailed)
+            {
+                return TypedResults.NotFound();
+            }
+
+            return TypedResults.Ok(result.Value);
             
-            // return session object with exercise titles.
-            
-            
-            return "get session";
         }).RequireAuthorization(nameof(Roles.AnonymousUser));
         
         // Create session
