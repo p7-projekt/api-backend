@@ -25,7 +25,7 @@ CREATE TABLE
     anon_users (
         user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
         session_id INTEGER REFERENCES session(session_id) ON DELETE CASCADE NOT NULL
-);
+); 
 
 CREATE TABLE
     exercise (
