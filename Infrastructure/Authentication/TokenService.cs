@@ -34,7 +34,7 @@ public class TokenService : ITokenService
             issuer: AuthConstants.Issuer,
             audience: AuthConstants.Audience,
             claims: claims,
-            expires: DateTime.Now.AddMinutes(AuthConstants.JwtExpirationInMinutes),
+            expires: DateTime.UtcNow.AddMinutes(AuthConstants.JwtExpirationInMinutes),
             signingCredentials: GetSigningCredentials()
             );
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -51,7 +51,7 @@ public class TokenService : ITokenService
                 new Claim(ClaimTypes.UserData, userId.ToString()),
                 new Claim(ClaimTypes.Role, nameof(Roles.AnonymousUser))
             },
-            expires: DateTime.Now.AddMinutes(sessionLength),
+            expires: DateTime.UtcNow.AddMinutes(sessionLength),
             signingCredentials: GetSigningCredentials()
         );
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -81,7 +81,7 @@ public class TokenService : ITokenService
         var refreshToken = new RefreshToken
         {
             Token = CreateRefreshToken(),
-            Expires = DateTime.UtcNow.AddMinutes(5),
+            Expires = DateTime.UtcNow.AddDays(AuthConstants.RefreshTokenExpirationInDays),
             CreatedAt = DateTime.UtcNow,
             UserId = userId
         };

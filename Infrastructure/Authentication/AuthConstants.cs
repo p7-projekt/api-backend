@@ -6,4 +6,5 @@ public class AuthConstants
 	public static string Audience = "Frontend";
 	public static string JwtSecret = "JWT_KEY";
 	public static int JwtExpirationInMinutes = 30;
+	public static int RefreshTokenExpirationInDays = 7;
 }
