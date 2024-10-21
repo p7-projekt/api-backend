@@ -52,7 +52,7 @@ public class SessionService : ISessionService
         return new CreateSessionResponseDto(sessionId, sessionCode);
     }
 
-    public async Task<Result<string>> JoinSessionAnonUser(JoinSessionDto dto, int sessionId)
+    public async Task<Result<JoinSessionResponseDto>> JoinSessionAnonUser(JoinSessionDto dto, int sessionId)
     {
         // check token exists
         var isTokenAndSessionValid = await _sessionRepository.CheckSessionCodeIsValid(dto.SessionCode, sessionId);
@@ -72,7 +72,7 @@ public class SessionService : ISessionService
         var timeOffset = session.ExpirationTimeUtc - DateTime.UtcNow;
         
         var createToken = _tokenService.GenerateAnonymousUserJwt((int)Math.Ceiling(timeOffset.TotalMinutes), student);
-        return createToken;
+        return new JoinSessionResponseDto(createToken);
     } 
     
     public string GenerateSessionCode()

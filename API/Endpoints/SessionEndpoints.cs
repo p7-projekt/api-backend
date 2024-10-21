@@ -31,6 +31,8 @@ public static class SessionEndpoints
             // need to get the role, such that we can act accordingly as instructors can only be verified access through the users table, and for anon users in the student table.
             var role = principal.Claims.First(c => c.Type == ClaimTypes.Role).Value;
             
+            
+            
             return "get session";
         }).RequireAuthorization(nameof(Roles.AnonymousUser));
         
@@ -51,7 +53,7 @@ public static class SessionEndpoints
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<CreateSessionDto>();
         
         // Join session
-        sessionV1Group.MapPost("/{id:int}/participants", async Task<Results<Ok<string>, BadRequest<ValidationProblemDetails>>> ([FromBody] JoinSessionDto dto, int id, ISessionService service) =>
+        sessionV1Group.MapPost("/{id:int}/participants", async Task<Results<Ok<JoinSessionResponseDto>, BadRequest<ValidationProblemDetails>>> ([FromBody] JoinSessionDto dto, int id, ISessionService service) =>
         {
             var result = await service.JoinSessionAnonUser(dto, id);
             if (result.IsFailed)
