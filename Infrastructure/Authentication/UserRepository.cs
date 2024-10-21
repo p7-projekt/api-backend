@@ -82,7 +82,8 @@ public class UserRepository : IUserRepository
 			                      RETURNING id;
 			                      """;
 			_logger.LogInformation("Inserting user into transaction: {query}", userInsertQuery);
-			var userId = await con.ExecuteScalarAsync<int>(userInsertQuery, new {user.CreatedAt}, transaction);
+			var userId = await con.ExecuteScalarAsync<int>(userInsertQuery, new {CreatedAt = user.CreatedAt}, transaction);
+			_logger.LogDebug("UserID created in transaction: {userid}", userId);			
 			var createAppUser = """
 			                 INSERT INTO app_users 
 			                     (user_id, email, password_hash) 
@@ -90,7 +91,7 @@ public class UserRepository : IUserRepository
 			                     (@UserId, @email, @password_hash);
 			                 """;
 			_logger.LogInformation("Inserting app user into transaction: {query}", createAppUser);
-			await con.ExecuteAsync(createAppUser, new {userId = userId, password_hash = user.PasswordHash}, transaction);
+			await con.ExecuteAsync(createAppUser, new {UserId = userId, email = user.Email, password_hash = user.PasswordHash}, transaction);
 			
 			var createRoleQuery = """
 			                      INSERT INTO user_role (user_id, role_id)

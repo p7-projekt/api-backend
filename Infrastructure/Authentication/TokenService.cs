@@ -26,7 +26,6 @@ public class TokenService : ITokenService
     {
         var claims = new List<Claim>();
         claims.Add(new Claim(ClaimTypes.UserData, userId.ToString()));
-        claims.Add(new Claim(AuthConstants.AnonymousUser, "false"));
         foreach (var role in roles)
         {
             claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
@@ -43,13 +42,13 @@ public class TokenService : ITokenService
 
     public string GenerateAnonymousUserJwt(int sessionLength, int userId)
     {
+        // todo: change this to load roles from anon users.
         var token = new JwtSecurityToken(
             issuer: AuthConstants.Issuer,
             audience: AuthConstants.Audience,
             claims: new List<Claim>
             {
                 new Claim(ClaimTypes.UserData, userId.ToString()),
-                new Claim(AuthConstants.AnonymousUser, "true"),
                 new Claim(ClaimTypes.Role, nameof(Roles.AnonymousUser))
             },
             expires: DateTime.Now.AddMinutes(sessionLength),
