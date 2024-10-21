@@ -21,6 +21,16 @@ public class SessionRepository : ISessionRepository
         _userRepository = userRepository;
     }
 
+    public async Task DeleteExpiredSessions()
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var query = """
+                    DELETE FROM session WHERE expirationtime_utc <= NOW();
+                    """;
+        await con.ExecuteAsync(query);
+        _logger.LogInformation("Executed {query}", query);
+    }
+
     public async Task<int> InsertSessionAsync(Session session)
     {
         using var con = await _connection.CreateConnectionAsync();

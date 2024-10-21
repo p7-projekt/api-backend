@@ -93,3 +93,16 @@ CREATE TABLE refresh_token(
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL
 );
 
+CREATE FUNCTION user_cleanup() -- After trigger https://www.postgresql.org/docs/current/plpgsql-trigger.html OLD is the deleted record from anon_users
+RETURNS TRIGGER AS $$
+    BEGIN
+        DELETE FROM users WHERE id = OLD.user_id;
+        RETURN NULL;
+    END;
+    $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER anon_user_cleanup
+    AFTER DELETE ON anon_users
+    FOR EACH ROW
+    EXECUTE FUNCTION user_cleanup();
+    
