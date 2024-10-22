@@ -1,4 +1,5 @@
 ﻿using Core.Models.DTOs;
+using FluentResults;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +10,5 @@ namespace Core.Contracts.Repositories;
 
 public interface IExerciseRepository
 {
-    Task<string> InsertExerciseAsync(ExerciseDto dto, int userId);
+    Task<Result> InsertExerciseAsync(ExerciseDto dto, int userId);
 }

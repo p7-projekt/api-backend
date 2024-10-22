@@ -41,7 +41,6 @@ namespace Core.Models
                 i++;
             }
         }
-        
     }
 
     public record TestCase

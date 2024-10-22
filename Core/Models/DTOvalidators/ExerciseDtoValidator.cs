@@ -1,6 +1,7 @@
 ﻿using Core.Example;
 using Core.Models.DTOs;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
@@ -11,8 +12,12 @@ using System.Threading.Tasks;
 namespace Core.Models.DTOvalidators;
 public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
 {
-    public ExerciseDtoValidator()
+    readonly public ILogger<ExerciseDtoValidator> _logger;
+    public ExerciseDtoValidator(ILogger<ExerciseDtoValidator> logger)
     {
+        _logger = logger;
+
+
         RuleFor(x => x.Name).NotEmpty().WithMessage("Name is required");
         RuleFor(x => x.Name).MinimumLength(1).MaximumLength(100).WithMessage("Exercise must have a title, that is no longer than 100 characters");
         RuleFor(x => x.Description).NotEmpty().WithMessage("Description of exercise is required");
@@ -46,8 +51,9 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                 }
             }
         }
-        catch (NullReferenceException)
+        catch (NullReferenceException ex)
         {
+            _logger.LogInformation("Null encountered during parameter type validation. Message:{} ", ex.Message);
             return false;
         }
         return true;
@@ -60,11 +66,13 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
             if (testcase.inputParams == null || testcase.inputParams.Length == 0)
             {
                 Console.WriteLine("Empty paramter");
+                _logger.LogInformation("Empty input paramter for; {}", testcase);
                 return false;
             }
             if (testcase.outputParams == null || testcase.outputParams.Length == 0)
             {
                 Console.WriteLine("Empty paramter");
+                _logger.LogInformation("Empty output paramter for; {}", testcase);
                 return false;
             }
         }
@@ -87,14 +95,14 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                 }
             }
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException ex)
         {
-            Console.WriteLine("Missing testcases");
+            _logger.LogInformation("Missing testcases: {}", ex.Message);
             return false;
         }
-        catch (NullReferenceException)
+        catch (NullReferenceException ex)
         {
-            Console.WriteLine("Missing testcases");
+            _logger.LogInformation("Missing testcases: {}", ex.Message);
             return false;
         }
         return true;
@@ -114,7 +122,7 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                         case "int": var tempInInt = int.Parse(testcase.inputParams[i]); break;
                         case "float": var tempInFloat = float.Parse(testcase.inputParams[i]); break;
                         case "string": break;
-                        case "char": if (testcase.inputParams[i].Length != 1) { return false; }; break;
+                        case "char": if (testcase.inputParams[i].Length != 1) { _logger.LogInformation("Empty input param for testcase");  return false; }; break;
                         default: Console.WriteLine("Invalid input"); return false;
                     }
                 }
@@ -126,31 +134,34 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                         case "int": var tempOutInt = int.Parse(testcase.outputParams[i]); break;
                         case "float": var tempOutFloat = float.Parse(testcase.outputParams[i]); break;
                         case "string": break;
-                        case "char": if (testcase.outputParams[i].Length != 1) { return false; }; break;
+                        case "char": if (testcase.outputParams[i].Length != 1) { _logger.LogInformation("Empty output param for testcase"); return false; }; break;
                         default: Console.WriteLine("Invalid output"); return false;
                     }
                 }
             }
-            catch (FormatException)
+            catch (FormatException ex)
             {
-                Console.WriteLine("Invalid parameter format");
+                _logger.LogInformation("Incorrect format of if testcase parameter. {}", ex.Message);
                 return false;
             }
-            catch (NullReferenceException)
+            catch (NullReferenceException ex)
             {
+                _logger.LogInformation("Null encountered during ExcerciseDto validation: {}", ex.Message);
                 return false;
             }
-            catch (IndexOutOfRangeException)
+            catch (IndexOutOfRangeException ex)
             {
-                Console.WriteLine("Missing parameter");
+                _logger.LogInformation("Missing paramater. {}", ex.Message);
                 return false;
             }
-            catch
+            catch (Exception ex)
             {
-                // Log error.
+                _logger.LogError("Unhandled exception caught in ExerciseDtoValidator: {}", ex.Message);
                 throw;
             }
         }
+
+        _logger.LogInformation("Exercise validated. Title: {}", dto.Name);
         return true;
     }
 }

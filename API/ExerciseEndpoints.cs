@@ -25,13 +25,13 @@ public static class ExerciseEndpoints
 
         exerciseV1.MapPost("/", async ([FromBody]ExerciseDto dto, ISolutionRunnerService solutionRunner, ClaimsPrincipal principal, IExerciseRepository exerciseRepo) =>
         {
-            //await solutionRunner.SubmitSolutionAsync(dto);
+            await solutionRunner.SubmitSolutionAsync(dto);
 
-            //var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
-            await exerciseRepo.InsertExerciseAsync(dto, Convert.ToInt32("1"));
+            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+            await exerciseRepo.InsertExerciseAsync(dto, Convert.ToInt32(userId));
 
             TypedResults.Ok(dto);
-        }).WithRequestValidation<ExerciseDto>();
+        }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ExerciseDto>();
         
         
         return app;
