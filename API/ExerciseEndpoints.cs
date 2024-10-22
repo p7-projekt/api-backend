@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using API.Configuration;
 using Infrastructure.Authentication.Models;
 using Core.Contracts.Services;
+using System.Security.Claims;
+using Core.Contracts.Repositories;
 
 namespace API;
 
@@ -21,9 +23,13 @@ public static class ExerciseEndpoints
 
         var exerciseV1 = app.MapGroup("v{version:apiVersion}/exercises").WithApiVersionSet(apiVersionSet).WithTags("Exercise");
 
-        exerciseV1.MapPost("/", async ([FromBody]ExerciseDto dto, ISolutionRunnerService solutionRunner) =>
+        exerciseV1.MapPost("/", async ([FromBody]ExerciseDto dto, ISolutionRunnerService solutionRunner, ClaimsPrincipal principal, IExerciseRepository exerciseRepo) =>
         {
-            await solutionRunner.SubmitSolutionAsync(dto);
+            //await solutionRunner.SubmitSolutionAsync(dto);
+
+            //var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+            await exerciseRepo.InsertExerciseAsync(dto, Convert.ToInt32("1"));
+
             TypedResults.Ok(dto);
         }).WithRequestValidation<ExerciseDto>();
         

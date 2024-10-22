@@ -20,9 +20,10 @@ public class SolutionRunnnerService : ISolutionRunnerService
         using var client = new HttpClient();
 
         var submission = JsonSerializer.Serialize(new Submission(dto));
-
+        
         var content = new StringContent(submission, Encoding.UTF8, "application/json");
         var response = await client.PostAsync(url, content);
         string responseBody = await response.Content.ReadAsStringAsync();
+        //Managge potentiel responses from solution runner.
     }
 }

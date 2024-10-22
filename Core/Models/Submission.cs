@@ -26,15 +26,15 @@ namespace Core.Models
             foreach (var testCase in exerciseDto.Testcases)
             {
                 var inputParams = new List<Parameter>();
-                for(int j = 0; j < testCase.Item1.Length; j++)
+                for(int j = 0; j < testCase.inputParams.Length; j++)
                 {
-                    inputParams.Add(new Parameter(exerciseDto.InputParameterType[j], testCase.Item1[j]));
+                    inputParams.Add(new Parameter(exerciseDto.InputParameterType[j], testCase.inputParams[j]));
                 }
 
                 var outputParams = new List<Parameter>();
-                for (int j = 0; j < testCase.Item2.Length; j++)
+                for (int j = 0; j < testCase.outputParams.Length; j++)
                 {
-                    outputParams.Add(new Parameter(exerciseDto.OutputParamaterType[j], testCase.Item2[j]));
+                    outputParams.Add(new Parameter(exerciseDto.OutputParamaterType[j], testCase.outputParams[j]));
                 }
 
                 TestCases.Add(new TestCase(i, inputParams, outputParams));

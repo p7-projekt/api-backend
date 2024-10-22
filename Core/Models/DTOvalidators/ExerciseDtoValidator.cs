@@ -53,16 +53,16 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         return true;
     }
 
-    private bool HaveAllParameters(List<(string[], string[])> testcases)
+    private bool HaveAllParameters(List<Testcase> testcases)
     {
         foreach (var testcase in testcases)
         {
-            if (testcase.Item1 == null || testcase.Item1.Length == 0)
+            if (testcase.inputParams == null || testcase.inputParams.Length == 0)
             {
                 Console.WriteLine("Empty paramter");
                 return false;
             }
-            if (testcase.Item2 == null || testcase.Item2.Length == 0)
+            if (testcase.outputParams == null || testcase.outputParams.Length == 0)
             {
                 Console.WriteLine("Empty paramter");
                 return false;
@@ -71,16 +71,16 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         return true;
     }
 
-    private bool HasSameParameterAmount(List<(string[], string[])> testcases)
+    private bool HasSameParameterAmount(List<Testcase> testcases)
     {
         try
         {
             var temp = testcases.First();
-            var inputParams = temp.Item1.Length;
-            var outputParams = temp.Item2.Length;
+            var inputParams = temp.inputParams.Length;
+            var outputParams = temp.outputParams.Length;
             foreach (var testcase in testcases)
             {
-                if (testcase.Item1.Length != inputParams || testcase.Item2.Length != outputParams)
+                if (testcase.inputParams.Length != inputParams || testcase.outputParams.Length != outputParams)
                 {
                     Console.WriteLine("Inconsistency in parameter amount across test cases");
                     return false;
@@ -110,11 +110,11 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                 {
                     switch (dto.InputParameterType[i].ToLower())
                     {
-                        case "bool": var tempInBool = bool.Parse(testcase.Item1[i]); break;
-                        case "int": var tempInInt = int.Parse(testcase.Item1[i]); break;
-                        case "float": var tempInFloat = float.Parse(testcase.Item1[i]); break;
+                        case "bool": var tempInBool = bool.Parse(testcase.inputParams[i]); break;
+                        case "int": var tempInInt = int.Parse(testcase.inputParams[i]); break;
+                        case "float": var tempInFloat = float.Parse(testcase.inputParams[i]); break;
                         case "string": break;
-                        case "char": if (testcase.Item1[i].Length != 1) { return false; }; break;
+                        case "char": if (testcase.inputParams[i].Length != 1) { return false; }; break;
                         default: Console.WriteLine("Invalid input"); return false;
                     }
                 }
@@ -122,11 +122,11 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                 {
                     switch (dto.OutputParamaterType[i].ToLower())
                     {
-                        case "bool": var tempOutBool = bool.Parse(testcase.Item2[i]); break;
-                        case "int": var tempOutInt = int.Parse(testcase.Item2[i]); break;
-                        case "float": var tempOutFloat = float.Parse(testcase.Item2[i]); break;
+                        case "bool": var tempOutBool = bool.Parse(testcase.outputParams[i]); break;
+                        case "int": var tempOutInt = int.Parse(testcase.outputParams[i]); break;
+                        case "float": var tempOutFloat = float.Parse(testcase.outputParams[i]); break;
                         case "string": break;
-                        case "char": if (testcase.Item2[i].Length != 1) { return false; }; break;
+                        case "char": if (testcase.outputParams[i].Length != 1) { return false; }; break;
                         default: Console.WriteLine("Invalid output"); return false;
                     }
                 }

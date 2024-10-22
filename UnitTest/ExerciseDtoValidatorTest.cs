@@ -15,7 +15,9 @@ public class ExerciseDtoValidatorTest
     public void ExerciseDtoValidatorTest_ShouldBe_Valid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam,  string[] testcase2InParam, string[] testcase2OutParam)
     {
         var validator = new ExerciseDtoValidator();
-        var testcases = new List<(string[], string[])> { (testcase1InParam, testcase1OutParam), (testcase2InParam, testcase2OutParam)};
+        var testcase1 = new Testcase(testcase1InParam, testcase1OutParam);
+        var testcase2 = new Testcase(testcase2InParam, testcase2OutParam);
+        var testcases = new List<Testcase> { testcase1, testcase2 };
         var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
 
         var result = validator.Validate(dto);
@@ -29,7 +31,8 @@ public class ExerciseDtoValidatorTest
     public void ExerciseDtoValidatorTest_MissingTitel_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam) 
     {
         var validator = new ExerciseDtoValidator();
-        var testcases = new List<(string[], string[])> { (testcase1InParam, testcase1OutParam)};
+        var testcase1 = new Testcase(testcase1InParam, testcase1OutParam);
+        var testcases = new List<Testcase> { testcase1};
         var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
 
         var result = validator.Validate(dto);
@@ -42,7 +45,8 @@ public class ExerciseDtoValidatorTest
     public void ExerciseDtoValidatorTest_TitelTooLong_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam)
     {
         var validator = new ExerciseDtoValidator();
-        var testcases = new List<(string[], string[])> { (testcase1InParam, testcase1OutParam) };
+        var testcase1 = new Testcase(testcase1InParam, testcase1OutParam);
+        var testcases = new List<Testcase> { testcase1 };
         var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
 
         var result = validator.Validate(dto);
@@ -56,7 +60,8 @@ public class ExerciseDtoValidatorTest
     public void ExerciseDtoValidatorTest_MissingDescription_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam)
     {
         var validator = new ExerciseDtoValidator();
-        var testcases = new List<(string[], string[])> { (testcase1InParam, testcase1OutParam) };
+        var testcase1 = new Testcase(testcase1InParam, testcase1OutParam);
+        var testcases = new List<Testcase> { testcase1 };
         var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
 
         var result = validator.Validate(dto);
@@ -70,7 +75,8 @@ public class ExerciseDtoValidatorTest
     public void ExerciseDtoValidatorTest_MissinggInputParameterType_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam)
     {
         var validator = new ExerciseDtoValidator();
-        var testcases = new List<(string[], string[])> { (testcase1InParam, testcase1OutParam) };
+        var testcase1 = new Testcase(testcase1InParam, testcase1OutParam);
+        var testcases = new List<Testcase> { testcase1 };
         var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
 
         var result = validator.Validate(dto);
@@ -83,7 +89,8 @@ public class ExerciseDtoValidatorTest
     public void ExerciseDtoValidatorTest_MissinggOutputParameterType_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam)
     {
         var validator = new ExerciseDtoValidator();
-        var testcases = new List<(string[], string[])> { (testcase1InParam, testcase1OutParam) };
+        var testcase1 = new Testcase(testcase1InParam, testcase1OutParam);
+        var testcases = new List<Testcase> { testcase1 };
         var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
 
         var result = validator.Validate(dto);
@@ -98,7 +105,8 @@ public class ExerciseDtoValidatorTest
     public void ExerciseDtoValidatorTest_InputParamterInvalidType_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam)
     {
         var validator = new ExerciseDtoValidator();
-        var testcases = new List<(string[], string[])> { (testcase1InParam, testcase1OutParam) };
+        var testcase1 = new Testcase(testcase1InParam, testcase1OutParam);
+        var testcases = new List<Testcase> { testcase1 };
         var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
 
         var result = validator.Validate(dto);
@@ -113,7 +121,8 @@ public class ExerciseDtoValidatorTest
     public void ExerciseDtoValidatorTest_OutputParamterInvalidType_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam)
     {
         var validator = new ExerciseDtoValidator();
-        var testcases = new List<(string[], string[])> { (testcase1InParam, testcase1OutParam) };
+        var testcase1 = new Testcase(testcase1InParam, testcase1OutParam);
+        var testcases = new List<Testcase> { testcase1 };
         var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
 
         var result = validator.Validate(dto);
@@ -126,7 +135,7 @@ public class ExerciseDtoValidatorTest
     public void ExerciseDtoValidatorTest_MissingTestcases_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams)
     {
         var validator = new ExerciseDtoValidator();
-        var testcases = new List<(string[], string[])> { };
+        var testcases = new List<Testcase> { };
         var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
 
         var result = validator.Validate(dto);
@@ -142,7 +151,9 @@ public class ExerciseDtoValidatorTest
     public void ExerciseDtoValidatorTest_MissingTestcaseParameter_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam, string[] testcase2InParam, string[] testcase2OutParam)
     {
         var validator = new ExerciseDtoValidator();
-        var testcases = new List<(string[], string[])> { (testcase1InParam, testcase1OutParam), (testcase2InParam, testcase2OutParam) };
+        var testcase1 = new Testcase(testcase1InParam, testcase1OutParam);
+        var testcase2 = new Testcase(testcase2InParam, testcase2OutParam);
+        var testcases = new List<Testcase> { testcase1, testcase2 };
         var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
 
         var result = validator.Validate(dto);
@@ -159,7 +170,10 @@ public class ExerciseDtoValidatorTest
     public void ExerciseDtoValidatorTest_InconsistentParameterAmount_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam, string[] testcase2InParam, string[] testcase2OutParam, string[] testcase3InParam, string[] testcase3OutParam)
     {
         var validator = new ExerciseDtoValidator();
-        var testcases = new List<(string[], string[])> { (testcase1InParam, testcase1OutParam), (testcase2InParam, testcase2OutParam), (testcase3InParam, testcase3OutParam)};
+        var testcase1 = new Testcase(testcase1InParam, testcase1OutParam);
+        var testcase2 = new Testcase(testcase2InParam, testcase2OutParam);
+        var testcase3 = new Testcase(testcase3InParam, testcase3OutParam);
+        var testcases = new List<Testcase> { testcase1, testcase2, testcase3 };
         var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
 
         var result = validator.Validate(dto);
@@ -178,7 +192,8 @@ public class ExerciseDtoValidatorTest
     public void ExerciseDtoValidatorTest_ParameterValueDoesNotMatchDeclaredType_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam)
     {
         var validator = new ExerciseDtoValidator();
-        var testcases = new List<(string[], string[])> { (testcase1InParam, testcase1OutParam) };
+        var testcase1 = new Testcase(testcase1InParam, testcase1OutParam);
+        var testcases = new List<Testcase> { testcase1 };
         var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
 
         var result = validator.Validate(dto);

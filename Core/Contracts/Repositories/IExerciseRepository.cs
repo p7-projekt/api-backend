@@ -9,5 +9,5 @@ namespace Core.Contracts.Repositories;
 
 public interface IExerciseRepository
 {
-    Task<string> InsertExercise(ExerciseDto dto);
+    Task<string> InsertExerciseAsync(ExerciseDto dto, int userId);
 }
