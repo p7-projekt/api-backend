@@ -1,11 +1,11 @@
-using Core.Models.DTOs;
-using Core.Models.DTOvalidators;
 using Infrastructure;
 using Infrastructure.Authentication;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Serilog.Core;
 using System.ComponentModel;
+using Core.Exercises.Models;
+using Core.Exercises.Validators;
 
 namespace ExerciseDtoValidatorTest;
 

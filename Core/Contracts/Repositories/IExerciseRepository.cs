@@ -1,10 +1,10 @@
-﻿using Core.Models.DTOs;
-using FluentResults;
+﻿using FluentResults;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Core.Exercises.Models;
 
 namespace Core.Contracts.Repositories;
 

@@ -1,16 +1,14 @@
-﻿using Asp.Versioning.Builder;
-using Asp.Versioning;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Core.Example;
-using Core.Models.DTOs;
-using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
 using API.Configuration;
-using Infrastructure.Authentication.Models;
-using Core.Contracts.Services;
-using System.Security.Claims;
+using Asp.Versioning;
+using Asp.Versioning.Builder;
 using Core.Contracts.Repositories;
+using Core.Contracts.Services;
+using Core.Exercises.Models;
+using Infrastructure.Authentication.Models;
+using Microsoft.AspNetCore.Mvc;
 
-namespace API;
+namespace API.Endpoints;
 
 public static class ExerciseEndpoints
 {
