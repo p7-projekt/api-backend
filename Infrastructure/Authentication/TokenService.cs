@@ -72,12 +72,10 @@ public class TokenService : ITokenService
 
     public async Task<Result<RefreshToken>> GenerateRefreshToken(int userId)
     {
-        var token = await _tokenRepository.GetRefreshTokenByUserIdAsync(userId);
-        if (token != null)
-        {
-            return token;
-        }
+        // if token exist remove it.
+        await _tokenRepository.DeleteRefreshTokenByUserIdAsync(userId);
         
+        // Create new
         var refreshToken = new RefreshToken
         {
             Token = CreateRefreshToken(),
@@ -99,7 +97,7 @@ public class TokenService : ITokenService
 
     public async Task<Result<LoginResponse>> GenerateJwtFromRefreshToken(RefreshDto refreshToken)
     {
-        var token = await _tokenRepository.GetRefreshTokenByRefreshTokenAsync(refreshToken.RefreshToken);
+        var token = await _tokenRepository.GetAccessTokenByRefreshTokenAsync(refreshToken.RefreshToken);
         if (token == null)
         {
             _logger.LogInformation("Invalid refresh token: {token}", refreshToken);

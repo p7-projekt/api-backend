@@ -27,27 +27,16 @@ public class TokenRepository : ITokenRepository
 		await con.ExecuteAsync(query, new { token = token.Token, expires = token.Expires, created_at = token.CreatedAt, userId = token.UserId });
 	}
 
-	public async Task<RefreshToken?> GetRefreshTokenByUserIdAsync(int userId)
+	public async Task DeleteRefreshTokenByUserIdAsync(int userId)
 	{
-		// check token exists based on userid
-		var query = """
-		            SELECT id, token, expires, created_at AS createdat, user_id AS userid FROM refresh_token WHERE user_id = @UserId
-		            """;
 		using var con = await _connection.CreateConnectionAsync();
-		var token = await con.QuerySingleOrDefaultAsync<RefreshToken>(query, new {UserId = userId});
-		if (token == null)
-		{
-			return null;
-		}
-		// check expiration 
-		if (!await CheckValidRefreshToken(token.Token))
-		{
-			return null;
-		}
-		return token;
+		var query = """
+		            DELETE FROM refresh_token WHERE user_id = @UserId;
+		            """;
+		await con.ExecuteAsync(query, new { userId });
 	}
 	
-	public async Task<RefreshToken?> GetRefreshTokenByRefreshTokenAsync(string refreshToken)
+	public async Task<RefreshToken?> GetAccessTokenByRefreshTokenAsync(string refreshToken)
 	{
 		// check token exists based on userid
 		var query = """
