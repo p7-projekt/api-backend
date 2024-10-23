@@ -3,7 +3,7 @@ using Asp.Versioning.Builder;
 using Core;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace API;
+namespace API.Endpoints;
 
 public static class StudentEndpoints
 {

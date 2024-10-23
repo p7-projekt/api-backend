@@ -40,14 +40,15 @@ public class TokenService : ITokenService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public string GenerateAnonymousUserJwt(int sessionLength)
+    public string GenerateAnonymousUserJwt(int sessionLength, int userId)
     {
+        // todo: change this to load roles from anon users.
         var token = new JwtSecurityToken(
             issuer: AuthConstants.Issuer,
             audience: AuthConstants.Audience,
             claims: new List<Claim>
             {
-                new Claim(ClaimTypes.UserData, AuthConstants.AnonymousUserId.ToString()),
+                new Claim(ClaimTypes.UserData, userId.ToString()),
                 new Claim(ClaimTypes.Role, nameof(Roles.AnonymousUser))
             },
             expires: DateTime.UtcNow.AddMinutes(sessionLength),

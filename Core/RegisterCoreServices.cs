@@ -1,6 +1,10 @@
 using System.Reflection;
+using Core.Sessions;
+using Core.Sessions.Contracts;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using Quartz;
+using Quartz.Simpl;
 
 namespace Core;
 
@@ -10,7 +14,23 @@ public static class RegisterCoreServices
     {
         services.AddValidatorsFromAssemblies(new [] {Assembly.GetExecutingAssembly() });
         services.AddScoped<StudentService>();
+        services.AddScoped<ISessionService, SessionService>();
 
+
+        services.AddQuartzHostedService(options =>
+        {
+            options.WaitForJobsToComplete = true;
+        });
+        services.AddQuartz(configure =>
+        {
+            var job = new JobKey(nameof(SessionExpirationJob));
+            configure.AddJob<SessionExpirationJob>(job)
+                .AddTrigger(trigger =>
+                {
+                    trigger.ForJob(job).WithSimpleSchedule(
+                        schedule => schedule.WithIntervalInMinutes(5).RepeatForever());
+                });
+        });
 
         return services;
     }

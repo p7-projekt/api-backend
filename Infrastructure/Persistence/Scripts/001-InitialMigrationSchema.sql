@@ -1,9 +1,32 @@
-CREATE TABLE users (
-   id SERIAL PRIMARY KEY,
-   email VARCHAR(50) UNIQUE NOT NULL,
-   password_hash VARCHAR(255) NOT NULL,
-   created_at TIMESTAMP NOT NULL
+CREATE TABLE 
+    users (
+        id SERIAL PRIMARY KEY,
+        created_at TIMESTAMP NOT NULL
 );
+
+CREATE TABLE
+    session (
+        session_id SERIAL PRIMARY KEY,
+        title VARCHAR(50) NOT NULL,
+        description TEXT,
+        author_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+        expirationtime_utc TIMESTAMP NOT NULL,
+        session_code VARCHAR(6) UNIQUE NOT NULL
+);
+
+CREATE TABLE 
+    app_users (
+        user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        email VARCHAR(50) UNIQUE NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        password_hash VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE 
+    anon_users (
+        user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        session_id INTEGER REFERENCES session(session_id) ON DELETE CASCADE NOT NULL
+); 
 
 CREATE TABLE
     exercise (
@@ -14,13 +37,7 @@ CREATE TABLE
         solution TEXT NOT NULL
     );
 
-CREATE TABLE
-    session (
-        session_id SERIAL PRIMARY KEY,
-        title VARCHAR(50) NOT NULL,
-        description TEXT,
-        expirationtime_utc TIMESTAMP NOT NULL
-    );
+
 
 CREATE TABLE
     exercise_in_session (
@@ -30,16 +47,10 @@ CREATE TABLE
     );
 
 CREATE TABLE
-    student (
-        student_id SERIAL PRIMARY KEY,
-        session_id INTEGER REFERENCES session (session_id) ON DELETE CASCADE NOT NULL
-    );
-
-CREATE TABLE
     solved (
-        student_id INTEGER REFERENCES student (student_id) ON DELETE CASCADE,
+        user_id INTEGER REFERENCES users (id) ON DELETE CASCADE,
         exercise_id INTEGER REFERENCES exercise (exercise_id) ON DELETE CASCADE,
-        PRIMARY KEY (student_id, exercise_id)
+        PRIMARY KEY (user_id, exercise_id)
     );
 
 CREATE TABLE
@@ -82,3 +93,16 @@ CREATE TABLE refresh_token(
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL
 );
 
+CREATE FUNCTION user_cleanup() -- After trigger https://www.postgresql.org/docs/current/plpgsql-trigger.html OLD is the deleted record from anon_users
+RETURNS TRIGGER AS $$
+    BEGIN
+        DELETE FROM users WHERE id = OLD.user_id;
+        RETURN NULL;
+    END;
+    $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER anon_user_cleanup
+    AFTER DELETE ON anon_users
+    FOR EACH ROW
+    EXECUTE FUNCTION user_cleanup();
+    

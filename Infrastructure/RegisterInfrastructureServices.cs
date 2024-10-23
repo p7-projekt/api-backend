@@ -1,5 +1,7 @@
 using System.Reflection;
 using Core;
+using Core.Sessions.Contracts;
+using Core.Shared.Contracts;
 using DbUp;
 using FluentValidation;
 using Infrastructure.Authentication;
@@ -28,11 +30,13 @@ public static class RegisterInfrastructureServices
         
         // Authentication - Authorization
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IAnonTokenService, TokenService>();
         services.AddValidatorsFromAssemblies(new [] {Assembly.GetExecutingAssembly() });
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ITokenRepository, TokenRepository>();
+        services.AddScoped<ISessionRepository, SessionRepository>();
         return services;
     }
 
