@@ -1,3 +1,4 @@
+using Core.Contracts.Repositories;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
 using Core.Shared.Contracts;
@@ -11,12 +12,14 @@ public class SessionService : ISessionService
     private readonly ISessionRepository _sessionRepository;
     private readonly ILogger<SessionService> _logger;
     private readonly IAnonTokenService _tokenService;
+    private readonly IExerciseRepository _exerciseRepository;
 
-    public SessionService(ISessionRepository sessionRepository, ILogger<SessionService> logger, IAnonTokenService tokenService)
+    public SessionService(ISessionRepository sessionRepository, ILogger<SessionService> logger, IAnonTokenService tokenService, IExerciseRepository exerciseRepository)
     {
         _sessionRepository = sessionRepository;
         _logger = logger;
         _tokenService = tokenService;
+        _exerciseRepository = exerciseRepository;
     }
 
     public async Task<Result<CreateSessionResponseDto>> CreateSessionAsync(CreateSessionDto sessionDto, int authorId)
@@ -25,7 +28,14 @@ public class SessionService : ISessionService
         var session = sessionDto.ConvertToSession();
         session.AuthorId = authorId;
         session.SessionCode = sessionCode;
-
+        
+        // validate if exercises exists..
+        var exercisesExist = await _exerciseRepository.VerifyExerciseIdsAsync(session.Exercises, authorId);
+        if (!exercisesExist)
+        {
+            return Result.Fail("Exercises not found");
+        }
+        
         var sessionId = await _sessionRepository.InsertSessionAsync(session);
         if (sessionId == (int)ErrorCodes.UniqueConstraintViolation)
         {
