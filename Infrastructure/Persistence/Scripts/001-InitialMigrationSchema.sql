@@ -49,7 +49,8 @@ CREATE TABLE
 CREATE TABLE
     solved (
         user_id INTEGER REFERENCES users (id) ON DELETE CASCADE,
-        exercise_id INTEGER REFERENCES exercise (exercise_id) ON DELETE CASCADE,
+        session_id INTEGER REFERENCES session(session_id) ON DELETE CASCADE NOT NULL,
+        exercise_id INTEGER REFERENCES exercise (exercise_id) ON DELETE CASCADE NOT NULL,
         PRIMARY KEY (user_id, exercise_id)
     );
 
