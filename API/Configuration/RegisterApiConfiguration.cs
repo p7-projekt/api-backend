@@ -1,5 +1,6 @@
 using System.Text;
 using Asp.Versioning;
+using Core.Shared;
 using Infrastructure.Authentication;
 using Infrastructure.Authentication.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

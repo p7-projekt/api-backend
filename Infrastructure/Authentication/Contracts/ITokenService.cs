@@ -1,3 +1,4 @@
+using Core.Shared;
 using Core.Shared.Contracts;
 using FluentResults;
 using Infrastructure.Authentication.Models;
