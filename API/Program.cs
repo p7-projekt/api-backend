@@ -49,8 +49,6 @@ public class Program
         app.UseSerilogRequestLogging();
 
         // Endpoints
-        app.UseStudentEndpoints();
-        app.UseExampleEndpoints();
         app.UseExerciseEndpoints();
         app.UseAuthenticationEndpoints();
         app.UseSessionEndpoints();

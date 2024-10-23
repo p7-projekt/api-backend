@@ -1,8 +1,8 @@
 using System.Reflection;
 using Core.Contracts.Services;
-using Core.Services;
 using Core.Sessions;
 using Core.Sessions.Contracts;
+using Core.Solutions;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
@@ -14,7 +14,6 @@ public static class RegisterCoreServices
     public static IServiceCollection AddCoreServices(this IServiceCollection services)
     {
         services.AddValidatorsFromAssemblies(new [] {Assembly.GetExecutingAssembly() });
-        services.AddScoped<StudentService>();
         services.AddScoped<ISolutionRunnerService, SolutionRunnnerService>();
         services.AddScoped<ISessionService, SessionService>();
 

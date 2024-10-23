@@ -1,15 +1,8 @@
-﻿using Core.Example;
-using Core.Models.DTOs;
+﻿using Core.Exercises.Models;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Core.Models.DTOvalidators;
+namespace Core.Exercises.Validators;
 public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
 {
     readonly public ILogger<ExerciseDtoValidator> _logger;

@@ -27,7 +27,6 @@ public static class RegisterInfrastructureServices
         // Migrate schema
         EnsureMigration(connectionString);
         
-        services.AddScoped<IStudentRepository, StudentRepository>();
         services.AddScoped<IExerciseRepository, ExerciseRepository>();
         
         // Authentication - Authorization
