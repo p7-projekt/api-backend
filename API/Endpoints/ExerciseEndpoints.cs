@@ -5,6 +5,7 @@ using Asp.Versioning.Builder;
 using Core.Contracts.Repositories;
 using Core.Contracts.Services;
 using Core.Exercises.Models;
+using Core.Shared;
 using Infrastructure.Authentication.Models;
 using Microsoft.AspNetCore.Mvc;
 

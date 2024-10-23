@@ -1,6 +1,7 @@
 using Core.Contracts.Repositories;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
+using Core.Shared;
 using Core.Shared.Contracts;
 using FluentResults;
 using Microsoft.Extensions.Logging;
@@ -85,7 +86,7 @@ public class SessionService : ISessionService
         return new JoinSessionResponseDto(createToken);
     }
 
-    public async Task<Result<GetSessionResponseDto>> GetSessionByIdAsync(int sessionId, int userId)
+    public async Task<Result<GetSessionResponseDto>> GetSessionByIdAsync(int sessionId, int userId, Roles role)
     {
         var session = await _sessionRepository.GetSessionByIdAsync(sessionId);
         if (session == null)
@@ -93,14 +94,21 @@ public class SessionService : ISessionService
             _logger.LogInformation("Session {sessionid}, request by {userid} does not exist", sessionId, userId);
             return Result.Fail("Session does not exist");
         }
-        var access = await _sessionRepository.VerifyParticipantAccess(userId, sessionId);
+
+        var access = false;
+        if (role == Roles.Instructor)
+        {
+            access = await _sessionRepository.VerifyAuthor(userId, sessionId);
+        }
+        else
+        {
+            access = await _sessionRepository.VerifyParticipantAccess(userId, sessionId);
+        }
         if (!access)
         {
             _logger.LogInformation("User {userid} does not have access to {sessionid}", userId, sessionId);
             return Result.Fail("User does not have access to session");
         }
-        
-        
         
         return session.ConvertToGetResponse();
     }

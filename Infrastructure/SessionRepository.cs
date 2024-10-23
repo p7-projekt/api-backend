@@ -103,6 +103,19 @@ public class SessionRepository : ISessionRepository
         var result = await con.ExecuteScalarAsync<int>(query, new { UserId = userId, SessionId = sessionId });
         return result == 1;
     }
+
+    public async Task<bool> VerifyAuthor(int userId, int sessionId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var query = """
+                    SELECT COUNT(*) FROM app_users
+                    JOIN session
+                    ON session.author_id = app_users.user_id
+                    WHERE app_users.user_id = @UserId AND session.session_id = @SessionId;
+                    """;
+        var result = await con.QuerySingleAsync<int>(query, new { UserId = userId, SessionId = sessionId });
+        return result == 1;
+    }
     
     public async Task<Session?> GetSessionByIdAsync(int sessionId)
     {
