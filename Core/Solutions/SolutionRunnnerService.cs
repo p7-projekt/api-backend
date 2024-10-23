@@ -1,7 +1,11 @@
-﻿using System.Text;
+﻿using System.ComponentModel;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Core.Contracts.Services;
 using Core.Exercises.Models;
+using Core.Solutions.Models;
+using FluentResults;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Solutions;
@@ -15,7 +19,7 @@ public class SolutionRunnnerService : ISolutionRunnerService
         _logger = logger;
     }
 
-    public async Task SubmitSolutionAsync(ExerciseDto dto)
+    public async Task<Result> SubmitSolutionAsync(ExerciseSubmissionDto dto)
     {
         var haskellURL = Environment.GetEnvironmentVariable("MOZART_HASKELL");
         if (string.IsNullOrEmpty(haskellURL))
@@ -29,11 +33,36 @@ public class SolutionRunnnerService : ISolutionRunnerService
         
         _logger.LogDebug("Current submission: {submission}", submission);
         
-        
         var content = new StringContent(submission, Encoding.UTF8, "application/json");
         var response = await client.PostAsync(url, content);
         string responseBody = await response.Content.ReadAsStringAsync();
-        _logger.LogInformation("Response: {response}", responseBody);
-        //Managge potentiel responses from solution runner.
+
+
+        if (response.IsSuccessStatusCode) {
+            var result = JsonDocument.Parse(responseBody).RootElement.GetProperty("result");
+            switch (result.ToString())
+            {
+                case "pass": return Result.Ok();
+                case "failure":
+                    _logger.LogInformation("Testcases failed");
+                    var reason = JsonDocument.Parse(responseBody).RootElement.GetProperty("reason");
+                    return Result.Fail(reason.ToString());
+                case "error":
+                    _logger.LogInformation("Execution of solution failed");
+                    var errorReason = JsonDocument.Parse(responseBody).RootElement.GetProperty("reason");
+                    return Result.Fail(errorReason.ToString());
+                default:
+                    _logger.LogError("Unknown result received from solution runner: {response}", responseBody);
+                    throw new Exception("Unknown result received from solution runner");
+            }
+        } else if(response.StatusCode == System.Net.HttpStatusCode.UnprocessableContent)
+        {
+            _logger.LogError("Wrong format of json provided to solution runner: {json_body}, {message}", submission, response.Content);
+            return Result.Fail("Wrong format provided to solution runner");
+        } else
+        {
+            _logger.LogError("Unknown response from solution runner: {response}", responseBody);
+            return Result.Fail("Uknown response encountered");
+        }
     }
 }
