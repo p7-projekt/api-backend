@@ -1,10 +1,11 @@
 using System.Reflection;
+using Core.Contracts.Services;
+using Core.Services;
 using Core.Sessions;
 using Core.Sessions.Contracts;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
-using Quartz.Simpl;
 
 namespace Core;
 
