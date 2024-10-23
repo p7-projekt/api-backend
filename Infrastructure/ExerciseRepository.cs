@@ -4,6 +4,7 @@ using Core.Models.DTOs;
 using Dapper;
 using FluentResults;
 using Infrastructure.Persistence.Contracts;
+using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -26,12 +27,12 @@ namespace Infrastructure
             _logger = logger;
         }
 
-        
+
         public async Task<Result> InsertExerciseAsync(ExerciseDto dto, int userId)
         {
 
-                using var con = await _connection.CreateConnectionAsync();
-                using var transaction = con.BeginTransaction();
+            using var con = await _connection.CreateConnectionAsync();
+            using var transaction = con.BeginTransaction();
             try
             {
                 var exerciseQuery = """
@@ -47,7 +48,7 @@ namespace Infrastructure
                     }, transaction);
 
                 var insertTestcasesQuery = """
-                                       INSERT INTO testcase (exercise_id, testcase_no) VALUES (@ExerciseId, @OrderNo) RETURNING testcase_id;
+                                       INSERT INTO testcase (exercise_id, testcase_no) VALUES (@ExerciseId, @OrderNo);
                                        """;
 
                 List<int> OrderNo = new List<int>();
@@ -79,32 +80,24 @@ namespace Infrastructure
                 {
                     // Combines the order of the paramater, with the respective type and value in a shared list.
                     // Reason being that they are iterated over together in the subsequent query.
-                    var InputOrderAndTypeAndValue = new List<(int, string, string)>();
-                    for (int j = 0; j < dto.InputParameterType.Length; j++)
-                    {
-                        InputOrderAndTypeAndValue.Add((j, dto.InputParameterType[j], dto.Testcases.ElementAt(i).inputParams[j]));
-                    }
-                    var OutputOrderAndTypeAndValue = new List<(int, string, string)>();
-                    for (int j = 0; j < dto.OutputParamaterType.Length; j++)
-                    {
-                        OutputOrderAndTypeAndValue.Add((j, dto.OutputParamaterType[j], dto.Testcases.ElementAt(i).outputParams[j]));
-                    }
+                    var InputParamDataStructure = ConstructTestcaseParameterQueryArgument(dto.Testcases.ElementAt(i), dto.InputParameterType, IsOutput:false);
+                    var OutputParamDataStructure = ConstructTestcaseParameterQueryArgument(dto.Testcases.ElementAt(i), dto.OutputParamaterType, IsOutput: true);
                     await con.ExecuteAsync(insertParameterQuery,
-                        InputOrderAndTypeAndValue.Select(x => new
+                        InputParamDataStructure.Select(x => new
                         {
                             TestcaseId = testcasesIds.ElementAt(i),
                             OrderNo = x.Item1,
-                            ParamType = x.Item2,
+                            ParamType = x.Item2.ToLower(),
                             Value = x.Item3,
                             IsOutput = false
                         }),
                         transaction);
                     await con.ExecuteAsync(insertParameterQuery,
-                        OutputOrderAndTypeAndValue.Select(x => new
+                        OutputParamDataStructure.Select(x => new
                         {
                             TestcaseId = testcasesIds.ElementAt(i),
                             OrderNo = x.Item1,
-                            ParamType = x.Item2,
+                            ParamType = x.Item2.ToLower(),
                             Value = x.Item3,
                             IsOutput = true
                         }),
@@ -121,5 +114,23 @@ namespace Infrastructure
 
             return Result.Ok();
         }
+
+        private List<(int, string, string)> ConstructTestcaseParameterQueryArgument(Testcase tc, string[] paramType, bool IsOutput)
+        {
+            var OrderAndTypeAndValue = new List<(int, string, string)>();
+            string[] paramsDecider;
+            if (IsOutput)
+            {
+                paramsDecider = tc.outputParams;
+            } else
+            {
+                paramsDecider = tc.inputParams;
+            }
+            for (int j = 0; j<paramType.Length; j++)
+            {
+                OrderAndTypeAndValue.Add((j, paramType[j], paramsDecider[j]));
+            }
+            return OrderAndTypeAndValue;
+}
     }
 }

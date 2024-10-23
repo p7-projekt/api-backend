@@ -24,11 +24,11 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         RuleFor(x => x.Description).MaximumLength(10000).WithMessage("The description is too long");
         RuleFor(x => x.Solution).NotEmpty().WithMessage("A proposed solution is required");
         RuleFor(x => x.Solution).MaximumLength(10000).WithMessage("The proposed solution is too long");
-        RuleFor(x => x.InputParameterType).NotEmpty().NotNull().WithMessage("Type of input parameter must be provided");
+        RuleFor(x => x.InputParameterType).NotEmpty().WithMessage("Type of input parameter must be provided");
         RuleFor(x => x.InputParameterType).Must(ParametersAreValidType).WithMessage("Input parameter must be of a valid type");
-        RuleFor(x => x.OutputParamaterType).NotEmpty().NotNull().WithMessage("Type of output parameter must be provided");
+        RuleFor(x => x.OutputParamaterType).NotEmpty().WithMessage("Type of output parameter must be provided");
         RuleFor(x => x.OutputParamaterType).Must(ParametersAreValidType).WithMessage("Output parameter must be of a valid type");
-        RuleFor(x => x.Testcases).NotEmpty().NotNull().WithMessage("Test cases must be provided");
+        RuleFor(x => x.Testcases).NotEmpty().WithMessage("Test cases must be provided");
         RuleFor(x => x.Testcases).Must(HaveAllParameters).WithMessage("All testcases must have both input and output");
         RuleFor(x => x.Testcases).Must(HasSameParameterAmount).WithMessage("All testcases must have the same amount of parameters");
         RuleFor(x => x).Must(ParametersValuesHaveCorrectTypes).WithMessage("All testcase parameters must be of correct type");
@@ -47,7 +47,7 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                     case "float": break;
                     case "string": break;
                     case "char": break;
-                    default: Console.WriteLine("Invalid parameter type"); return false;
+                    default: _logger.LogInformation("Invalid parameter type"); return false;
                 }
             }
         }
@@ -65,13 +65,11 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         {
             if (testcase.inputParams == null || testcase.inputParams.Length == 0)
             {
-                Console.WriteLine("Empty paramter");
                 _logger.LogInformation("Empty input paramter for; {}", testcase);
                 return false;
             }
             if (testcase.outputParams == null || testcase.outputParams.Length == 0)
             {
-                Console.WriteLine("Empty paramter");
                 _logger.LogInformation("Empty output paramter for; {}", testcase);
                 return false;
             }
@@ -90,17 +88,12 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
             {
                 if (testcase.inputParams.Length != inputParams || testcase.outputParams.Length != outputParams)
                 {
-                    Console.WriteLine("Inconsistency in parameter amount across test cases");
+                    _logger.LogInformation("Inconsistency in parameter amount across test cases");
                     return false;
                 }
             }
         }
-        catch (InvalidOperationException ex)
-        {
-            _logger.LogInformation("Missing testcases: {}", ex.Message);
-            return false;
-        }
-        catch (NullReferenceException ex)
+        catch (Exception ex)
         {
             _logger.LogInformation("Missing testcases: {}", ex.Message);
             return false;
@@ -123,7 +116,7 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                         case "float": var tempInFloat = float.Parse(testcase.inputParams[i]); break;
                         case "string": break;
                         case "char": if (testcase.inputParams[i].Length != 1) { _logger.LogInformation("Empty input param for testcase");  return false; }; break;
-                        default: Console.WriteLine("Invalid input"); return false;
+                        default: _logger.LogInformation("Invalid input"); return false;
                     }
                 }
                 for (int i = 0; i < dto.OutputParamaterType.Length; i++)
@@ -135,7 +128,7 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                         case "float": var tempOutFloat = float.Parse(testcase.outputParams[i]); break;
                         case "string": break;
                         case "char": if (testcase.outputParams[i].Length != 1) { _logger.LogInformation("Empty output param for testcase"); return false; }; break;
-                        default: Console.WriteLine("Invalid output"); return false;
+                        default: _logger.LogInformation("Invalid output"); return false;
                     }
                 }
             }
