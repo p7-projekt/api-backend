@@ -9,3 +9,10 @@ services:
       POSTGRES_PASSWORD: api-pass
     ports:
       - 5200:5432
+
+  mozart-haskell:
+    container_name: p7-mozart-haskell
+    image: p7project/mozart-haskell:alpha
+    restart: on-failure
+    ports:
+      - 8080:8080

@@ -17,7 +17,8 @@
       "applicationUrl": "http://localhost:5015",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "JWT_KEY": "8a6e4bde-3a4b-4691-9223-1662e4d3b4c4"
+        "JWT_KEY": "8a6e4bde-3a4b-4691-9223-1662e4d3b4c4",
+        "MOZART_HASKELL": "localhost:8080"
       }
     },
     "https": {
