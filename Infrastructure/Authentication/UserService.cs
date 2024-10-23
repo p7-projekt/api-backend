@@ -33,8 +33,12 @@ public class UserService : IUserService
 		_logger.LogInformation("User created: {email} with role: {role}", user.Email, Roles.Instructor);
 	}
 
-	public async Task<Result<GetUserResponseDto>> GetAppUserByIdAsync(int id)
+	public async Task<Result<GetUserResponseDto>> GetAppUserByIdAsync(int id, int userIdParameter)
 	{
+		if (id != userIdParameter)
+		{
+			return Result.Fail("User id not consistent");
+		}
 		var result = await _userRepository.GetAppUserByIdAsync(id);
 		_logger.LogInformation("Selecting user with userid: {userid}", id);
 		if (result == null)

@@ -27,7 +27,7 @@ public class SessionService : ISessionService
         session.SessionCode = sessionCode;
 
         var sessionId = await _sessionRepository.InsertSessionAsync(session);
-        if (sessionId == 0)
+        if (sessionId == (int)ErrorCodes.UniqueConstraintViolation)
         {
             // sessionCode not unique
             _logger.LogInformation("Session code {sessionCode} is already in use!", sessionCode);
@@ -103,5 +103,10 @@ public class SessionService : ISessionService
         var pinCode = rnd.Next(1000, 10000);
         var chars = string.Concat(firstChar, secondChar);
         return string.Concat(chars, pinCode.ToString());
+    }
+    
+    public enum ErrorCodes
+    {
+        UniqueConstraintViolation = 0
     }
 }

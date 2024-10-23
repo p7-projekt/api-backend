@@ -19,6 +19,6 @@ public class CreateSessionDtoValidator : AbstractValidator<CreateSessionDto>
 
     private bool IsLetterOrDigit(string sentence)
     {
-        return sentence.All(x => char.IsAsciiLetterOrDigit(x) || char.IsWhiteSpace(x)) && sentence.Any(char.IsAsciiLetterOrDigit);
+        return sentence.Any(char.IsAsciiLetterOrDigit);
     }
 }

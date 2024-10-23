@@ -20,8 +20,8 @@ public static class UserEndpoints
 		var usersV1Group = app.MapGroup("v{version:apiVersion}/users").WithApiVersionSet(apiVersionSet)
 			.WithTags("Users");
 
-		usersV1Group.MapGet("/",
-			async Task<Results<Ok<GetUserResponseDto>, NotFound>> (ClaimsPrincipal principal, IUserService service) =>
+		usersV1Group.MapGet("/{id:int}",
+			async Task<Results<Ok<GetUserResponseDto>, NotFound>> (ClaimsPrincipal principal, IUserService service, int id) =>
 			{
 				var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
 				if (string.IsNullOrEmpty(userId))
@@ -29,7 +29,7 @@ public static class UserEndpoints
 					return TypedResults.NotFound();
 				}
 
-				var user = await service.GetAppUserByIdAsync(Convert.ToInt32(userId));
+				var user = await service.GetAppUserByIdAsync(Convert.ToInt32(userId), id);
 				if (user.IsFailed)
 				{
 					return TypedResults.NotFound();

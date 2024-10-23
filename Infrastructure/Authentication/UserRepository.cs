@@ -22,10 +22,9 @@ public class UserRepository : IUserRepository
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
-		            SELECT au.email, au.name 
-		            FROM users AS u
-		            JOIN app_users AS au ON u.id = au.user_id
-		            WHERE id = @id;
+		            SELECT email, name
+		            FROM app_users
+		            WHERE user_id = @id;
 		            """;
 		var user = await con.QuerySingleAsync<User>(query, new { id = userId });
 		return user;
@@ -62,9 +61,7 @@ public class UserRepository : IUserRepository
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
 					SELECT COUNT(email) 
-					FROM users AS u
-					JOIN app_users AS au
-						ON u.id = au.user_id
+					FROM app_users
 					WHERE email = @email;
 					""";
 		_logger.LogInformation("Checking if email {email} is available", email);
