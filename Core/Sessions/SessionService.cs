@@ -90,6 +90,8 @@ public class SessionService : ISessionService
             return Result.Fail("User does not have access to session");
         }
         
+        
+        
         return session.ConvertToGetResponse();
     }
     
