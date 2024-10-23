@@ -1,5 +1,6 @@
 using System.Reflection;
 using Core;
+using Core.Contracts.Repositories;
 using Core.Sessions.Contracts;
 using Core.Shared.Contracts;
 using DbUp;
@@ -27,6 +28,7 @@ public static class RegisterInfrastructureServices
         EnsureMigration(connectionString);
         
         services.AddScoped<IStudentRepository, StudentRepository>();
+        services.AddScoped<IExerciseRepository, ExerciseRepository>();
         
         // Authentication - Authorization
         services.AddScoped<ITokenService, TokenService>();
