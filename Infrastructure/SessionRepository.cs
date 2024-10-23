@@ -114,6 +114,19 @@ public class SessionRepository : ISessionRepository
                     """;
         using var con = await _connection.CreateConnectionAsync();
         var session = await con.QueryFirstOrDefaultAsync<Session>(query, new { sessionId });
+        if (session == null)
+        {
+            return null;
+        }
+        var exercisesQuery = """
+                             SELECT e.exercise_id AS exerciseid, title AS exercisetitle FROM exercise AS e
+                             JOIN exercise_in_session AS eis
+                             ON e.exercise_id = eis.exercise_id
+                             WHERE eis.session_id = @SessionId;
+                             """;
+        var exercises = await con.QueryAsync<ExerciseDetails>(exercisesQuery, new { sessionId });
+        session.ExerciseDetails = exercises.ToList();
+        
         return session;
     }
 
