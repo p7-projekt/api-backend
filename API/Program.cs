@@ -1,4 +1,5 @@
 using API.Configuration;
+using API.Endpoints;
 using Core;
 using Infrastructure;
 using Infrastructure.Persistence;
@@ -52,6 +53,8 @@ public class Program
         app.UseExampleEndpoints();
         app.UseExerciseEndpoints();
         app.UseAuthenticationEndpoints();
+        app.UseSessionEndpoints();
+        app.UseUserEndpoints();
 
         app.Run();
     }

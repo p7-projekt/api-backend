@@ -1,7 +1,5 @@
-using System.Data;
 using Dapper;
 using FluentResults;
-using FluentValidation.Validators;
 using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Models;
 using Infrastructure.Persistence.Contracts;
@@ -20,23 +18,27 @@ public class UserRepository : IUserRepository
 		_logger = logger;
 	}
 
-	public async Task<User?> GetUserByIdAsync(int userId)
+	public async Task<User?> GetAppUserByIdAsync(int userId)
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
-		            SELECT * FROM users WHERE id = @id;
+		            SELECT email, name
+		            FROM app_users
+		            WHERE user_id = @id;
 		            """;
-		var user = await con.QueryAsync<User>(query, new { id = userId });
-		return user.FirstOrDefault();
+		var user = await con.QuerySingleAsync<User>(query, new { id = userId });
+		return user;
 	}
 
 	public async Task<User?> GetUserByEmailAsync(string email)
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
-					SELECT id, email, password_hash AS passwordhash, created_at AS createdat FROM users
-
-					    WHERE email = @email;
+					SELECT u.id, au.email, au.password_hash AS passwordhash, u.created_at AS createdat
+					FROM users AS u
+					         JOIN app_users AS au
+					              ON u.id = au.user_id
+					WHERE email = @Email;
 					""";
 		var user = await con.QuerySingleAsync<User>(query, new { email });
 		return user;
@@ -58,31 +60,43 @@ public class UserRepository : IUserRepository
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
-					SELECT COUNT(email) FROM users WHERE email = @email;
+					SELECT COUNT(email) 
+					FROM app_users
+					WHERE email = @email;
 					""";
 		_logger.LogInformation("Checking if email {email} is available", email);
 		var result = await con.QueryAsync<int>(query, new { email = email });
 		return result.First() == 0;
 	}
 
-	public async Task<Result> CreateUserAsync(User user, Roles role)
+	public async Task<Result> CreateAppUserAsync(User user, Roles role)
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		using var transaction = con.BeginTransaction();
 		try
 		{
-			var insertQuery = """
-			                 INSERT INTO users (email, password_hash, created_at) VALUES (@email, @password_hash, @created_at) RETURNING id;
+			var userInsertQuery = """
+			                      INSERT INTO users (created_at) VALUES (@CreatedAt) 
+			                      RETURNING id;
+			                      """;
+			_logger.LogInformation("Inserting user into transaction: {query}", userInsertQuery);
+			var userId = await con.ExecuteScalarAsync<int>(userInsertQuery, new {CreatedAt = user.CreatedAt}, transaction);
+			_logger.LogDebug("UserID created in transaction: {userid}", userId);			
+			var createAppUser = """
+			                 INSERT INTO app_users 
+			                     (user_id, email, name, password_hash) 
+			                 VALUES 
+			                     (@UserId, @email, @Name, @password_hash);
 			                 """;
-			_logger.LogInformation("Inserting user into transaction: {query}", insertQuery);
-			var userId = await con.ExecuteScalarAsync<int>(insertQuery, new {email = user.Email, password_hash = user.PasswordHash, created_at = user.CreatedAt}, transaction);
+			_logger.LogInformation("Inserting app user into transaction: {query}", createAppUser);
+			await con.ExecuteAsync(createAppUser, new {UserId = userId, email = user.Email, Name = user.Name, password_hash = user.PasswordHash}, transaction);
 			
 			var createRoleQuery = """
 			                      INSERT INTO user_role (user_id, role_id)
 			                      SELECT @userId, id FROM role WHERE name = @roleName;
 			                      """;
 			_logger.LogInformation("Inserting role in user_roles: {query}", createRoleQuery);
-			await con.ExecuteAsync(createRoleQuery, new {userId = userId, roleName = role.ToString()});
+			await con.ExecuteAsync(createRoleQuery, new {userId = userId, roleName = role.ToString()}, transaction);
 			
 			_logger.LogInformation("Committing transaction");
 			transaction.Commit();
@@ -95,5 +109,49 @@ public class UserRepository : IUserRepository
 		}
 
 		return Result.Ok();
+	}
+
+	public async Task<Result<int>> CreateAnonUserAsync(int sessionId)
+	{
+		using var con = await _connection.CreateConnectionAsync();
+		using var transaction = con.BeginTransaction();
+		try
+		{
+			var userInsertQuery = """
+			                      INSERT INTO users (created_at) VALUES (@CreatedAt) 
+			                      RETURNING id;
+			                      """;
+			_logger.LogInformation("Inserting user into transaction: {query}", userInsertQuery);
+			var userId = await con.ExecuteScalarAsync<int>(userInsertQuery, new {CreatedAt = DateTime.UtcNow}, transaction);
+			_logger.LogDebug("UserID created in transaction: {userid}", userId);
+			
+			var createAnonUserQuery= """
+			            INSERT INTO anon_users 
+			                (user_id, session_id) 
+			            VALUES (@UserId, @SessionId); 
+			            """;
+			_logger.LogInformation("Inserting anon user into transaction: {query}", createAnonUserQuery);
+			await con.ExecuteAsync(createAnonUserQuery, new {UserId = userId, SessionId = sessionId }, transaction);
+			
+			var createRoleQuery = """
+			                      INSERT INTO user_role (user_id, role_id)
+			                      SELECT @userId, id FROM role WHERE name = @roleName;
+			                      """;
+			_logger.LogInformation("Inserting role in user_roles: {query}", createRoleQuery);
+			await con.ExecuteAsync(createRoleQuery, new {userId = userId, roleName = nameof(Roles.AnonymousUser)}, transaction);
+			
+			_logger.LogInformation("Committing transaction");
+			
+			
+			transaction.Commit();
+			return Result.Ok(userId);
+		}
+		catch (Exception e)
+		{
+			_logger.LogInformation("Creating anonymous user for session: {sessionId} failed", sessionId);
+			_logger.LogInformation("Exeception: {exceptionMesg}", e.Message);
+			transaction.Rollback();
+			return Result.Fail("Failed to create user");
+		}
 	}
 }

@@ -34,24 +34,24 @@ public class TokenService : ITokenService
             issuer: AuthConstants.Issuer,
             audience: AuthConstants.Audience,
             claims: claims,
-            expires: DateTime.Now.AddMinutes(AuthConstants.JwtExpirationInMinutes),
+            expires: DateTime.UtcNow.AddMinutes(AuthConstants.JwtExpirationInMinutes),
             signingCredentials: GetSigningCredentials()
             );
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public string GenerateAnonymousUserJwt(int sessionLength)
+    public string GenerateAnonymousUserJwt(int sessionLength, int userId)
     {
+        // todo: change this to load roles from anon users.
         var token = new JwtSecurityToken(
             issuer: AuthConstants.Issuer,
             audience: AuthConstants.Audience,
             claims: new List<Claim>
             {
-                new Claim(ClaimTypes.UserData, AuthConstants.AnonymousUserId.ToString()),
+                new Claim(ClaimTypes.UserData, userId.ToString()),
                 new Claim(ClaimTypes.Role, nameof(Roles.AnonymousUser))
-                // new Claim("session_id", "1231")
             },
-            expires: DateTime.Now.AddMinutes(sessionLength),
+            expires: DateTime.UtcNow.AddMinutes(sessionLength),
             signingCredentials: GetSigningCredentials()
         );
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -81,7 +81,7 @@ public class TokenService : ITokenService
         var refreshToken = new RefreshToken
         {
             Token = CreateRefreshToken(),
-            Expires = DateTime.UtcNow.AddMinutes(5),
+            Expires = DateTime.UtcNow.AddDays(AuthConstants.RefreshTokenExpirationInDays),
             CreatedAt = DateTime.UtcNow,
             UserId = userId
         };
