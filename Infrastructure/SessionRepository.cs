@@ -2,6 +2,7 @@ using Core.Sessions.Contracts;
 using Core.Sessions.Models;
 using Dapper;
 using Infrastructure.Authentication.Contracts;
+using Infrastructure.Persistence;
 using Infrastructure.Persistence.Contracts;
 using Microsoft.Extensions.Logging;
 using Npgsql;

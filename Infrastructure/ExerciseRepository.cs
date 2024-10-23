@@ -1,6 +1,4 @@
 ﻿using Core.Contracts.Repositories;
-using Core.Models;
-using Core.Models.DTOs;
 using Dapper;
 using FluentResults;
 using Infrastructure.Persistence.Contracts;
@@ -13,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
+using Core.Exercises.Models;
 
 namespace Infrastructure
 {

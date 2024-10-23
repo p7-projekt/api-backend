@@ -1,4 +1,4 @@
-namespace Infrastructure;
+namespace Infrastructure.Persistence;
 
 public enum PostgresExceptions
 {
