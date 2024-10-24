@@ -1,5 +1,4 @@
-﻿using Core.Contracts.Repositories;
-using Dapper;
+﻿using Dapper;
 using FluentResults;
 using Infrastructure.Persistence.Contracts;
 using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
@@ -11,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
+using Core.Exercises.Contracts.Repositories;
 using Core.Exercises.Models;
 
 namespace Infrastructure

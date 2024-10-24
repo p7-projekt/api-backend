@@ -1,8 +1,8 @@
 using System.Reflection;
-using Core.Contracts.Services;
+using Core.Exercises.Contracts.Services;
+using Core.Exercises.Solutions;
 using Core.Sessions;
 using Core.Sessions.Contracts;
-using Core.Solutions;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
@@ -31,7 +31,7 @@ public static class RegisterCoreServices
                         schedule => schedule.WithIntervalInMinutes(5).RepeatForever());
                 });
         });
-
+        
         return services;
     }
 }
