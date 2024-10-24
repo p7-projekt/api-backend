@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
+using Core.Exercises.Models;
 
-namespace Core.Exercises.Models
+namespace Core.Solutions.Models
 {
     public record Submission
     {
@@ -10,24 +11,24 @@ namespace Core.Exercises.Models
         [JsonPropertyName("testCases")]
         public List<TestCase> TestCases { get; }
 
-        public Submission(ExerciseDto exerciseDto)
+        public Submission(ExerciseSubmissionDto dto)
         {
-            Solution = exerciseDto.Solution;
+            Solution = dto.Solution;
             TestCases = new List<TestCase>();
 
             int i = 0;
-            foreach (var testCase in exerciseDto.Testcases)
+            foreach (var testCase in dto.Testcases)
             {
                 var inputParams = new List<Parameter>();
-                for(int j = 0; j < testCase.inputParams.Length; j++)
+                for (int j = 0; j < testCase.InputParams.Length; j++)
                 {
-                    inputParams.Add(new Parameter(exerciseDto.InputParameterType[j], testCase.inputParams[j]));
+                    inputParams.Add(new Parameter(dto.InputParameterType[j], testCase.InputParams[j]));
                 }
 
                 var outputParams = new List<Parameter>();
-                for (int j = 0; j < testCase.outputParams.Length; j++)
+                for (int j = 0; j < testCase.OutputParams.Length; j++)
                 {
-                    outputParams.Add(new Parameter(exerciseDto.OutputParamaterType[j], testCase.outputParams[j]));
+                    outputParams.Add(new Parameter(dto.OutputParamaterType[j], testCase.OutputParams[j]));
                 }
 
                 TestCases.Add(new TestCase(i, inputParams, outputParams));
