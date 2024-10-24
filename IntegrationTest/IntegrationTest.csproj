@@ -10,6 +10,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Castle.Core" Version="5.1.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.10" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0"/>
         <PackageReference Include="xunit" Version="2.4.2"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
@@ -26,6 +28,12 @@
       <ProjectReference Include="..\API\API.csproj" />
       <ProjectReference Include="..\Core\Core.csproj" />
       <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="NSubstitute">
+        <HintPath>..\..\..\..\..\.nuget\packages\nsubstitute\5.1.0\lib\net6.0\NSubstitute.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>
