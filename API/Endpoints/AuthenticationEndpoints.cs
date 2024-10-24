@@ -1,6 +1,7 @@
 using System.Net;
 using System.Security.Claims;
 using API.Configuration;
+using API.Endpoints.Shared;
 using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -20,16 +21,7 @@ public static class AuthenticationEndpoints
 			var result = await service.GenerateJwtFromRefreshToken(refreshDto);
 			if (result.IsFailed)
 			{
-				var errors = result.Errors.Select(e => e.Message).ToArray();
-				var errorDict = new Dictionary<string, string[]>(); 
-				errorDict.Add("error", errors);
-				return TypedResults.BadRequest(new ValidationProblemDetails
-				{
-					Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-					Title = "Authentication error",
-					Status = (int)HttpStatusCode.BadRequest,
-					Errors = errorDict,
-				});
+				return TypedResults.BadRequest(CreateBadRequest.CreateValidationProblemDetails(result.Errors, "Bad refresh token", "errors"));
 			}
 			return TypedResults.Ok(result.Value);
 		});
@@ -39,16 +31,8 @@ public static class AuthenticationEndpoints
 			var result = await service.LoginAsync(loginDto);
 			if (result.IsFailed)
 			{
-				var errors = result.Errors.Select(e => e.Message).ToArray();
-				var errorDict = new Dictionary<string, string[]>(); 
-				errorDict.Add("error", errors);
-				return TypedResults.BadRequest(new ValidationProblemDetails
-				{
-					Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-					Title = "One or more validation errors occurred.",
-					Status = (int)HttpStatusCode.BadRequest,
-					Errors = errorDict,
-				});
+				return TypedResults.BadRequest(
+					CreateBadRequest.CreateValidationProblemDetails(result.Errors, "Login failed", "errors"));
 			}
 			return TypedResults.Ok(result.Value);
 		});

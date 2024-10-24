@@ -120,7 +120,7 @@ public class TokenServiceTest
 		var _userRepoSubstitute = Substitute.For<IUserRepository>();
 		var _tokenRepoSubstitute = Substitute.For<ITokenRepository>();
 		var service = new TokenService(_loggerSubstitute, _tokenRepoSubstitute, _userRepoSubstitute);
-		_tokenRepoSubstitute.GetRefreshTokenByUserIdAsync(1).Returns(Task.FromResult((RefreshToken)null));
+		_tokenRepoSubstitute.DeleteRefreshTokenByUserIdAsync(Arg.Any<int>()).Returns(Task.CompletedTask);
 		_tokenRepoSubstitute.InsertTokenAsync(Arg.Any<RefreshToken>()).Returns(Task.CompletedTask);
 		
 		// Act
@@ -141,18 +141,18 @@ public class TokenServiceTest
 		var service = new TokenService(_loggerSubstitute, _tokenRepoSubstitute, _userRepoSubstitute);
 		var rf = new RefreshToken
 		{
-			Id = 1,
+			Id = 0,
+			UserId = 1,
 			Token = "token",
 			CreatedAt = DateTime.UtcNow,
 			Expires = DateTime.UtcNow.AddMinutes(1)
 		};
-		_tokenRepoSubstitute.GetRefreshTokenByUserIdAsync(1).Returns(rf);
+		_tokenRepoSubstitute.DeleteRefreshTokenByUserIdAsync(Arg.Any<int>()).Returns(Task.CompletedTask);
 		
 		// Act
 		var result = await service.GenerateRefreshToken(1);
 		
 		// Assert
 		Assert.True(result.IsSuccess);
-		Assert.Equivalent(result.Value, rf);
 	}
 }
