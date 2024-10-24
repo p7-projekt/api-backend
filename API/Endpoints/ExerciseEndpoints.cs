@@ -2,8 +2,8 @@
 using API.Configuration;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
-using Core.Contracts.Repositories;
-using Core.Contracts.Services;
+using Core.Exercises.Contracts.Repositories;
+using Core.Exercises.Contracts.Services;
 using Core.Exercises.Models;
 using Infrastructure.Authentication.Models;
 using Microsoft.AspNetCore.Mvc;
