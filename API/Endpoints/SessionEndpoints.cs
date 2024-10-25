@@ -23,6 +23,44 @@ public static class SessionEndpoints
 
         var sessionV1Group = app.MapGroup("v{version:apiVersion}/sessions").WithApiVersionSet(apiVersionSet)
             .WithTags("Sessions");
+
+        sessionV1Group.MapDelete("/{sessionId:int}",
+            async Task<Results<NoContent, NotFound>> (ClaimsPrincipal principal, int sessionId,
+                ISessionService service) =>
+            {
+                var userId = principal.FindFirst( ClaimTypes.UserData)?.Value;
+                if (userId == null)
+                {
+                    return TypedResults.NotFound();
+                }
+                
+                var results = await service.DeleteSession(sessionId, Convert.ToInt32(userId));
+                if (results.IsFailed)
+                {
+                    return TypedResults.NotFound();
+                }
+                return TypedResults.NoContent();
+                
+            }).RequireAuthorization(nameof(Roles.Instructor));
+        
+        // Get author sessions
+        sessionV1Group.MapGet("/",
+            async Task<Results<Ok<List<GetSessionsResponseDto>>, NotFound, BadRequest>> (ClaimsPrincipal principal,
+                ISessionService sessionService) =>
+            {
+                var userId = principal.FindFirst( ClaimTypes.UserData)?.Value;
+                if (userId == null)
+                {
+                    return TypedResults.BadRequest();
+                }
+
+                var results = await sessionService.GetSessions(Convert.ToInt32(userId));
+                if (results.IsFailed)
+                {
+                    return TypedResults.NotFound();
+                }
+            return TypedResults.Ok(results.Value);
+            }).RequireAuthorization(nameof(Roles.Instructor));
         
         // Get session
         sessionV1Group.MapGet("/{id:int}", async Task<Results<Ok<GetSessionResponseDto>, NotFound, BadRequest>>(int id, ClaimsPrincipal principal, ISessionService service) =>

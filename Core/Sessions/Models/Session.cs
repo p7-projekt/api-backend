@@ -33,6 +33,11 @@ public static class SessionMapper
             Exercises = dto.ExerciseIds
         };
     }
+    
+    public static GetSessionsResponseDto ConvertToGetSessionsResponse(this Session session)
+    {
+        return new GetSessionsResponseDto(session.Id, session.Title);
+    }
 
     public static GetSessionResponseDto ConvertToGetResponse(this Session session)
     {

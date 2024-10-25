@@ -143,6 +143,16 @@ public class SessionRepository : ISessionRepository
         return session;
     }
 
+    public async Task<IEnumerable<Session>?> GetSessionsAsync(int authorId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var query = """
+                    SELECT session_id AS id, title FROM session WHERE author_id = @Id;
+                    """;
+        var results = await con.QueryAsync<Session>(query, new { Id = authorId });
+        return results;
+    }
+
     public async Task<bool> CheckSessionCodeIsValid(string sessionCode, int sessionId)
     {
         using var con = await _connection.CreateConnectionAsync();
@@ -151,6 +161,19 @@ public class SessionRepository : ISessionRepository
                     """;
         var result = await con.ExecuteScalarAsync<int>(query, new { SessionCode = sessionCode, SessionId = sessionId });
         _logger.LogInformation("Requesting check on session id {sessionid} with session code {sessioncode}", sessionId, sessionCode);
+        return result == 1;
+    }
+
+    public async Task<bool> DeleteSessionAsync(int sessionId, int authorId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var query = """
+                    DELETE FROM session WHERE session_id = @SessionId
+                    AND EXISTS (
+                        SELECT 1 FROM session WHERE session_id = @SessionId AND author_id = @AuthorId
+                    )
+                    """;
+        var result = await con.ExecuteAsync(query, new { SessionId = sessionId, AuthorId = authorId });
         return result == 1;
     }
 }

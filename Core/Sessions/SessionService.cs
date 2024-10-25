@@ -23,6 +23,27 @@ public class SessionService : ISessionService
         _exerciseRepository = exerciseRepository;
     }
 
+    public async Task<Result> DeleteSession(int sessionId, int userId)
+    {
+        var result = await _sessionRepository.DeleteSessionAsync(sessionId, userId);
+        if (!result)
+        {
+            return Result.Fail("Session could not be deleted");
+        }
+        return Result.Ok();
+    }
+    
+    public async Task<Result<List<GetSessionsResponseDto>>> GetSessions(int userId)
+    {
+        var sessions = await _sessionRepository.GetSessionsAsync(userId);
+        if (sessions == null)
+        {
+            return Result.Fail("Sessions not found");
+        }
+
+        return Result.Ok(sessions.Select(x => x.ConvertToGetSessionsResponse()).ToList());
+    }
+    
     public async Task<Result<CreateSessionResponseDto>> CreateSessionAsync(CreateSessionDto sessionDto, int authorId)
     {
         var sessionCode = GenerateSessionCode();
