@@ -1,4 +1,5 @@
 using System.Data;
+using Core.Shared;
 using Dapper;
 using FluentResults;
 using Infrastructure.Authentication.Contracts;

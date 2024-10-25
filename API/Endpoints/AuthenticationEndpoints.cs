@@ -2,6 +2,7 @@ using System.Net;
 using System.Security.Claims;
 using API.Configuration;
 using API.Endpoints.Shared;
+using Core.Shared;
 using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
