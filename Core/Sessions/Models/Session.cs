@@ -36,7 +36,7 @@ public static class SessionMapper
     
     public static GetSessionsResponseDto ConvertToGetSessionsResponse(this Session session)
     {
-        return new GetSessionsResponseDto(session.Id, session.Title);
+        return new GetSessionsResponseDto(session.Id, session.Title, Math.Ceiling((session.ExpirationTimeUtc - DateTime.UtcNow).TotalMinutes).ToString());
     }
 
     public static GetSessionResponseDto ConvertToGetResponse(this Session session)
