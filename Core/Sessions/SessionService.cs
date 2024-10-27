@@ -74,7 +74,7 @@ public class SessionService : ISessionService
             _logger.LogInformation("Succesfully created a unique a unqiue session code: {sessionCode}", sessionCode);
         } else if (sessionId == (int)ErrorCodes.ExerciseDoesNotExist)
         {
-            return Result.Fail("Exercises for session could not be found");
+            return Result.Fail("Exercises for Author could not be found");
         }
 
         return new CreateSessionResponseDto(sessionId, sessionCode);
