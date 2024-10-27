@@ -1,7 +1,7 @@
 ﻿using Core.Exercises.Models;
 using FluentResults;
 
-namespace Core.Contracts.Services;
+namespace Core.Solutions.Contracts;
 
 public interface ISolutionRunnerService
 {

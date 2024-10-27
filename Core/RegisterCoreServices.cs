@@ -1,8 +1,8 @@
 using System.Reflection;
-using Core.Exercises.Contracts.Services;
-using Core.Exercises.Solutions;
 using Core.Sessions;
 using Core.Sessions.Contracts;
+using Core.Solutions;
+using Core.Solutions.Contracts;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;

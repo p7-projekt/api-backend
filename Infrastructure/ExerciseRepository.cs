@@ -1,4 +1,4 @@
-﻿using Core.Contracts.Repositories;
+﻿using Core.Exercises.Contracts.Repositories;
 using Dapper;
 using FluentResults;
 using Infrastructure.Persistence.Contracts;
