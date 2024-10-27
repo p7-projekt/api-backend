@@ -10,5 +10,4 @@ namespace Core.Contracts.Services;
 public interface ISolutionRunnerService
 {
     Task SubmitSolutionAsync(ExerciseDto dto);
-
 }
