@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
+using Core.Shared;
 using FluentResults;
 using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Models;

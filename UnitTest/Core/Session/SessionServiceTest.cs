@@ -1,3 +1,4 @@
+using Core.Contracts.Repositories;
 using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Shared.Contracts;
@@ -15,7 +16,8 @@ public class SessionServiceTest
         var loggerSub = Substitute.For<ILogger<SessionService>>();
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenRepoSub = Substitute.For<IAnonTokenService>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub);
+        var exerciseRepoSub = Substitute.For<IExerciseRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub, exerciseRepoSub);
         
         // Act
         var result = sessionService.GenerateSessionCode();

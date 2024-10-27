@@ -1,16 +1,8 @@
-﻿using Dapper;
+﻿using Core.Contracts.Repositories;
+using Dapper;
 using FluentResults;
 using Infrastructure.Persistence.Contracts;
-using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Transactions;
-using Core.Exercises.Contracts.Repositories;
 using Core.Exercises.Models;
 
 namespace Infrastructure
@@ -26,6 +18,15 @@ namespace Infrastructure
             _logger = logger;
         }
 
+        public async Task<bool> VerifyExerciseIdsAsync(List<int> exerciseIds, int authorId)
+        {
+            using var con = await _connection.CreateConnectionAsync();
+            var query = """
+                        SELECT COUNT(*) FROM EXERCISE WHERE exercise_id = ANY(@Ids) AND author_id = @AuthorId;
+                        """;
+            var result = await con.QuerySingleAsync<int>(query, new { Ids = exerciseIds.ToArray(), @AuthorID = authorId });
+            return exerciseIds.Count == result;
+        }
 
         public async Task<Result> InsertExerciseAsync(ExerciseDto dto, int userId)
         {
@@ -120,10 +121,10 @@ namespace Infrastructure
             string[] paramsDecider;
             if (IsOutput)
             {
-                paramsDecider = tc.outputParams;
+                paramsDecider = tc.OutputParams;
             } else
             {
-                paramsDecider = tc.inputParams;
+                paramsDecider = tc.InputParams;
             }
             for (int j = 0; j<paramType.Length; j++)
             {
