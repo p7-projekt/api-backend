@@ -2,13 +2,12 @@
 using API.Configuration;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
+using Core.Contracts.Services;
 using Core.Exercises.Contracts.Repositories;
 using Core.Exercises.Models;
-using FluentResults;
 using Core.Shared;
-using Core.Solutions;
+using FluentResults;
 using Core.Solutions.Contracts;
-using Infrastructure.Authentication.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -41,7 +40,38 @@ public static class ExerciseEndpoints
 
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ExerciseDto>();
         
-        
+        exerciseV1.MapGet("/", async Task<Results<Ok<List<GetExercisesResponseDto>>, BadRequest, NotFound>> (ClaimsPrincipal principal, IExerciseService exerciseService) => 
+            {
+                var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
+                if (userId == null)
+                {
+                    return TypedResults.BadRequest();
+                }
+
+                var results = await exerciseService.GetExercises(Convert.ToInt32(userId));
+                if (results.IsFailed)
+                {
+                    return TypedResults.NotFound();
+                }
+                return TypedResults.Ok(results.Value);
+            }).RequireAuthorization(nameof(Roles.Instructor));
+
+        exerciseV1.MapDelete("/{exerciseId:int}", async Task<Results<NoContent, NotFound>> (ClaimsPrincipal principal, int exerciseId, IExerciseService exerciseService) =>
+            {
+                var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
+                if (userId == null)
+                {
+                    return TypedResults.NotFound();
+                }
+
+                var results = await exerciseService.DeleteExercise(exerciseId, Convert.ToInt32(userId));
+                if (results.IsFailed)
+                {
+                    return TypedResults.NotFound();
+                }
+                return TypedResults.NoContent();
+            }).RequireAuthorization(nameof(Roles.Instructor));
+
         return app;
     }
 }

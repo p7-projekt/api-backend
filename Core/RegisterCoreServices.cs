@@ -1,4 +1,6 @@
 using System.Reflection;
+using Core.Contracts.Services;
+using Core.Exercises;
 using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Solutions;
@@ -16,6 +18,7 @@ public static class RegisterCoreServices
         services.AddValidatorsFromAssemblies(new [] {Assembly.GetExecutingAssembly() });
         services.AddScoped<ISolutionRunnerService, SolutionRunnnerService>();
         services.AddScoped<ISessionService, SessionService>();
+        services.AddScoped<IExerciseService, ExerciseService>();
 
         services.AddQuartzHostedService(options =>
         {

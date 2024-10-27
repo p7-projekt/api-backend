@@ -14,5 +14,5 @@ public interface ISessionRepository
 
     Task<IEnumerable<Session>?> GetSessionsAsync(int authorId);
     
-    Task<bool>  DeleteSessionAsync(int sessionId, int authorId);
+    Task<bool> DeleteSessionAsync(int sessionId, int authorId);
 }

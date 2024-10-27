@@ -18,6 +18,16 @@ namespace Infrastructure
             _logger = logger;
         }
 
+        public async Task<bool> VerifyExerciseAuthorAsync(int exerciseId, int authorId)
+        {
+            using var con = await _connection.CreateConnectionAsync();
+            var query = """
+                        SELECT COUNT(*) FROM EXERCISE WHERE exercise_id = @ExerciseId AND author_id = @AuthorId;
+                        """;
+            var result = await con.QueryFirstOrDefaultAsync<int>(query, new { ExerciseId = exerciseId, @AuthorID = authorId });
+            return result == 1;
+        }
+
         public async Task<bool> VerifyExerciseIdsAsync(List<int> exerciseIds, int authorId)
         {
             using var con = await _connection.CreateConnectionAsync();
@@ -28,7 +38,7 @@ namespace Infrastructure
             return exerciseIds.Count == result;
         }
 
-        public async Task<Result> InsertExerciseAsync(ExerciseDto dto, int userId)
+        public async Task<Result> InsertExerciseAsync(ExerciseDto dto, int authorId)
         {
 
             using var con = await _connection.CreateConnectionAsync();
@@ -41,7 +51,7 @@ namespace Infrastructure
                 var exerciseId = await con.ExecuteScalarAsync<int>(exerciseQuery,
                     new
                     {
-                        Author = userId,
+                        Author = authorId,
                         Title = dto.Name,
                         Description = dto.Description,
                         Solution = dto.Solution
@@ -115,6 +125,25 @@ namespace Infrastructure
             return Result.Ok();
         }
 
+        public async Task<IEnumerable<GetExercisesResponseDto>?> GetExercisesAsync(int authorId)
+        {
+            using var con = await _connection.CreateConnectionAsync();
+            var query = """
+                    SELECT exercise_id AS id, title as name FROM exercise WHERE author_id = @Id;
+                    """;
+            var results = await con.QueryAsync<GetExercisesResponseDto>(query, new { Id = authorId });
+            return results;
+        }
+
+        public async Task<bool> DeleteExerciseAsync(int exerciseId)
+        {
+            using var con = await _connection.CreateConnectionAsync();
+            var query = """
+                    DELETE FROM exercise WHERE exercise_id = @ExerciseId;
+                    """;
+            var result = await con.ExecuteAsync(query, new { ExerciseId = exerciseId});
+            return result == 1;
+        }
         private List<(int, string, string)> ConstructTestcaseParameterQueryArgument(Testcase tc, string[] paramType, bool IsOutput)
         {
             var OrderAndTypeAndValue = new List<(int, string, string)>();
@@ -126,11 +155,11 @@ namespace Infrastructure
             {
                 paramsDecider = tc.InputParams;
             }
-            for (int j = 0; j<paramType.Length; j++)
+            for (int j = 0; j < paramType.Length; j++)
             {
                 OrderAndTypeAndValue.Add((j, paramType[j], paramsDecider[j]));
             }
             return OrderAndTypeAndValue;
-}
+        }
     }
 }
