@@ -121,10 +121,10 @@ namespace Infrastructure
             string[] paramsDecider;
             if (IsOutput)
             {
-                paramsDecider = tc.outputParams;
+                paramsDecider = tc.OutputParams;
             } else
             {
-                paramsDecider = tc.inputParams;
+                paramsDecider = tc.InputParams;
             }
             for (int j = 0; j<paramType.Length; j++)
             {
