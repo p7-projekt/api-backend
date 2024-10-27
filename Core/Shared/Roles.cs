@@ -1,4 +1,4 @@
-namespace Infrastructure.Authentication.Models;
+namespace Core.Shared;
 
 public enum Roles
 {
