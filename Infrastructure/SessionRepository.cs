@@ -47,15 +47,17 @@ public class SessionRepository : ISessionRepository
         using var transaction = con.BeginTransaction();
         try
         {
-            
+
             var exercisesExist = await VerifyExerciseIdsAsync(session.Exercises, session.AuthorId, con, transaction);
             if (!exercisesExist)
             {
-                _logger.LogWarning("Exercises did not exist for author {authorid}, tyring to create session {sessionTitle}", authorId, session.Title);
+                _logger.LogWarning(
+                    "Exercises did not exist for author {authorid}, tyring to create session {sessionTitle}", authorId,
+                    session.Title);
                 transaction.Rollback();
                 return (int)SessionService.ErrorCodes.ExerciseDoesNotExist;
             }
-            
+
             var query = """
                         INSERT INTO session (title, description, author_id, expirationtime_utc, session_code) VALUES (@Title, @Description, @Author, @ExpirationTime, @SessionCode) RETURNING session_id;
                         """;
@@ -79,17 +81,21 @@ public class SessionRepository : ISessionRepository
             _logger.LogInformation("User: {userid} created Session: {sessionid}.", session.AuthorId, sessionId);
             return sessionId;
         }
-        catch (PostgresException e) when (e.SqlState == PostgresExceptions.UniqueConstraintViolation.ToString())
+        catch (PostgresException e)
         {
             transaction.Rollback();
-            _logger.LogWarning("Session code not unique!");
-            return (int)SessionService.ErrorCodes.UniqueConstraintViolation;
-        }
-        catch (PostgresException e) when (e.SqlState == PostgresExceptions.ForeignKeyViolation.ToString())
-        {
-            transaction.Rollback();
-            _logger.LogWarning("Exercises id's doesnt exist!");
-            throw;
+            switch (e.SqlState)
+            {
+                case PostgresExceptions.UniqueConstraintViolation:
+                    _logger.LogWarning("Session code not unique!");
+                    return (int)SessionService.ErrorCodes.UniqueConstraintViolation;
+                
+                case PostgresExceptions.ForeignKeyViolation:
+                    _logger.LogWarning("Exercises id's doesnt exist!");
+                    return (int)SessionService.ErrorCodes.ExerciseDoesNotExist;
+                default:
+                    throw;
+            }
         }
         catch (Exception e)
         {

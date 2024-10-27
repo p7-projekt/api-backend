@@ -1,7 +1,7 @@
 namespace Infrastructure.Persistence;
 
-public enum PostgresExceptions
+public static class PostgresExceptions
 {
-    UniqueConstraintViolation = 23505,
-    ForeignKeyViolation = 23503
+    public const string UniqueConstraintViolation = "23505";
+    public const string ForeignKeyViolation = "23503";
 }
