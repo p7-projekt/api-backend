@@ -1,12 +1,12 @@
-﻿namespace Core.Exercises.Models
-{
-    public record ExerciseDto(
-        string Name,
-        string Description,
-        string Solution,
-        string[] InputParameterType,
-        string[] OutputParamaterType,
-        List<Testcase> Testcases);
+﻿using Core.Sessions.Models;
 
-    public record Testcase(string[] inputParams, string[] outputParams);
-}
+namespace Core.Exercises.Models;
+
+public record ExerciseDto(
+    string Name,
+    string Description,
+    string Solution,
+    string[] InputParameterType,
+    string[] OutputParamaterType,
+    List<Testcase> Testcases
+);

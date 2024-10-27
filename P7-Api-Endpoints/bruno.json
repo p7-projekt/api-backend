@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "P7-Api-Endpoints",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

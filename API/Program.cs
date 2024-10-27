@@ -1,6 +1,7 @@
 using API.Configuration;
 using API.Endpoints;
 using Core;
+using Core.Solutions.Services.TestRunners;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Serilog;
@@ -16,6 +17,10 @@ public class Program
         {
             configuration.ReadFrom.Configuration(context.Configuration);
         });
+        
+        // Supported languages
+        builder.Services.AddHttpClient<HaskellService>()
+            .SetHandlerLifetime(TimeSpan.FromSeconds(30));
         
         // Add services to the container.
         builder.Services.AddCoreServices();

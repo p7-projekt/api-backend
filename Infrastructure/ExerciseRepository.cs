@@ -1,10 +1,9 @@
-﻿using Core.Contracts.Repositories;
+﻿using Core.Exercises.Contracts.Repositories;
 using Dapper;
 using FluentResults;
 using Infrastructure.Persistence.Contracts;
 using Microsoft.Extensions.Logging;
 using Core.Exercises.Models;
-using Core.Sessions.Models;
 
 namespace Infrastructure
 {
@@ -151,11 +150,10 @@ namespace Infrastructure
             string[] paramsDecider;
             if (IsOutput)
             {
-                paramsDecider = tc.outputParams;
-            }
-            else
+                paramsDecider = tc.OutputParams;
+            } else
             {
-                paramsDecider = tc.inputParams;
+                paramsDecider = tc.InputParams;
             }
             for (int j = 0; j < paramType.Length; j++)
             {

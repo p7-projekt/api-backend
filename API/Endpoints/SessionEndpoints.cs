@@ -6,7 +6,6 @@ using Asp.Versioning.Builder;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
 using Core.Shared;
-using Infrastructure.Authentication.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 

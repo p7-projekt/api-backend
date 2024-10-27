@@ -1,15 +1,8 @@
-﻿using Core.Contracts.Repositories;
-using Core.Contracts.Services;
+﻿using Core.Contracts.Services;
 using Core.Exercises.Models;
-using Core.Sessions.Contracts;
-using Core.Sessions.Models;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Core.Exercises.Contracts.Repositories;
 
 namespace Core.Exercises;
 

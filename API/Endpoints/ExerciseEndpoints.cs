@@ -2,15 +2,12 @@
 using API.Configuration;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
-using Core.Contracts.Repositories;
 using Core.Contracts.Services;
+using Core.Exercises.Contracts.Repositories;
 using Core.Exercises.Models;
-using Core.Sessions;
-using Core.Sessions.Contracts;
-using Core.Sessions.Models;
 using Core.Shared;
-using Infrastructure.Authentication.Models;
-using Microsoft.AspNetCore.Builder;
+using FluentResults;
+using Core.Solutions.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,16 +24,22 @@ public static class ExerciseEndpoints
 
         var exerciseV1 = app.MapGroup("v{version:apiVersion}/exercises").WithApiVersionSet(apiVersionSet).WithTags("Exercise");
 
-        exerciseV1.MapPost("/", async ([FromBody]ExerciseDto dto, ISolutionRunnerService solutionRunner, ClaimsPrincipal principal, IExerciseRepository exerciseRepo) =>
+        exerciseV1.MapPost("/", async Task<Results<Created, BadRequest<Result>>>([FromBody]ExerciseDto dto, ISolutionRunnerService solutionRunner, ClaimsPrincipal principal, IExerciseRepository exerciseRepo) =>
+        {
+            var result = await solutionRunner.SubmitSolutionAsync(new ExerciseSubmissionDto(dto.Solution, dto.InputParameterType, dto.OutputParamaterType, dto.Testcases));
+
+            if (result.IsFailed)
             {
-                await solutionRunner.SubmitSolutionAsync(dto);
 
-                var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
-                await exerciseRepo.InsertExerciseAsync(dto, Convert.ToInt32(userId));
+                return TypedResults.BadRequest(result);
+            }
 
-                TypedResults.Ok(dto);
-            }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ExerciseDto>();
+            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+            await exerciseRepo.InsertExerciseAsync(dto, Convert.ToInt32(userId));
+            return TypedResults.Created();
 
+        }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ExerciseDto>();
+        
         exerciseV1.MapGet("/", async Task<Results<Ok<List<GetExercisesResponseDto>>, BadRequest, NotFound>> (ClaimsPrincipal principal, IExerciseService exerciseService) => 
             {
                 var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
