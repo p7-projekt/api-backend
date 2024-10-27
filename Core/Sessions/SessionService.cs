@@ -51,14 +51,7 @@ public class SessionService : ISessionService
         session.AuthorId = authorId;
         session.SessionCode = sessionCode;
         
-        // validate if exercises exists..
-        var exercisesExist = await _exerciseRepository.VerifyExerciseIdsAsync(session.Exercises, authorId);
-        if (!exercisesExist)
-        {
-            return Result.Fail("Exercises not found");
-        }
-        
-        var sessionId = await _sessionRepository.InsertSessionAsync(session);
+        var sessionId = await _sessionRepository.InsertSessionAsync(session, authorId);
         if (sessionId == (int)ErrorCodes.UniqueConstraintViolation)
         {
             // sessionCode not unique
@@ -66,7 +59,7 @@ public class SessionService : ISessionService
             sessionCode = GenerateSessionCode();
             session.SessionCode = sessionCode;
             var limit = 10;
-            while (await _sessionRepository.InsertSessionAsync(session) == 0 && limit > 0)
+            while (await _sessionRepository.InsertSessionAsync(session, authorId) == 0 && limit > 0)
             {
                 sessionCode = GenerateSessionCode();
                 session.SessionCode = sessionCode;
@@ -79,6 +72,9 @@ public class SessionService : ISessionService
                 return Result.Fail("Error creating session");
             }
             _logger.LogInformation("Succesfully created a unique a unqiue session code: {sessionCode}", sessionCode);
+        } else if (sessionId == (int)ErrorCodes.ExerciseDoesNotExist)
+        {
+            return Result.Fail("Exercises for session could not be found");
         }
 
         return new CreateSessionResponseDto(sessionId, sessionCode);
@@ -148,6 +144,7 @@ public class SessionService : ISessionService
     
     public enum ErrorCodes
     {
-        UniqueConstraintViolation = 0
+        UniqueConstraintViolation = 0,
+        ExerciseDoesNotExist = 1
     }
 }

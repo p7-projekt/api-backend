@@ -1,3 +1,5 @@
+using System.Data;
+using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
 using Dapper;
@@ -31,13 +33,29 @@ public class SessionRepository : ISessionRepository
         await con.ExecuteAsync(query);
     }
 
-    public async Task<int> InsertSessionAsync(Session session)
+    private async Task<bool> VerifyExerciseIdsAsync(List<int> exerciseIds, int authorId, IDbConnection con, IDbTransaction transaction)
+    {
+        var query = """
+                    SELECT COUNT(*) FROM EXERCISE WHERE exercise_id = ANY(@Ids) AND author_id = @AuthorId;
+                    """;
+        var result = await con.QuerySingleAsync<int>(query, new { Ids = exerciseIds.ToArray(), @AuthorID = authorId } ,transaction);
+        return exerciseIds.Count == result;
+    }
+    public async Task<int> InsertSessionAsync(Session session, int authorId)
     {
         using var con = await _connection.CreateConnectionAsync();
         using var transaction = con.BeginTransaction();
         try
         {
-
+            
+            var exercisesExist = await VerifyExerciseIdsAsync(session.Exercises, session.AuthorId, con, transaction);
+            if (!exercisesExist)
+            {
+                _logger.LogWarning("Exercises did not exist for author {authorid}, tyring to create session {sessionTitle}", authorId, session.Title);
+                transaction.Rollback();
+                return (int)SessionService.ErrorCodes.ExerciseDoesNotExist;
+            }
+            
             var query = """
                         INSERT INTO session (title, description, author_id, expirationtime_utc, session_code) VALUES (@Title, @Description, @Author, @ExpirationTime, @SessionCode) RETURNING session_id;
                         """;
@@ -65,7 +83,7 @@ public class SessionRepository : ISessionRepository
         {
             transaction.Rollback();
             _logger.LogWarning("Session code not unique!");
-            return 0;
+            return (int)SessionService.ErrorCodes.UniqueConstraintViolation;
         }
         catch (PostgresException e) when (e.SqlState == PostgresExceptions.ForeignKeyViolation.ToString())
         {

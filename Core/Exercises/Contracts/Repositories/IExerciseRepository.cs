@@ -9,5 +9,4 @@ public interface IExerciseRepository
     Task<bool> VerifyExerciseAuthorAsync(int exerciseId, int authorId);
     Task<IEnumerable<GetExercisesResponseDto>?> GetExercisesAsync(int authorId);
     Task<bool> DeleteExerciseAsync(int exerciseId);
-    Task<bool> VerifyExerciseIdsAsync(List<int> exerciseIds, int authorId);
 }
