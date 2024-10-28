@@ -25,7 +25,7 @@ public class HaskellService
 		_httpClient.BaseAddress = new Uri($"http://{haskellURL}");
 	}
 
-	public async Task<Result> SubmitSolution(ExerciseSubmissionDto dto)
+	public async Task<Result> CreateSolution(ExerciseSubmissionDto dto)
 	{
 		using var response = await _httpClient.PostAsJsonAsync("/submit", new Submission(dto));
 		_logger.LogInformation("HTTP response: {response}, {body}", response.StatusCode, response.Content.ReadAsStringAsync().Result);
@@ -58,5 +58,13 @@ public class HaskellService
 		    _logger.LogError("Unknown response from solution runner: {response}", responseBody);
 		    return Result.Fail("Uknown response encountered");
 		}
+	}
+
+	public async Task<Result> SubmitSolution()
+	{
+
+
+		await Task.Delay(1);
+		return Result.Ok();
 	}
 }

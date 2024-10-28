@@ -19,6 +19,6 @@ public class SolutionRunnnerService : ISolutionRunnerService
 
     public async Task<Result> SubmitSolutionAsync(ExerciseSubmissionDto dto)
     {
-        return await _haskellService.SubmitSolution(dto);
+        return await _haskellService.CreateSolution(dto);
     }
 }
