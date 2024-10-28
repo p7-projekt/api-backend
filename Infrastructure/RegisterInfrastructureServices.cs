@@ -3,6 +3,7 @@ using Core;
 using Core.Exercises.Contracts.Repositories;
 using Core.Sessions.Contracts;
 using Core.Shared.Contracts;
+using Core.Solutions.Contracts;
 using DbUp;
 using FluentValidation;
 using Infrastructure.Authentication;
@@ -38,6 +39,7 @@ public static class RegisterInfrastructureServices
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ITokenRepository, TokenRepository>();
         services.AddScoped<ISessionRepository, SessionRepository>();
+        services.AddScoped<ISolutionRepository, SolutionRepository>();
         return services;
     }
 

@@ -25,46 +25,38 @@ public class HaskellService
 		_httpClient.BaseAddress = new Uri($"http://{haskellURL}");
 	}
 
-	public async Task<Result> CreateSolution(ExerciseSubmissionDto dto)
+	public async Task<Result> SubmitSubmission(Submission submission)
 	{
-		using var response = await _httpClient.PostAsJsonAsync("/submit", new Submission(dto));
+		using var response = await _httpClient.PostAsJsonAsync("/submit", submission);
 		_logger.LogInformation("HTTP response: {response}, {body}", response.StatusCode, response.Content.ReadAsStringAsync().Result);
 		
 		var responseBody = await response.Content.ReadAsStringAsync();
 		
 		if (response.IsSuccessStatusCode) {
-		    var result = JsonDocument.Parse(responseBody).RootElement.GetProperty("result");
-		    switch (result.ToString())
-		    {
-		        case "pass": return Result.Ok();
-		        case "failure":
-		            _logger.LogInformation("Testcases failed");
-		            var reason = JsonDocument.Parse(responseBody).RootElement.GetProperty("reason");
-		            return Result.Fail(reason.ToString());
-		        case "error":
-		            _logger.LogInformation("Execution of solution failed");
-		            var errorReason = JsonDocument.Parse(responseBody).RootElement.GetProperty("reason");
-		            return Result.Fail(errorReason.ToString());
-		        default:
-		            _logger.LogError("Unknown result received from solution runner: {response}", responseBody);
-		            throw new Exception("Unknown result received from solution runner");
-		    }
+			var result = JsonDocument.Parse(responseBody).RootElement.GetProperty("result");
+			switch (result.ToString())
+			{
+				case "pass": return Result.Ok();
+				case "failure":
+					_logger.LogInformation("Testcases failed");
+					var reason = JsonDocument.Parse(responseBody).RootElement.GetProperty("reason");
+					return Result.Fail(reason.ToString());
+				case "error":
+					_logger.LogInformation("Execution of solution failed");
+					var errorReason = JsonDocument.Parse(responseBody).RootElement.GetProperty("reason");
+					return Result.Fail(errorReason.ToString());
+				default:
+					_logger.LogError("Unknown result received from solution runner: {response}", responseBody);
+					throw new Exception("Unknown result received from solution runner");
+			}
 		} else if(response.StatusCode == HttpStatusCode.UnprocessableContent)
 		{
-		    _logger.LogError("Wrong format of json provided to solution runner:, {message}", response.Content);
-		    return Result.Fail("Wrong format provided to solution runner");
+			_logger.LogError("Wrong format of json provided to solution runner:, {message}", response.Content);
+			return Result.Fail("Wrong format provided to solution runner");
 		} else
 		{
-		    _logger.LogError("Unknown response from solution runner: {response}", responseBody);
-		    return Result.Fail("Uknown response encountered");
+			_logger.LogError("Unknown response from solution runner: {response}", responseBody);
+			return Result.Fail("Uknown response encountered");
 		}
-	}
-
-	public async Task<Result> SubmitSolution()
-	{
-
-
-		await Task.Delay(1);
-		return Result.Ok();
 	}
 }
