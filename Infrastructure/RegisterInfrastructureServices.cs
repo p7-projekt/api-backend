@@ -1,6 +1,6 @@
 using System.Reflection;
 using Core;
-using Core.Exercises.Contracts.Repositories;
+using Core.Exercises.Contracts;
 using Core.Sessions.Contracts;
 using Core.Shared.Contracts;
 using DbUp;

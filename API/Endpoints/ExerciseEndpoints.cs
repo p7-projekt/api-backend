@@ -2,14 +2,13 @@
 using API.Configuration;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
-using Core.Contracts.Services;
-using Core.Exercises.Contracts.Repositories;
 using Core.Exercises.Models;
 using Core.Shared;
 using FluentResults;
 using Core.Solutions.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Core.Exercises.Contracts;
 
 namespace API.Endpoints;
 

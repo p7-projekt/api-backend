@@ -1,8 +1,7 @@
-﻿using Core.Contracts.Services;
-using Core.Exercises.Models;
+﻿using Core.Exercises.Models;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using Core.Exercises.Contracts.Repositories;
+using Core.Exercises.Contracts;
 
 namespace Core.Exercises;
 

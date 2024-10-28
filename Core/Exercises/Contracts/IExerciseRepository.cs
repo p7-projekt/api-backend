@@ -1,7 +1,7 @@
 ﻿using Core.Exercises.Models;
 using FluentResults;
 
-namespace Core.Exercises.Contracts.Repositories;
+namespace Core.Exercises.Contracts;
 
 public interface IExerciseRepository
 {

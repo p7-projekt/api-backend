@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Core.Contracts.Services;
+namespace Core.Exercises.Contracts;
 
 public interface IExerciseService
 {
