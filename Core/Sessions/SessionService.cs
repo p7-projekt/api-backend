@@ -80,22 +80,22 @@ public class SessionService : ISessionService
         return new CreateSessionResponseDto(sessionId, sessionCode);
     }
 
-    public async Task<Result<JoinSessionResponseDto>> JoinSessionAnonUser(JoinSessionDto dto, int sessionId)
+    public async Task<Result<JoinSessionResponseDto>> JoinSessionAnonUser(JoinSessionDto dto)
     {
         // check token exists
-        var isTokenAndSessionValid = await _sessionRepository.CheckSessionCodeIsValid(dto.SessionCode, sessionId);
+        var isTokenAndSessionValid = await _sessionRepository.CheckSessionCodeIsValid(dto.SessionCode, dto.SessionId);
         if (!isTokenAndSessionValid)
         {
             return Result.Fail($"{nameof(dto.SessionCode)} is invalid!");
         }
         
         // create anon user entry in table
-        var session = await _sessionRepository.GetSessionByIdAsync(sessionId);
+        var session = await _sessionRepository.GetSessionByIdAsync(dto.SessionId);
         if (session == null)
         {
             return Result.Fail("Invalid session");
         }
-        var student = await _sessionRepository.CreateAnonUser(sessionId);
+        var student = await _sessionRepository.CreateAnonUser(dto.SessionId);
         
         var timeOffset = session.ExpirationTimeUtc - DateTime.UtcNow;
         

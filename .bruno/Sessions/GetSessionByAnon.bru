@@ -1,15 +1,15 @@
 meta {
-  name: DeleteSession
+  name: GetSessionByAnon
   type: http
-  seq: 5
+  seq: 6
 }
 
-delete {
+get {
   url: {{baseURL}}/{{currentVersion}}/sessions/{{sessionId}}
   body: none
   auth: bearer
 }
 
 auth:bearer {
-  token: {{instructorToken}}
+  token: {{anonToken}}
 }
