@@ -4,7 +4,7 @@ namespace Core.Sessions.Contracts;
 
 public interface ISessionRepository
 {
-    Task<int> InsertSessionAsync(Session session);
+    Task<int> InsertSessionAsync(Session session, int authorId);
     Task<bool> CheckSessionCodeIsValid(string sessionCode, int sessionId);
     Task<bool> VerifyAuthor(int userId, int sessionId);
     Task<int> CreateAnonUser(int sessionId);

@@ -1,3 +1,5 @@
+using System.Data;
+using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
 using Dapper;
@@ -31,12 +33,30 @@ public class SessionRepository : ISessionRepository
         await con.ExecuteAsync(query);
     }
 
-    public async Task<int> InsertSessionAsync(Session session)
+    private async Task<bool> VerifyExerciseIdsAsync(List<int> exerciseIds, int authorId, IDbConnection con, IDbTransaction transaction)
+    {
+        var query = """
+                    SELECT COUNT(*) FROM EXERCISE WHERE exercise_id = ANY(@Ids) AND author_id = @AuthorId;
+                    """;
+        var result = await con.QuerySingleAsync<int>(query, new { Ids = exerciseIds.ToArray(), @AuthorID = authorId } ,transaction);
+        return exerciseIds.Count == result;
+    }
+    public async Task<int> InsertSessionAsync(Session session, int authorId)
     {
         using var con = await _connection.CreateConnectionAsync();
         using var transaction = con.BeginTransaction();
         try
         {
+
+            var exercisesExist = await VerifyExerciseIdsAsync(session.Exercises, session.AuthorId, con, transaction);
+            if (!exercisesExist)
+            {
+                _logger.LogWarning(
+                    "Exercises did not exist for author {authorid}, tyring to create session {sessionTitle}", authorId,
+                    session.Title);
+                transaction.Rollback();
+                return (int)SessionService.ErrorCodes.ExerciseDoesNotExist;
+            }
 
             var query = """
                         INSERT INTO session (title, description, author_id, expirationtime_utc, session_code) VALUES (@Title, @Description, @Author, @ExpirationTime, @SessionCode) RETURNING session_id;
@@ -61,17 +81,21 @@ public class SessionRepository : ISessionRepository
             _logger.LogInformation("User: {userid} created Session: {sessionid}.", session.AuthorId, sessionId);
             return sessionId;
         }
-        catch (PostgresException e) when (e.SqlState == PostgresExceptions.UniqueConstraintViolation.ToString())
+        catch (PostgresException e)
         {
             transaction.Rollback();
-            _logger.LogWarning("Session code not unique!");
-            return 0;
-        }
-        catch (PostgresException e) when (e.SqlState == PostgresExceptions.ForeignKeyViolation.ToString())
-        {
-            transaction.Rollback();
-            _logger.LogWarning("Exercises id's doesnt exist!");
-            throw;
+            switch (e.SqlState)
+            {
+                case PostgresExceptions.UniqueConstraintViolation:
+                    _logger.LogWarning("Session code not unique!");
+                    return (int)SessionService.ErrorCodes.UniqueConstraintViolation;
+                
+                case PostgresExceptions.ForeignKeyViolation:
+                    _logger.LogWarning("Exercises id's doesnt exist!");
+                    return (int)SessionService.ErrorCodes.ExerciseDoesNotExist;
+                default:
+                    throw;
+            }
         }
         catch (Exception e)
         {
