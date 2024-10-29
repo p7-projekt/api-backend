@@ -1,5 +1,4 @@
 using System.Data;
-using Core.Exercises.Contracts.Repositories;
 using Dapper;
 using FluentResults;
 using Infrastructure.Persistence.Contracts;
@@ -124,6 +123,17 @@ namespace Infrastructure
                     SELECT exercise_id AS id, title as name FROM exercise WHERE author_id = @Id;
                     """;
             var results = await con.QueryAsync<GetExercisesResponseDto>(query, new { Id = authorId });
+            return results;
+        }
+
+        public async Task<GetExerciseResponseDto?> GetExerciseByIdAsync(int exerciseId)
+        {
+            using var con = await _connection.CreateConnectionAsync();
+            var query = """
+                    SELECT exercise_id AS id, title, description FROM exercise WHERE exercise_id = @ExerciseId;
+                    """;
+            var results = await con.QueryFirstOrDefaultAsync<GetExerciseResponseDto>(query, new { ExerciseId = exerciseId });
+
             return results;
         }
 

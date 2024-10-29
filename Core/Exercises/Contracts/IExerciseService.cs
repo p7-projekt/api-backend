@@ -12,4 +12,6 @@ public interface IExerciseService
 {
     Task<Result<List<GetExercisesResponseDto>>> GetExercises(int userId);
     Task<Result> DeleteExercise(int exerciseId, int userId);
+    Task<Result<GetExerciseResponseDto>> GetExerciseById(int exerciseId);
+
 }
