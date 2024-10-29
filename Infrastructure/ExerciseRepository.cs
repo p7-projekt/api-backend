@@ -1,4 +1,6 @@
-﻿using Dapper;
+using System.Data;
+using Core.Exercises.Contracts.Repositories;
+using Dapper;
 using FluentResults;
 using Infrastructure.Persistence.Contracts;
 using Microsoft.Extensions.Logging;
@@ -26,16 +28,6 @@ namespace Infrastructure
                         """;
             var result = await con.QueryFirstOrDefaultAsync<int>(query, new { ExerciseId = exerciseId, @AuthorID = authorId });
             return result == 1;
-        }
-
-        public async Task<bool> VerifyExerciseIdsAsync(List<int> exerciseIds, int authorId)
-        {
-            using var con = await _connection.CreateConnectionAsync();
-            var query = """
-                        SELECT COUNT(*) FROM EXERCISE WHERE exercise_id = ANY(@Ids) AND author_id = @AuthorId;
-                        """;
-            var result = await con.QuerySingleAsync<int>(query, new { Ids = exerciseIds.ToArray(), @AuthorID = authorId });
-            return exerciseIds.Count == result;
         }
 
         public async Task<Result> InsertExerciseAsync(ExerciseDto dto, int authorId)

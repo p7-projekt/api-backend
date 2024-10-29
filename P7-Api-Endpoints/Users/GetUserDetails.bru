@@ -1,0 +1,15 @@
+meta {
+  name: GetUserDetails
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseURL}}/{{currentVersion}}/users/4
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}

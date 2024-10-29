@@ -1,0 +1,17 @@
+meta {
+  name: Refresh
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseURL}}/refresh
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+      "refreshToken": "{{instructorRefreshToken}}"
+  }
+}

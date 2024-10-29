@@ -1,0 +1,15 @@
+meta {
+  name: DeleteSession
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseURL}}/{{currentVersion}}/sessions/{{sessionId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}

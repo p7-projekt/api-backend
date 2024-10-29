@@ -1,0 +1,15 @@
+meta {
+  name: GetSessionDetails
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseURL}}/{{currentVersion}}/sessions/{{sessionId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
