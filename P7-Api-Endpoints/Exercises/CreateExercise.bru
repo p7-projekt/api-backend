@@ -1,0 +1,32 @@
+meta {
+  name: CreateExercise
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseURL}}/{{currentVersion}}/exercises
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+    "Name": "Square of a Number",
+    "Description": "This exercise asks you to implement a Haskell function that takes an integer and returns its square.",
+    "Solution": "solution x =\n  if x < 0\n    then x * (-1)\n    else x",
+    "InputParameterType": ["int"],
+    "OutputParamaterType": ["int"],
+    "Testcases": [
+      {
+        "inputParams": ["-5"],
+        "outputParams": ["5"]
+      }
+    ]
+  }
+  
+}
