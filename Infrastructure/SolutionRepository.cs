@@ -79,10 +79,10 @@ public class SolutionRepository : ISolutionRepository
 		            WHERE au.user_id = @UserId;
 		            """;
 		var result = await con.ExecuteScalarAsync<int>(query, new { UserId = userId });
-		return result == 1;
+		return result > 0;
 	}
 
-	public async Task<bool> InsertSolvedRelation(int userId)
+	public async Task<bool> InsertSolvedRelation(int userId, int exerciseId)
 	{
 		using var con = await _dbConnection.CreateConnectionAsync();
 		var query = """
@@ -91,11 +91,9 @@ public class SolutionRepository : ISolutionRepository
 		                                FROM exercise_in_session AS eis
 		                                         JOIN anon_users AS au
 		                                              ON au.session_id = eis.session_id
-		                                WHERE au.user_id = 2
+		                                WHERE au.user_id = @UserId AND eis.exercise_id = @ExerciseId
 		                                AND NOT EXISTS(
-		                                SELECT 1 FROM solved WHERE user_id = au.user_id)
-		                                GROUP BY userid, sessionid, exerciseid
-		                                LIMIT 1
+		                                SELECT 1 FROM solved WHERE user_id = au.user_id AND solved.exercise_id = eis.exercise_id)
 		                                
 		            )
 		            INSERT INTO solved (user_id, session_id, exercise_id)
@@ -103,7 +101,7 @@ public class SolutionRepository : ISolutionRepository
 		            FROM In_Session
 		            RETURNING user_id;
 		            """;
-		var result = await con.ExecuteScalarAsync<int>(query);
+		var result = await con.ExecuteScalarAsync<int>(query, new { UserId = userId, ExerciseId = exerciseId });
 		return result > 0;
 	}
 }

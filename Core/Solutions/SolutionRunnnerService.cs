@@ -51,7 +51,7 @@ public class SolutionRunnnerService : ISolutionRunnerService
         }
         
         // Ensure user is part of a given session, and Create a solved relation 
-        var inserted = await _solutionRepository.InsertSolvedRelation(userId);
+        var inserted = await _solutionRepository.InsertSolvedRelation(userId, exerciseId);
         if (!inserted)
         {
             _logger.LogInformation("Failed to insert solved for userid {userid}, for exercise: {exerciseId}, but exercise passed!", userId, exerciseId);

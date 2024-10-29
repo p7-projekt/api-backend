@@ -102,13 +102,6 @@ public class SessionService : ISessionService
 
     public async Task<Result<GetSessionResponseDto>> GetSessionByIdAsync(int sessionId, int userId, Roles role)
     {
-        var session = await _sessionRepository.GetSessionByIdAsync(sessionId);
-        if (session == null)
-        {
-            _logger.LogInformation("Session {sessionid}, request by {userid} does not exist", sessionId, userId);
-            return Result.Fail("Session does not exist");
-        }
-
         var access = false;
         if (role == Roles.Instructor)
         {
@@ -123,6 +116,15 @@ public class SessionService : ISessionService
             _logger.LogInformation("User {userid} does not have access to {sessionid}", userId, sessionId);
             return Result.Fail("User does not have access to session");
         }
+        
+        
+        var session = await _sessionRepository.GetSessionOverviewAsync(sessionId, userId);
+        if (session == null)
+        {
+            _logger.LogInformation("Session {sessionid}, request by {userid} does not exist", sessionId, userId);
+            return Result.Fail("Session does not exist");
+        }
+
         
         return session.ConvertToGetResponse();
     }
