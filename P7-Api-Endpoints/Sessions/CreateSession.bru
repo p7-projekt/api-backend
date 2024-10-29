@@ -1,0 +1,31 @@
+meta {
+  name: CreateSession
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseURL}}/{{currentVersion}}/sessions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+    "title": "sfdfdssfdsf",
+    "description": "Den bedste seshhh",
+    "expiresInHours": 5,
+    "exerciseIds": [
+      1
+    ]
+  }
+}
+
+script:post-response {
+  bru.setEnvVar("sessionId",res.body.id);
+  bru.setEnvVar("sessionCode",res.body.sessionCode);
+}

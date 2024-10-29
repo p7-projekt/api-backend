@@ -8,6 +8,7 @@ using Core.Exercises.Models;
 using Core.Shared;
 using FluentResults;
 using Core.Solutions.Contracts;
+using Core.Solutions.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,7 +27,7 @@ public static class ExerciseEndpoints
 
         exerciseV1.MapPost("/", async Task<Results<Created, BadRequest<Result>>>([FromBody]ExerciseDto dto, ISolutionRunnerService solutionRunner, ClaimsPrincipal principal, IExerciseRepository exerciseRepo) =>
         {
-            var result = await solutionRunner.SubmitSolutionAsync(new ExerciseSubmissionDto(dto.Solution, dto.InputParameterType, dto.OutputParamaterType, dto.Testcases));
+            var result = await solutionRunner.CreateSolutionAsync(new ExerciseSubmissionDto(dto.Solution, dto.InputParameterType, dto.OutputParamaterType, dto.Testcases));
 
             if (result.IsFailed)
             {
@@ -71,6 +72,17 @@ public static class ExerciseEndpoints
                 }
                 return TypedResults.NoContent();
             }).RequireAuthorization(nameof(Roles.Instructor));
+        
+        exerciseV1.MapPost("/{exerciseId:int}/submit", async Task<IResult> ([FromBody] SubmitSolutionDto dto, int exerciseId, ISolutionRunnerService service) =>
+        {
+            var result = await service.SubmitSolutionAsync(dto);
+            if (result.IsFailed)
+            {
+                return TypedResults.BadRequest(result.Errors);
+            }
+
+            return TypedResults.Ok();
+        }).WithRequestValidation<SubmitSolutionDto>();
 
         return app;
     }
