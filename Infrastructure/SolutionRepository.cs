@@ -68,4 +68,42 @@ public class SolutionRepository : ISolutionRepository
 			return null;
 		}
 	}
+
+	public async Task<bool> CheckAnonUserExistsInSessionAsync(int userId)
+	{
+		using var con = await _dbConnection.CreateConnectionAsync();
+		var query = """
+		            SELECT COUNT(*) FROM exercise_in_session AS eis
+		                JOIN anon_users AS au
+		                ON au.session_id = eis.session_id
+		            WHERE au.user_id = @UserId;
+		            """;
+		var result = await con.ExecuteScalarAsync<int>(query, new { UserId = userId });
+		return result == 1;
+	}
+
+	public async Task<bool> InsertSolvedRelation(int userId)
+	{
+		using var con = await _dbConnection.CreateConnectionAsync();
+		var query = """
+		            WITH In_Session AS (SELECT au.user_id AS userid, 
+		                                       eis.session_id AS sessionid, eis.exercise_id AS exerciseid
+		                                FROM exercise_in_session AS eis
+		                                         JOIN anon_users AS au
+		                                              ON au.session_id = eis.session_id
+		                                WHERE au.user_id = 2
+		                                AND NOT EXISTS(
+		                                SELECT 1 FROM solved WHERE user_id = au.user_id)
+		                                GROUP BY userid, sessionid, exerciseid
+		                                LIMIT 1
+		                                
+		            )
+		            INSERT INTO solved (user_id, session_id, exercise_id)
+		            SELECT userid, sessionid, exerciseid
+		            FROM In_Session
+		            RETURNING user_id;
+		            """;
+		var result = await con.ExecuteScalarAsync<int>(query);
+		return result > 0;
+	}
 }

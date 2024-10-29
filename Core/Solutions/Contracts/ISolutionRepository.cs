@@ -5,4 +5,6 @@ namespace Core.Solutions.Contracts;
 public interface ISolutionRepository
 {
 	Task<List<TestCaseEntity>?> GetTestCasesByExerciseIdAsync(int exerciseId);
+	Task<bool> CheckAnonUserExistsInSessionAsync(int userId);
+	Task<bool> InsertSolvedRelation(int userId);
 }

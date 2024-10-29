@@ -142,6 +142,6 @@ public class SessionService : ISessionService
     public enum ErrorCodes
     {
         UniqueConstraintViolation = 0,
-        ExerciseDoesNotExist = 1
+        ExerciseDoesNotExist = -1
     }
 }

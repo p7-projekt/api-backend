@@ -7,12 +7,16 @@ meta {
 post {
   url: {{baseURL}}/{{currentVersion}}/exercises/1/submission
   body: json
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{anonToken}}
 }
 
 body:json {
   {
-    "exerciseId": 1,
+    "sessionId": 1,
     "solution": "solution x = if x < 0 then x * (-1) else x\n"
   }
 }

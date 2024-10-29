@@ -25,13 +25,18 @@ public class SolutionRunnnerService : ISolutionRunnerService
         return await _haskellService.SubmitSubmission(new Submission(dto));
     }
 
-    public async Task<Result> SubmitSolutionAsync(SubmitSolutionDto dto)
+    public async Task<Result> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId)
     {
         // validate anon user is part of a given session
         // Short circuit if user is not part of the session
-        
+        var userExistsInSession = await _solutionRepository.CheckAnonUserExistsInSessionAsync(userId);
+        if (!userExistsInSession)
+        {
+            _logger.LogWarning("User {UserId} does not exist in Session {SessionId}", userId, dto.SessionId);
+            return Result.Fail($"User {userId} does not exist in the session.");
+        }
         // get testcases
-        var testcases = await _solutionRepository.GetTestCasesByExerciseIdAsync(dto.ExerciseId);
+        var testcases = await _solutionRepository.GetTestCasesByExerciseIdAsync(exerciseId);
         if (testcases == null)
         {
             return Result.Fail("Error retreiving test cases");
@@ -39,7 +44,6 @@ public class SolutionRunnnerService : ISolutionRunnerService
         
         // Validate through mozart
         var submission = SubmissionMapper.ToSubmission(testcases, dto.Solution);
-        _logger.LogDebug("Dto: {submission}, with testcases: {testcases}, input: {input}, output {output}", submission, submission.TestCases, submission.TestCases.First().InputParameters, submission.TestCases.First().OutputParameters);
         var result = await _haskellService.SubmitSubmission(submission);
         if (result.IsFailed)
         {
@@ -47,8 +51,12 @@ public class SolutionRunnnerService : ISolutionRunnerService
         }
         
         // Ensure user is part of a given session, and Create a solved relation 
-        
-        
-        return await _haskellService.SubmitSubmission(submission);
+        var inserted = await _solutionRepository.InsertSolvedRelation(userId);
+        if (!inserted)
+        {
+            _logger.LogInformation("Failed to insert solved for userid {userid}, for exercise: {exerciseId}, but exercise passed!", userId, exerciseId);
+            return Result.Ok();
+        }
+        return Result.Ok();
     }
 }

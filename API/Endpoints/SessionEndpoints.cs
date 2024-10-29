@@ -110,17 +110,6 @@ public static class SessionEndpoints
             
             return TypedResults.Ok(result.Value);
         }).WithRequestValidation<JoinSessionDto>();
-        // sessionV1Group.MapPost("/{id:int}/participants", async Task<Results<Ok<JoinSessionResponseDto>, BadRequest<ValidationProblemDetails>>> ([FromBody] JoinSessionDto dto, int id, ISessionService service, ClaimsPrincipal principal) =>
-        // {
-        //     var result = await service.JoinSessionAnonUser(dto, id);
-        //     if (result.IsFailed)
-        //     {
-        //         var error = CreateBadRequest.CreateValidationProblemDetails(result.Errors, $"Invalid {nameof(dto.SessionCode)}", nameof(dto.SessionCode));
-        //         return TypedResults.BadRequest(error);
-        //     }
-        //     
-        //     return TypedResults.Ok(result.Value);
-        // }).WithRequestValidation<JoinSessionDto>();
         return app;
     }
 }
