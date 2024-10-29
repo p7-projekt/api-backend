@@ -1,4 +1,3 @@
-using Core.Exercises.Contracts.Repositories;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
 using Core.Shared;
@@ -13,14 +12,12 @@ public class SessionService : ISessionService
     private readonly ISessionRepository _sessionRepository;
     private readonly ILogger<SessionService> _logger;
     private readonly IAnonTokenService _tokenService;
-    private readonly IExerciseRepository _exerciseRepository;
 
-    public SessionService(ISessionRepository sessionRepository, ILogger<SessionService> logger, IAnonTokenService tokenService, IExerciseRepository exerciseRepository)
+    public SessionService(ISessionRepository sessionRepository, ILogger<SessionService> logger, IAnonTokenService tokenService)
     {
         _sessionRepository = sessionRepository;
         _logger = logger;
         _tokenService = tokenService;
-        _exerciseRepository = exerciseRepository;
     }
 
     public async Task<Result> DeleteSession(int sessionId, int userId)
