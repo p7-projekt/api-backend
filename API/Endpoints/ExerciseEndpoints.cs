@@ -73,12 +73,12 @@ public static class ExerciseEndpoints
                 return TypedResults.NoContent();
             }).RequireAuthorization(nameof(Roles.Instructor));
         
-        exerciseV1.MapPost("/{exerciseId:int}/submit", async Task<IResult> ([FromBody] SubmitSolutionDto dto, int exerciseId, ISolutionRunnerService service) =>
+        exerciseV1.MapPost("/{exerciseId:int}/submission", async Task<IResult> ([FromBody] SubmitSolutionDto dto, int exerciseId, ISolutionRunnerService service) =>
         {
             var result = await service.SubmitSolutionAsync(dto);
             if (result.IsFailed)
             {
-                return TypedResults.BadRequest(result.Errors);
+                return TypedResults.BadRequest(result.Errors.Select(e => e.Message).ToArray());
             }
 
             return TypedResults.Ok();
