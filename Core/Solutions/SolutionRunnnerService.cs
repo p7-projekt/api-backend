@@ -1,5 +1,4 @@
-﻿using Core.Exercises.Models;
-using Core.Solutions.Contracts;
+﻿using Core.Solutions.Contracts;
 using Core.Solutions.Models;
 using Core.Solutions.Services;
 using FluentResults;
@@ -20,12 +19,17 @@ public class SolutionRunnnerService : ISolutionRunnerService
         _solutionRepository = solutionRepository;
     }
 
-    public async Task<Result> ConfirmSolutionAsync(ExerciseDto dto)
-    {
-        return await _haskellService.SubmitSubmission(new SubmissionDto(dto));
-    }
+    // public async Task<Result<>> ConfirmSolutionAsync(ExerciseDto dto)
+    // {
+    //     var result = await _haskellService.SubmitSubmission(new SubmissionDto(dto));
+    //     if (result.IsFailed)
+    //     {
+    //         return result;
+    //     }
+    //     return await _haskellService.SubmitSubmission(new SubmissionDto(dto));
+    // }
 
-    public async Task<Result> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId)
+    public async Task<Result<HaskellResponseDto>> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId)
     {
         // validate anon user is part of a given session
         // Short circuit if user is not part of the session
@@ -47,8 +51,19 @@ public class SolutionRunnnerService : ISolutionRunnerService
         var result = await _haskellService.SubmitSubmission(submission);
         if (result.IsFailed)
         {
-            return result;
+            return Result.Fail(result.Errors);
         }
+
+        if (result.Value.Action == ResponseCode.Failure)
+        {
+            return new HaskellResponseDto(result.Value.ResponseDto!.TestCaseResults, null);
+        }
+
+        if (result.Value.Action == ResponseCode.Error)
+        {
+            return new HaskellResponseDto(null, result.Value.ResponseDto!.Message);
+        }
+        
         
         // Ensure user is part of a given session, and Create a solved relation 
         var inserted = await _solutionRepository.InsertSolvedRelation(userId, exerciseId);
