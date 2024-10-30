@@ -1,3 +1,3 @@
 namespace Core.Sessions.Models;
 
-public record JoinSessionResponseDto(string Token);
+public record JoinSessionResponseDto(string Token, DateTime ExpiresAt);
