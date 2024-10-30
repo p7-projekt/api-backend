@@ -58,7 +58,8 @@ CREATE TABLE
     testcase (
         testcase_id SERIAL PRIMARY KEY,
         exercise_id INTEGER REFERENCES exercise (exercise_id) ON DELETE CASCADE NOT NULL,
-        testcase_no INTEGER NOT NULL
+        testcase_no INTEGER NOT NULL,
+        public_visible BOOL NOT NULL
     );
 
 CREATE TABLE

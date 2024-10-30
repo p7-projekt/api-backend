@@ -1,4 +1,4 @@
-using Core.Exercises.Contracts.Repositories;
+using Core.Exercises.Contracts;
 using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Shared.Contracts;

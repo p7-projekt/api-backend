@@ -1,10 +1,10 @@
-﻿using System.Data;
-using Core.Exercises.Contracts.Repositories;
+using System.Data;
 using Dapper;
 using FluentResults;
 using Infrastructure.Persistence.Contracts;
 using Microsoft.Extensions.Logging;
 using Core.Exercises.Models;
+using Core.Exercises.Contracts;
 
 namespace Infrastructure
 {
@@ -49,17 +49,17 @@ namespace Infrastructure
                     }, transaction);
 
                 var insertTestcasesQuery = """
-                                       INSERT INTO testcase (exercise_id, testcase_no) VALUES (@ExerciseId, @OrderNo);
+                                       INSERT INTO testcase (exercise_id, testcase_no, public_visible) VALUES (@ExerciseId, @OrderNo, @PublicVisible);
                                        """;
 
-                List<int> OrderNo = new List<int>();
+                var OrderNo = new List<(int, bool)>();
                 for (int i = 0; i < dto.Testcases.Count(); i++)
                 {
-                    OrderNo.Add(i);
+                    OrderNo.Add((i, dto.Testcases[i].PublicVisible));
                 }
                 // Inserts all testcases of an exercise
                 await con.ExecuteAsync(insertTestcasesQuery,
-                    OrderNo.Select(i => new { ExerciseId = exerciseId, OrderNo = i }).ToList(),
+                    OrderNo.Select(i => new { ExerciseId = exerciseId, OrderNo = i.Item1, PublicVisible = i.Item2 }).ToList(),
                     transaction);
 
                 var getTestcasesIdsQuery = """
@@ -123,6 +123,17 @@ namespace Infrastructure
                     SELECT exercise_id AS id, title as name FROM exercise WHERE author_id = @Id;
                     """;
             var results = await con.QueryAsync<GetExercisesResponseDto>(query, new { Id = authorId });
+            return results;
+        }
+
+        public async Task<GetExerciseResponseDto?> GetExerciseByIdAsync(int exerciseId)
+        {
+            using var con = await _connection.CreateConnectionAsync();
+            var query = """
+                    SELECT exercise_id AS id, title, description, solution FROM exercise WHERE exercise_id = @ExerciseId;
+                    """;
+            var results = await con.QueryFirstOrDefaultAsync<GetExerciseResponseDto>(query, new { ExerciseId = exerciseId });
+
             return results;
         }
 

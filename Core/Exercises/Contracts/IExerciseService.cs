@@ -6,10 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Core.Contracts.Services;
+namespace Core.Exercises.Contracts;
 
 public interface IExerciseService
 {
     Task<Result<List<GetExercisesResponseDto>>> GetExercises(int userId);
     Task<Result> DeleteExercise(int exerciseId, int userId);
+    Task<Result<GetExerciseResponseDto>> GetExerciseById(int exerciseId);
+
 }

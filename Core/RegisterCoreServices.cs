@@ -1,6 +1,6 @@
 using System.Reflection;
-using Core.Contracts.Services;
 using Core.Exercises;
+using Core.Exercises.Contracts;
 using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Solutions;

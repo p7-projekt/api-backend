@@ -1,8 +1,8 @@
-﻿using Core.Contracts.Services;
-using Core.Exercises.Models;
+﻿using Core.Exercises.Models;
 using FluentResults;
 using Microsoft.Extensions.Logging;
-using Core.Exercises.Contracts.Repositories;
+using Core.Exercises.Contracts;
+using Core.Solutions.Contracts;
 
 namespace Core.Exercises;
 
@@ -10,11 +10,13 @@ public class ExerciseService : IExerciseService
 {
     private readonly IExerciseRepository _exerciseRepository;
     private readonly ILogger<ExerciseService> _logger;
+    private readonly ISolutionRepository _solutionRepository;
 
-    public ExerciseService(IExerciseRepository exerciseRepository, ILogger<ExerciseService> logger)
+    public ExerciseService(IExerciseRepository exerciseRepository, ILogger<ExerciseService> logger, ISolutionRepository solutionRepository)
     {
         _exerciseRepository = exerciseRepository;
         _logger = logger;
+        _solutionRepository = solutionRepository;
     }
 
     public async Task<Result> DeleteExercise(int exerciseId, int userId)
@@ -31,6 +33,24 @@ public class ExerciseService : IExerciseService
             return Result.Fail("Exercise could not be deleted");
         }
         return Result.Ok();
+    }
+
+    public async Task<Result<GetExerciseResponseDto>> GetExerciseById(int exerciseId)
+    {
+        var exercise = await _exerciseRepository.GetExerciseByIdAsync(exerciseId);
+        if (exercise == null) 
+        {
+            _logger.LogDebug("Failed to retreive exercies with id: {exercise_id}", exerciseId);
+            return Result.Fail("Failed to retreive exercise");
+        }
+        exercise.TestCases = await _solutionRepository.GetTestCasesByExerciseIdAsync(exerciseId) ?? new List<TestCaseEntity>();
+        if(exercise.TestCases.Count() == 0)
+        {
+            _logger.LogDebug("Failed to retreive testcases of exercise with id: {exercise_id}", exerciseId);
+            return Result.Fail("Failed to retreive exercise");
+        }
+
+        return Result.Ok(exercise);
     }
 
     public async Task<Result<List<GetExercisesResponseDto>>> GetExercises(int userId)
