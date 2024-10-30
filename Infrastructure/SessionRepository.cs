@@ -1,4 +1,5 @@
 using System.Data;
+using Core.Exercises.Models;
 using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
@@ -169,7 +170,7 @@ public class SessionRepository : ISessionRepository
                                 ON e.exercise_id = s.exercise_id AND s.user_id = @UserId
                              WHERE eis.session_id = @SessionId;
                              """;
-        var exercises = await con.QueryAsync<ExerciseDetails>(exercisesQuery, new { SessionId = sessionId, UserId = userId });
+        var exercises = await con.QueryAsync<SolvedExercise>(exercisesQuery, new { SessionId = sessionId, UserId = userId });
         session.ExerciseDetails = exercises.ToList();
         
         return session;
@@ -197,7 +198,7 @@ public class SessionRepository : ISessionRepository
                              ON e.exercise_id = eis.exercise_id
                              WHERE eis.session_id = @SessionId;
                              """;
-        var exercises = await con.QueryAsync<ExerciseDetails>(exercisesQuery, new { SessionId = session.Id });
+        var exercises = await con.QueryAsync<SolvedExercise>(exercisesQuery, new { SessionId = session.Id });
         session.ExerciseDetails = exercises.ToList();
             
         
@@ -224,7 +225,7 @@ public class SessionRepository : ISessionRepository
                              ON e.exercise_id = eis.exercise_id
                              WHERE eis.session_id = @SessionId;
                              """;
-        var exercises = await con.QueryAsync<ExerciseDetails>(exercisesQuery, new { sessionId });
+        var exercises = await con.QueryAsync<SolvedExercise>(exercisesQuery, new { sessionId });
         session.ExerciseDetails = exercises.ToList();
         
         return session;

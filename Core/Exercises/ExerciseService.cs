@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Core.Exercises.Contracts;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
-using Core.Solutions.Services.TestRunners;
+using Core.Solutions.Services;
 
 namespace Core.Exercises;
 
@@ -48,8 +48,11 @@ public class ExerciseService : IExerciseService
             _logger.LogDebug("Failed to retreive exercies with id: {exercise_id}", exerciseId);
             return Result.Fail("Failed to retreive exercise");
         }
-        exercise.TestCases = await _solutionRepository.GetTestCasesByExerciseIdAsync(exerciseId) ?? new List<TestCaseEntity>();
-        if(exercise.TestCases.Count() == 0)
+        var tempTestcases = await _solutionRepository.GetTestCasesByExerciseIdAsync(exerciseId) ?? new List<Testcase>();
+        exercise.TestCases = tempTestcases.Select(x => x.ToTestcaseDto()).ToList();
+        exercise.InputParameterType = tempTestcases.First().Input.Select(x => x.ParameterType).ToList();
+        exercise.OutputParamaterType = tempTestcases.First().Output.Select(x => x.ParameterType).ToList();
+        if (exercise.TestCases.Count() == 0)
         {
             _logger.LogDebug("Failed to retreive testcases of exercise with id: {exercise_id}", exerciseId);
             return Result.Fail("Failed to retreive exercise");
@@ -79,7 +82,7 @@ public class ExerciseService : IExerciseService
         }
         
         // Should without a doubt be refactored at some point
-        var submissionResult = await _haskellService.SubmitSubmission(new Submission(new ExerciseSubmissionDto(dto.Solution, dto.InputParameterType, dto.OutputParamaterType, dto.Testcases)));
+        var submissionResult = await _haskellService.SubmitSubmission(new SubmissionDto(dto));
         if (submissionResult.IsFailed) 
         {
             _logger.LogInformation("Failed to validate exercise: {exercise}", dto);

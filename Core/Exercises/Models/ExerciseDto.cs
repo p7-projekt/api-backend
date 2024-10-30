@@ -8,5 +8,5 @@ public record ExerciseDto(
     string Solution,
     string[] InputParameterType,
     string[] OutputParamaterType,
-    List<Testcase> Testcases
+    List<TestcaseDto> Testcases
 );
