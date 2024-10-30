@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Core.Sessions.Models;
 
 public class Session
@@ -36,7 +38,7 @@ public static class SessionMapper
     
     public static GetSessionsResponseDto ConvertToGetSessionsResponse(this Session session)
     {
-        return new GetSessionsResponseDto(session.Id, session.Title, Math.Ceiling((session.ExpirationTimeUtc - DateTime.UtcNow).TotalMinutes).ToString());
+        return new GetSessionsResponseDto(session.Id, session.Title, Math.Floor((session.ExpirationTimeUtc - DateTime.UtcNow).TotalSeconds).ToString(CultureInfo.InvariantCulture));
     }
 
     public static GetSessionResponseDto ConvertToGetResponse(this Session session)
