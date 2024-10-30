@@ -98,7 +98,7 @@ public class SessionService : ISessionService
         var timeOffset = session.ExpirationTimeUtc - DateTime.UtcNow;
         
         var createToken = _tokenService.GenerateAnonymousUserJwt((int)Math.Ceiling(timeOffset.TotalMinutes), student);
-        return new JoinSessionResponseDto(createToken);
+        return new JoinSessionResponseDto(createToken, DateTime.UtcNow.AddMinutes((int)Math.Ceiling(timeOffset.TotalMinutes)));
     }
 
     public async Task<Result<GetSessionResponseDto>> GetSessionByIdAsync(int sessionId, int userId, Roles role)
