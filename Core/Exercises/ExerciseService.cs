@@ -3,6 +3,8 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using Core.Exercises.Contracts;
 using Core.Solutions.Contracts;
+using Core.Solutions.Models;
+using Core.Solutions.Services.TestRunners;
 
 namespace Core.Exercises;
 
@@ -11,12 +13,15 @@ public class ExerciseService : IExerciseService
     private readonly IExerciseRepository _exerciseRepository;
     private readonly ILogger<ExerciseService> _logger;
     private readonly ISolutionRepository _solutionRepository;
+    private readonly HaskellService _haskellService;
 
-    public ExerciseService(IExerciseRepository exerciseRepository, ILogger<ExerciseService> logger, ISolutionRepository solutionRepository)
+
+    public ExerciseService(IExerciseRepository exerciseRepository, ILogger<ExerciseService> logger, ISolutionRepository solutionRepository, HaskellService haskellService)
     {
         _exerciseRepository = exerciseRepository;
         _logger = logger;
         _solutionRepository = solutionRepository;
+        _haskellService = haskellService;
     }
 
     public async Task<Result> DeleteExercise(int exerciseId, int userId)
@@ -62,5 +67,31 @@ public class ExerciseService : IExerciseService
         }
 
         return Result.Ok(exercises.ToList());
+    }
+
+    public async Task<Result> UpdateExercise(int exerciseId, int authorId, ExerciseDto dto)
+    {
+        var result = await _exerciseRepository.VerifyExerciseAuthorAsync(exerciseId, authorId);
+        if (!result)
+        {
+            _logger.LogInformation("Exercise: {exercise_id} not created by provided author: {author_Id}", exerciseId, authorId);
+            return Result.Fail("Exercise not updated");
+        }
+        
+        // Should without a doubt be refactored at some point
+        var submissionResult = await _haskellService.SubmitSubmission(new Submission(new ExerciseSubmissionDto(dto.Solution, dto.InputParameterType, dto.OutputParamaterType, dto.Testcases)));
+        if (submissionResult.IsFailed) 
+        {
+            _logger.LogInformation("Failed to validate exercise: {exercise}", dto);
+            return Result.Fail("Solution of the exercise did not pass the testcases");
+        }
+
+        var updateResult = await _exerciseRepository.UpdateExerciseAsync(dto, exerciseId);
+        if (updateResult.IsFailed) {
+            _logger.LogInformation("Failed to update exercise with id: {exercise_id}", exerciseId);
+            return Result.Fail("Exercise not updated");
+        }
+
+        return Result.Ok();
     }
 }
