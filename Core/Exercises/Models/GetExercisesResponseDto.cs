@@ -6,4 +6,4 @@ using System.Threading.Tasks;
 
 namespace Core.Exercises.Models;
 
-public record GetExercisesResponseDto(int Id, string Name, bool Solved);
+public record GetExercisesResponseDto(int Id, string Name);

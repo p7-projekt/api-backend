@@ -6,3 +6,4 @@ public class SolvedExercise
     public string ExerciseTitle { get; set; } = string.Empty;
     public bool Solved { get; set; }
 }
+
