@@ -175,6 +175,34 @@ public class SessionRepository : ISessionRepository
         return session;
     }
     
+    public async Task<Session?> GetSessionBySessionCodeAsync(string sessionCode)
+    {
+        var query = """
+                    SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc, app_users.name AS authorname  
+                    FROM session
+                    JOIN app_users ON app_users.user_id = session.author_id
+                    WHERE session_code = @SessionCode;
+                    """;
+        using var con = await _connection.CreateConnectionAsync();
+        var session = await con.QueryFirstOrDefaultAsync<Session>(query, new { sessionCode });
+        if (session == null)
+        {
+            return null;
+        }
+        
+        var exercisesQuery = """
+                             SELECT e.exercise_id AS exerciseid, title AS exercisetitle FROM exercise AS e
+                             JOIN exercise_in_session AS eis
+                             ON e.exercise_id = eis.exercise_id
+                             WHERE eis.session_id = @SessionId;
+                             """;
+        var exercises = await con.QueryAsync<ExerciseDetails>(exercisesQuery, new { SessionId = session.Id });
+        session.ExerciseDetails = exercises.ToList();
+            
+        
+        return session;
+    }
+    
     public async Task<Session?> GetSessionByIdAsync(int sessionId)
     {
         var query = """

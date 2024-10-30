@@ -12,6 +12,8 @@ public interface ISessionRepository
     Task<bool> VerifyParticipantAccess(int userId, int sessionId);
     Task DeleteExpiredSessions();
 
+    Task<Session?> GetSessionBySessionCodeAsync(string sessionCode);
+
     Task<Session?> GetSessionOverviewAsync(int sessionId, int userId);
 
     Task<IEnumerable<Session>?> GetSessionsAsync(int authorId);
