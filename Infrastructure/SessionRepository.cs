@@ -141,22 +141,20 @@ public class SessionRepository : ISessionRepository
         return result == 1;
     }
 
-    public async Task<Session?> GetSessionBySessionCodeAsync(string sessionCode)
+    public async Task<Session?> GetSessionOverviewAsync(int sessionId, int userId)
     {
         var query = """
                     SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc, app_users.name AS authorname  
                     FROM session
                     JOIN app_users ON app_users.user_id = session.author_id
-
-                    WHERE session_code = @SessionCode;
+                    WHERE session_id = @SessionId;
                     """;
         using var con = await _connection.CreateConnectionAsync();
-        var session = await con.QueryFirstOrDefaultAsync<Session>(query, new { sessionCode });
+        var session = await con.QueryFirstOrDefaultAsync<Session>(query, new { sessionId });
         if (session == null)
         {
             return null;
         }
-
         var exercisesQuery = """
                              SELECT e.exercise_id AS exerciseid, 
                                     title AS exercisetitle,
@@ -176,6 +174,7 @@ public class SessionRepository : ISessionRepository
         
         return session;
     }
+
     
     public async Task<Session?> GetSessionBySessionCodeAsync(string sessionCode)
     {
