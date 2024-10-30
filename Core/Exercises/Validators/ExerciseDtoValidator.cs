@@ -25,6 +25,11 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         RuleFor(x => x.Testcases).Must(HaveAllParameters).WithMessage("All testcases must have both input and output");
         RuleFor(x => x.Testcases).Must(HasSameParameterAmount).WithMessage("All testcases must have the same amount of parameters");
         RuleFor(x => x).Must(ParametersValuesHaveCorrectTypes).WithMessage("All testcase parameters must be of correct type");
+        RuleForEach(x => x.Testcases).ChildRules(testcase =>
+        {
+            testcase.RuleFor(y => y.PublicVisible).NotNull().WithMessage("The visibility of each testcase must be determined");
+        });
+        RuleFor(x => x.Testcases).Must(y => y.Any(z => z.PublicVisible)).WithMessage("At least one test case must be marked as publically visible");
     }
 
     private bool ParametersAreValidType(string[] parameters)
@@ -146,9 +151,10 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                 throw;
             }
         }
-
         _logger.LogInformation("Exercise validated. Title: {}", dto.Name);
         return true;
     }
+
 }
+
 

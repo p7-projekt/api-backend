@@ -1,7 +1,7 @@
 ﻿using Core.Exercises.Models;
 using FluentResults;
 
-namespace Core.Exercises.Contracts.Repositories;
+namespace Core.Exercises.Contracts;
 
 public interface IExerciseRepository
 {
@@ -9,4 +9,7 @@ public interface IExerciseRepository
     Task<bool> VerifyExerciseAuthorAsync(int exerciseId, int authorId);
     Task<IEnumerable<GetExercisesResponseDto>?> GetExercisesAsync(int authorId);
     Task<bool> DeleteExerciseAsync(int exerciseId);
+    Task<GetExerciseResponseDto?> GetExerciseByIdAsync(int exerciseId);
+    Task<Result> UpdateExerciseAsync(ExerciseDto dto, int exerciseId);
+
 }

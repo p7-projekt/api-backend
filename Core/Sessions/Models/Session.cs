@@ -44,6 +44,6 @@ public static class SessionMapper
     public static GetSessionResponseDto ConvertToGetResponse(this Session session)
     {
         return new GetSessionResponseDto(session.Title, session.Description, session.AuthorName,
-            session.ExpirationTimeUtc, session.ExerciseDetails.Select(x => new ExerciseDetailsDto(x.ExerciseId, x.ExerciseTitle)).ToList());
+            session.ExpirationTimeUtc, session.ExerciseDetails.Select(x => new ExerciseDetailsDto(x.ExerciseId, x.ExerciseTitle, x.Solved)).ToList());
     }
 }

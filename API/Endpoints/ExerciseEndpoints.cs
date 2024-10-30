@@ -2,8 +2,6 @@
 using API.Configuration;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
-using Core.Contracts.Services;
-using Core.Exercises.Contracts.Repositories;
 using Core.Exercises.Models;
 using Core.Shared;
 using FluentResults;
@@ -11,6 +9,8 @@ using Core.Solutions.Contracts;
 using Core.Solutions.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Core.Exercises.Contracts;
+using Core.Exercises;
 
 namespace API.Endpoints;
 
@@ -57,6 +57,29 @@ public static class ExerciseEndpoints
                 return TypedResults.Ok(results.Value);
             }).RequireAuthorization(nameof(Roles.Instructor));
 
+        exerciseV1.MapGet("/{exerciseId:int}", async Task<Results<Ok<GetExerciseResponseDto>, BadRequest>> (int exerciseId, IExerciseService exerciseService) =>
+        {
+            var result = await exerciseService.GetExerciseById(exerciseId);
+            if (result.IsFailed)
+            {
+                return TypedResults.BadRequest();
+            }
+            return TypedResults.Ok(result.Value);
+        });
+
+        exerciseV1.MapPut("/{exerciseId:int}", async Task<Results<Ok, BadRequest<string>>> ([FromBody] ExerciseDto dto, ClaimsPrincipal principal, int exerciseId, IExerciseService exerciseService) =>
+        {
+            var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
+
+            var result = await exerciseService.UpdateExercise(exerciseId, Convert.ToInt32(userId), dto);
+            if (result.IsFailed)
+            {
+                return TypedResults.BadRequest(result.ToString());
+            }
+            return TypedResults.Ok();
+
+        }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ExerciseDto>();
+
         exerciseV1.MapDelete("/{exerciseId:int}", async Task<Results<NoContent, NotFound>> (ClaimsPrincipal principal, int exerciseId, IExerciseService exerciseService) =>
             {
                 var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
@@ -73,16 +96,17 @@ public static class ExerciseEndpoints
                 return TypedResults.NoContent();
             }).RequireAuthorization(nameof(Roles.Instructor));
         
-        exerciseV1.MapPost("/{exerciseId:int}/submit", async Task<IResult> ([FromBody] SubmitSolutionDto dto, int exerciseId, ISolutionRunnerService service) =>
+        exerciseV1.MapPost("/{exerciseId:int}/submission", async Task<IResult> ([FromBody] SubmitSolutionDto dto, int exerciseId, ISolutionRunnerService service, ClaimsPrincipal principal) =>
         {
-            var result = await service.SubmitSolutionAsync(dto);
+            var userId = Convert.ToInt32(principal.FindFirst(ClaimTypes.UserData)?.Value);
+            var result = await service.SubmitSolutionAsync(dto, exerciseId, userId);
             if (result.IsFailed)
             {
-                return TypedResults.BadRequest(result.Errors);
+                return TypedResults.BadRequest(result.Errors.Select(e => e.Message).ToArray());
             }
 
             return TypedResults.Ok();
-        }).WithRequestValidation<SubmitSolutionDto>();
+        }).WithRequestValidation<SubmitSolutionDto>().RequireAuthorization(nameof(Roles.AnonymousUser));
 
         return app;
     }

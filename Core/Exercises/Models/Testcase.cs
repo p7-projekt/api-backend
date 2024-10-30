@@ -6,4 +6,4 @@ using System.Threading.Tasks;
 
 namespace Core.Exercises.Models;
 
-public record Testcase(string[] InputParams, string[] OutputParams);
+public record Testcase(string[] InputParams, string[] OutputParams, bool PublicVisible);
