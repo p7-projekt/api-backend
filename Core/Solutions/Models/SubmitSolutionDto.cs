@@ -1,3 +1,3 @@
 namespace Core.Solutions.Models;
 
-public record SubmitSolutionDto(int ExerciseId, string Solution);
+public record SubmitSolutionDto(int SessionId, string Solution);

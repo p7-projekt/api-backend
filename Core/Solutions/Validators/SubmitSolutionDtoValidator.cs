@@ -8,7 +8,7 @@ public class SubmitSolutionDtoValidator : AbstractValidator<SubmitSolutionDto>
 {
     public SubmitSolutionDtoValidator()
     {
-        RuleFor(x => x.ExerciseId).NotEmpty().WithMessage(x => $"{nameof(x.ExerciseId)} cannot be empty");
+        RuleFor(x => x.SessionId).NotEmpty().WithMessage(x => $"{nameof(x.SessionId)} cannot be empty");
         RuleFor(x => x.Solution).NotEmpty().WithMessage(x => $"{nameof(x.Solution)} cannot be empty");
     }
 }

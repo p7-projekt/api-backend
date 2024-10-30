@@ -96,16 +96,17 @@ public static class ExerciseEndpoints
                 return TypedResults.NoContent();
             }).RequireAuthorization(nameof(Roles.Instructor));
         
-        exerciseV1.MapPost("/{exerciseId:int}/submit", async Task<IResult> ([FromBody] SubmitSolutionDto dto, int exerciseId, ISolutionRunnerService service) =>
+        exerciseV1.MapPost("/{exerciseId:int}/submission", async Task<IResult> ([FromBody] SubmitSolutionDto dto, int exerciseId, ISolutionRunnerService service, ClaimsPrincipal principal) =>
         {
-            var result = await service.SubmitSolutionAsync(dto);
+            var userId = Convert.ToInt32(principal.FindFirst(ClaimTypes.UserData)?.Value);
+            var result = await service.SubmitSolutionAsync(dto, exerciseId, userId);
             if (result.IsFailed)
             {
-                return TypedResults.BadRequest(result.Errors);
+                return TypedResults.BadRequest(result.Errors.Select(e => e.Message).ToArray());
             }
 
             return TypedResults.Ok();
-        }).WithRequestValidation<SubmitSolutionDto>();
+        }).WithRequestValidation<SubmitSolutionDto>().RequireAuthorization(nameof(Roles.AnonymousUser));
 
         return app;
     }
