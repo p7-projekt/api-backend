@@ -140,21 +140,23 @@ public class SessionRepository : ISessionRepository
         var result = await con.QuerySingleAsync<int>(query, new { UserId = userId, SessionId = sessionId });
         return result == 1;
     }
-    
-    public async Task<Session?> GetSessionOverviewAsync(int sessionId, int userId)
+
+    public async Task<Session?> GetSessionBySessionCodeAsync(string sessionCode)
     {
         var query = """
                     SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc, app_users.name AS authorname  
                     FROM session
                     JOIN app_users ON app_users.user_id = session.author_id
-                    WHERE session_id = @SessionId;
+
+                    WHERE session_code = @SessionCode;
                     """;
         using var con = await _connection.CreateConnectionAsync();
-        var session = await con.QueryFirstOrDefaultAsync<Session>(query, new { sessionId });
+        var session = await con.QueryFirstOrDefaultAsync<Session>(query, new { sessionCode });
         if (session == null)
         {
             return null;
         }
+
         var exercisesQuery = """
                              SELECT e.exercise_id AS exerciseid, 
                                     title AS exercisetitle,
@@ -209,17 +211,6 @@ public class SessionRepository : ISessionRepository
                     """;
         var results = await con.QueryAsync<Session>(query, new { Id = authorId });
         return results;
-    }
-
-    public async Task<bool> CheckSessionCodeIsValid(string sessionCode, int sessionId)
-    {
-        using var con = await _connection.CreateConnectionAsync();
-        var query = """
-                    SELECT COUNT(*) FROM session WHERE session_code = @SessionCode AND session_id = @SessionId;
-                    """;
-        var result = await con.ExecuteScalarAsync<int>(query, new { SessionCode = sessionCode, SessionId = sessionId });
-        _logger.LogInformation("Requesting check on session id {sessionid} with session code {sessioncode}", sessionId, sessionCode);
-        return result == 1;
     }
 
     public async Task<bool> DeleteSessionAsync(int sessionId, int authorId)
