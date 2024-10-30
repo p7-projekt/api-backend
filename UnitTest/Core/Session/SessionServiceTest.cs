@@ -17,7 +17,7 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenRepoSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub, exerciseRepoSub);
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub);
         
         // Act
         var result = sessionService.GenerateSessionCode();
