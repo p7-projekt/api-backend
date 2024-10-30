@@ -140,6 +140,41 @@ public class SessionRepository : ISessionRepository
         var result = await con.QuerySingleAsync<int>(query, new { UserId = userId, SessionId = sessionId });
         return result == 1;
     }
+
+    public async Task<Session?> GetSessionOverviewAsync(int sessionId, int userId)
+    {
+        var query = """
+                    SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc, app_users.name AS authorname  
+                    FROM session
+                    JOIN app_users ON app_users.user_id = session.author_id
+                    WHERE session_id = @SessionId;
+                    """;
+        using var con = await _connection.CreateConnectionAsync();
+        var session = await con.QueryFirstOrDefaultAsync<Session>(query, new { sessionId });
+        if (session == null)
+        {
+            return null;
+        }
+        var exercisesQuery = """
+                             SELECT e.exercise_id AS exerciseid, 
+                                    title AS exercisetitle,
+                                    CASE 
+                                        WHEN s.user_id IS NOT NULL THEN true
+                                        ELSE false
+                                    END AS solved
+                             FROM exercise AS e
+                             JOIN exercise_in_session AS eis
+                                ON e.exercise_id = eis.exercise_id
+                             LEFT JOIN solved AS s 
+                                ON e.exercise_id = s.exercise_id AND s.user_id = @UserId
+                             WHERE eis.session_id = @SessionId;
+                             """;
+        var exercises = await con.QueryAsync<ExerciseDetails>(exercisesQuery, new { SessionId = sessionId, UserId = userId });
+        session.ExerciseDetails = exercises.ToList();
+        
+        return session;
+    }
+
     
     public async Task<Session?> GetSessionBySessionCodeAsync(string sessionCode)
     {
@@ -204,17 +239,6 @@ public class SessionRepository : ISessionRepository
         var results = await con.QueryAsync<Session>(query, new { Id = authorId });
         return results;
     }
-    //
-    // public async Task<bool> CheckSessionCodeIsValid(string sessionCode, int sessionId)
-    // {
-    //     using var con = await _connection.CreateConnectionAsync();
-    //     var query = """
-    //                 SELECT COUNT(*) FROM session WHERE session_code = @SessionCode AND session_id = @SessionId;
-    //                 """;
-    //     var result = await con.ExecuteScalarAsync<int>(query, new { SessionCode = sessionCode, SessionId = sessionId });
-    //     _logger.LogInformation("Requesting check on session id {sessionid} with session code {sessioncode}", sessionId, sessionCode);
-    //     return result == 1;
-    // }
 
     public async Task<bool> DeleteSessionAsync(int sessionId, int authorId)
     {

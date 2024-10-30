@@ -1,11 +1,11 @@
 meta {
-  name: GetSessionDetails
+  name: GetSessionsByAuthor
   type: http
-  seq: 1
+  seq: 4
 }
 
 get {
-  url: {{baseURL}}/{{currentVersion}}/sessions/{{sessionId}}
+  url: {{baseURL}}/{{currentVersion}}/sessions
   body: none
   auth: bearer
 }
