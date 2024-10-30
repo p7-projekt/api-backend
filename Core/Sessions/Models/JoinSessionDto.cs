@@ -1,3 +1,3 @@
 namespace Core.Sessions.Models;
 
-public record JoinSessionDto(int SessionId, string SessionCode);
+public record JoinSessionDto(string SessionCode);
