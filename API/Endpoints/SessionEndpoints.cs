@@ -99,9 +99,9 @@ public static class SessionEndpoints
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<CreateSessionDto>();
         
         // Join session
-        sessionV1Group.MapPost("/{id:int}/participants", async Task<Results<Ok<JoinSessionResponseDto>, BadRequest<ValidationProblemDetails>>> ([FromBody] JoinSessionDto dto, int id, ISessionService service, ClaimsPrincipal principal) =>
+        app.MapPost("/join", async Task<Results<Ok<JoinSessionResponseDto>, BadRequest<ValidationProblemDetails>>> ([FromBody]JoinSessionDto dto, ISessionService service) =>
         {
-            var result = await service.JoinSessionAnonUser(dto, id);
+            var result = await service.JoinSessionAnonUser(dto);
             if (result.IsFailed)
             {
                 var error = CreateBadRequest.CreateValidationProblemDetails(result.Errors, $"Invalid {nameof(dto.SessionCode)}", nameof(dto.SessionCode));

@@ -1,4 +1,3 @@
-using Core.Exercises.Contracts.Repositories;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
 using Core.Shared;
@@ -13,14 +12,12 @@ public class SessionService : ISessionService
     private readonly ISessionRepository _sessionRepository;
     private readonly ILogger<SessionService> _logger;
     private readonly IAnonTokenService _tokenService;
-    private readonly IExerciseRepository _exerciseRepository;
 
-    public SessionService(ISessionRepository sessionRepository, ILogger<SessionService> logger, IAnonTokenService tokenService, IExerciseRepository exerciseRepository)
+    public SessionService(ISessionRepository sessionRepository, ILogger<SessionService> logger, IAnonTokenService tokenService)
     {
         _sessionRepository = sessionRepository;
         _logger = logger;
         _tokenService = tokenService;
-        _exerciseRepository = exerciseRepository;
     }
 
     public async Task<Result> DeleteSession(int sessionId, int userId)
@@ -80,22 +77,22 @@ public class SessionService : ISessionService
         return new CreateSessionResponseDto(sessionId, sessionCode);
     }
 
-    public async Task<Result<JoinSessionResponseDto>> JoinSessionAnonUser(JoinSessionDto dto, int sessionId)
+    public async Task<Result<JoinSessionResponseDto>> JoinSessionAnonUser(JoinSessionDto dto)
     {
         // check token exists
-        var isTokenAndSessionValid = await _sessionRepository.CheckSessionCodeIsValid(dto.SessionCode, sessionId);
-        if (!isTokenAndSessionValid)
-        {
-            return Result.Fail($"{nameof(dto.SessionCode)} is invalid!");
-        }
+        // var isTokenAndSessionValid = await _sessionRepository.CheckSessionCodeIsValid(dto.SessionCode);
+        // if (!isTokenAndSessionValid)
+        // {
+        //     return Result.Fail($"{nameof(dto.SessionCode)} is invalid!");
+        // }
         
         // create anon user entry in table
-        var session = await _sessionRepository.GetSessionByIdAsync(sessionId);
+        var session = await _sessionRepository.GetSessionBySessionCodeAsync(dto.SessionCode);
         if (session == null)
         {
             return Result.Fail("Invalid session");
         }
-        var student = await _sessionRepository.CreateAnonUser(sessionId);
+        var student = await _sessionRepository.CreateAnonUser(session.Id);
         
         var timeOffset = session.ExpirationTimeUtc - DateTime.UtcNow;
         
