@@ -6,7 +6,7 @@ namespace Core.Solutions.Contracts;
 
 public interface ISolutionRunnerService
 {
-    Task<Result> CreateSolutionAsync(ExerciseSubmissionDto dto);
+    Task<Result> ConfirmSolutionAsync(ExerciseDto dto);
     Task<Result> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId);
     
 }

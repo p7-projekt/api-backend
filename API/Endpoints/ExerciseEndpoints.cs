@@ -27,7 +27,7 @@ public static class ExerciseEndpoints
 
         exerciseV1.MapPost("/", async Task<Results<Created, BadRequest<Result>>>([FromBody]ExerciseDto dto, ISolutionRunnerService solutionRunner, ClaimsPrincipal principal, IExerciseRepository exerciseRepo) =>
         {
-            var result = await solutionRunner.CreateSolutionAsync(new ExerciseSubmissionDto(dto.Solution, dto.InputParameterType, dto.OutputParamaterType, dto.Testcases));
+            var result = await solutionRunner.ConfirmSolutionAsync(dto);
 
             if (result.IsFailed)
             {

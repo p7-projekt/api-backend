@@ -2,7 +2,7 @@
 using Core.Exercises.Models;
 
 namespace Core.Solutions.Models;
-public record Submission
+public record SubmissionDto
 {
     [JsonPropertyName("solution")]
     public string Solution { get; }
@@ -10,12 +10,12 @@ public record Submission
     [JsonPropertyName("testCases")]
     public List<TestCase> TestCases { get; }
 
-    public Submission(string solution, List<TestCase> testCases)
+    public SubmissionDto(string solution, List<TestCase> testCases)
     {
         Solution = solution;
         TestCases = testCases;
     }
-    public Submission(ExerciseSubmissionDto dto)
+    public SubmissionDto(ExerciseDto dto)
     {
         Solution = dto.Solution;
         TestCases = new List<TestCase>();
@@ -42,13 +42,13 @@ public record Submission
 }
 
 public static class SubmissionMapper {
-    public static Submission ToSubmission(List<TestCaseEntity> testCases, string solution)
+    public static SubmissionDto ToSubmission(List<Testcase> testCases, string solution)
     {
         var testDtos = testCases.Select(x => new TestCase(x.TestCaseId, 
             x.Input.Select(y => new Parameter(y.ParameterType, y.ParameterValue)).ToList(),
             x.Output.Select(y => new Parameter(y.ParameterType, y.ParameterValue)).ToList()
             )).ToList();
-        return new Submission(solution, testDtos);
+        return new SubmissionDto(solution, testDtos);
     }
 }
 

@@ -18,15 +18,15 @@ public class SolutionRepository : ISolutionRepository
 		_logger = logger;
 	}
 
-	public async Task<List<TestCaseEntity>?> GetTestCasesByExerciseIdAsync(int exerciseId)
+	public async Task<List<Testcase>?> GetTestCasesByExerciseIdAsync(int exerciseId)
 	{
 		using var con = await _dbConnection.CreateConnectionAsync();
 		try
 		{
 			var query = """
-			            SELECT testcase_id AS testcaseid, exercise_id as exerciseid, testcase_no as testcasenumber FROM testcase WHERE exercise_id = @ExerciseId;
+			            SELECT testcase_id AS testcaseid, exercise_id as exerciseid, testcase_no as testcasenumber, public_visible as IsPublicVisible FROM testcase WHERE exercise_id = @ExerciseId;
 			            """;
-			var testCases = (await con.QueryAsync<TestCaseEntity>(query, new { exerciseId })).ToList();
+			var testCases = (await con.QueryAsync<Testcase>(query, new { exerciseId })).ToList();
 			
 			var inputParameterQuery = """
 			                          SELECT parameter_id AS parameterid, testcase_id as testcaseid, arg_num as 
@@ -44,11 +44,11 @@ public class SolutionRepository : ISolutionRepository
 			
 			foreach (var testcase in testCases)
 			{
-				var inputList = (await con.QueryAsync<TestParameterEntity>(
+				var inputList = (await con.QueryAsync<TestParameter>(
 					inputParameterQuery, 
 					new {testcase.TestCaseId})).ToList();
         
-				var outputList = (await con.QueryAsync<TestParameterEntity>(
+				var outputList = (await con.QueryAsync<TestParameter>(
 					outputParameterQuery, 
 					new { testcase.TestCaseId })).ToList();
 				

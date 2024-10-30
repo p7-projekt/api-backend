@@ -1,3 +1,4 @@
+using Core.Exercises.Models;
 using System.Globalization;
 
 namespace Core.Sessions.Models;
@@ -20,7 +21,7 @@ public class Session
 
     public List<int> Exercises { get; set; } = new (); // this needs to be changed when exercises are available
 
-    public List<ExerciseDetails> ExerciseDetails { get; set; } = new();
+    public List<SolvedExercise> ExerciseDetails { get; set; } = new();
 }
 
 public static class SessionMapper
@@ -44,6 +45,6 @@ public static class SessionMapper
     public static GetSessionResponseDto ConvertToGetResponse(this Session session)
     {
         return new GetSessionResponseDto(session.Title, session.Description, session.AuthorName,
-            session.ExpirationTimeUtc, session.ExerciseDetails.Select(x => new ExerciseDetailsDto(x.ExerciseId, x.ExerciseTitle, x.Solved)).ToList());
+           session.ExpirationTimeUtc, session.ExerciseDetails.Select(x => new GetExercisesResponseDto(x.ExerciseId, x.ExerciseTitle, x.Solved)).ToList());
     }
 }

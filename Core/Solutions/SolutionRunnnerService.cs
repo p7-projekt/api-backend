@@ -1,7 +1,7 @@
 ﻿using Core.Exercises.Models;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
-using Core.Solutions.Services.TestRunners;
+using Core.Solutions.Services;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 
@@ -20,9 +20,9 @@ public class SolutionRunnnerService : ISolutionRunnerService
         _solutionRepository = solutionRepository;
     }
 
-    public async Task<Result> CreateSolutionAsync(ExerciseSubmissionDto dto)
+    public async Task<Result> ConfirmSolutionAsync(ExerciseDto dto)
     {
-        return await _haskellService.SubmitSubmission(new Submission(dto));
+        return await _haskellService.SubmitSubmission(new SubmissionDto(dto));
     }
 
     public async Task<Result> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId)

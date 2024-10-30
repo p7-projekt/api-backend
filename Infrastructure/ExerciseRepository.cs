@@ -225,7 +225,7 @@ namespace Infrastructure
             return (insertedExercises, insertedParameters);
         }
 
-        private List<(int, string, string)> ConstructTestcaseParameterQueryArgument(Testcase tc, string[] paramType, bool IsOutput)
+        private List<(int, string, string)> ConstructTestcaseParameterQueryArgument(TestcaseDto tc, string[] paramType, bool IsOutput)
         {
             var OrderAndTypeAndValue = new List<(int, string, string)>();
             string[] paramsDecider;

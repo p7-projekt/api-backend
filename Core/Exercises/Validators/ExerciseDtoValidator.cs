@@ -57,7 +57,7 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         return true;
     }
 
-    private bool HaveAllParameters(List<Testcase> testcases)
+    private bool HaveAllParameters(List<TestcaseDto> testcases)
     {
         foreach (var testcase in testcases)
         {
@@ -75,7 +75,7 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         return true;
     }
 
-    private bool HasSameParameterAmount(List<Testcase> testcases)
+    private bool HasSameParameterAmount(List<TestcaseDto> testcases)
     {
         try
         {

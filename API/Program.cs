@@ -1,7 +1,7 @@
 using API.Configuration;
 using API.Endpoints;
 using Core;
-using Core.Solutions.Services.TestRunners;
+using Core.Solutions.Services;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Serilog;
