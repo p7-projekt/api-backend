@@ -8,4 +8,6 @@ public interface IUserService
 	Task CreateUserAsync(CreateUserDto dto);
 	Task<Result<LoginResponse>> LoginAsync(LoginDto loginDto);
 	Task<Result<GetUserResponseDto>> GetAppUserByIdAsync(int id, int userIdParameter);
+
+	Task<Result<GetUserResponseDto>> GetAnonUserByIdAsync(int userId);
 }

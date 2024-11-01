@@ -32,6 +32,16 @@ public class UserRepository : IUserRepository
 		return user;
 	}
 
+	public async Task<int> GetAnonUserSessionByIdAsync(int userId)
+	{
+		using var con = await _connection.CreateConnectionAsync();
+		var query = """
+		            SELECT session_id FROM anon_users WHERE user_id = @UserId;
+		            """;
+		var sessionId = await con.QuerySingleAsync<int>(query, new { userId });
+		return sessionId;
+	}
+
 	public async Task<User?> GetUserByEmailAsync(string email)
 	{
 		using var con = await _connection.CreateConnectionAsync();

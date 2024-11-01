@@ -1,7 +1,7 @@
 meta {
-  name: GetUserDetails
+  name: GetUserDetailsAnon
   type: http
-  seq: 1
+  seq: 2
 }
 
 get {
@@ -11,5 +11,5 @@ get {
 }
 
 auth:bearer {
-  token: {{instructorToken}}
+  token: {{anonToken}}
 }
