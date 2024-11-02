@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Core.Exercises.Models;
 using Core.Solutions.Models;
 using FluentResults;
@@ -24,42 +25,44 @@ public class HaskellService
         }
         _httpClient.BaseAddress = new Uri($"http://{haskellURL}");
     }
-
-    public async Task<Result> SubmitSubmission(SubmissionDto submission)
+    public async Task<Result<SolutionRunnerResponse>> SubmitSubmission(SubmissionDto submission)
     {
         using var response = await _httpClient.PostAsJsonAsync("/submit", submission);
         _logger.LogInformation("HTTP response: {response}, {body}", response.StatusCode, response.Content.ReadAsStringAsync().Result);
 
-        var responseBody = await response.Content.ReadAsStringAsync();
-
+        var haskellResponse = new SolutionRunnerResponse();
         if (response.IsSuccessStatusCode)
         {
-            var result = JsonDocument.Parse(responseBody).RootElement.GetProperty("result");
-            switch (result.ToString())
+        var responseBody = await response.Content.ReadFromJsonAsync<SolutionResponseDto>();
+            switch (responseBody?.Result)
             {
-                case "pass": return Result.Ok();
+                case "pass": 
+                    haskellResponse.Action = ResponseCode.Pass;
+                    break;
                 case "failure":
                     _logger.LogInformation("Testcases failed");
-                    var reason = JsonDocument.Parse(responseBody).RootElement.GetProperty("reason");
-                    return Result.Fail(reason.ToString());
+                    haskellResponse.Action = ResponseCode.Failure;
+                    break;
                 case "error":
                     _logger.LogInformation("Execution of solution failed");
-                    var errorReason = JsonDocument.Parse(responseBody).RootElement.GetProperty("reason");
-                    return Result.Fail(errorReason.ToString());
+                    haskellResponse.Action = ResponseCode.Error;
+                    break;
                 default:
                     _logger.LogError("Unknown result received from solution runner: {response}", responseBody);
                     throw new Exception("Unknown result received from solution runner");
             }
+            haskellResponse.ResponseDto = responseBody;
+            return haskellResponse;
         }
         else if (response.StatusCode == HttpStatusCode.UnprocessableContent)
         {
-            _logger.LogError("Wrong format of json provided to solution runner:, {message}", response.Content);
-            return Result.Fail("Wrong format provided to solution runner");
+            _logger.LogError("Wrong format of json provided to solution runner:, {message}", submission.Solution);
+            return Result.Fail("Error occured");
         }
         else
         {
-            _logger.LogError("Unknown response from solution runner: {response}", responseBody);
-            return Result.Fail("Uknown response encountered");
+            _logger.LogError("Unknown response from solution runner: {response}", response.Content.ReadAsStringAsync().Result);
+            return Result.Fail("Unknown error occured");
         }
     }
 }

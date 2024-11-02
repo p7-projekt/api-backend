@@ -4,13 +4,13 @@ using Asp.Versioning;
 using Asp.Versioning.Builder;
 using Core.Exercises.Models;
 using Core.Shared;
-using FluentResults;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Core.Exercises.Contracts;
-using Core.Exercises;
+using Core.Solutions.Services;
+using FluentResults;
 
 namespace API.Endpoints;
 
@@ -24,15 +24,21 @@ public static class ExerciseEndpoints
             .Build();
 
         var exerciseV1 = app.MapGroup("v{version:apiVersion}/exercises").WithApiVersionSet(apiVersionSet).WithTags("Exercise");
-
-        exerciseV1.MapPost("/", async Task<Results<Created, BadRequest<Result>>>([FromBody]ExerciseDto dto, ISolutionRunnerService solutionRunner, ClaimsPrincipal principal, IExerciseRepository exerciseRepo) =>
+        
+        exerciseV1.MapPost("/", async Task<Results<Created, BadRequest<HaskellResponseDto>, IResult>>([FromBody]ExerciseDto dto, ISolutionRunnerService solutionRunner, ClaimsPrincipal principal, HaskellService service, IExerciseRepository exerciseRepo) =>
         {
-            var result = await solutionRunner.ConfirmSolutionAsync(dto);
-
+            var result = await service.SubmitSubmission(new SubmissionDto(dto));
             if (result.IsFailed)
             {
+                return TypedResults.Problem(statusCode: 500, title: "An error occured", detail: result.Errors.First().Message);
+            }
 
-                return TypedResults.BadRequest(result);
+            switch (result.Value.Action)
+            {
+                case ResponseCode.Failure:
+                    return TypedResults.BadRequest(new HaskellResponseDto(result.Value.ResponseDto!.TestCaseResults, null));
+                case ResponseCode.Error:
+                    return TypedResults.BadRequest(new HaskellResponseDto(null, result.Value.ResponseDto!.Message));
             }
 
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
@@ -102,9 +108,14 @@ public static class ExerciseEndpoints
             var result = await service.SubmitSolutionAsync(dto, exerciseId, userId);
             if (result.IsFailed)
             {
-                return TypedResults.BadRequest(result.Errors.Select(e => e.Message).ToArray());
+                return TypedResults.Problem(statusCode: 500, title: "An error occured", detail: result.Errors.First().Message);
             }
 
+            if (result.Value != null)
+            {
+                return TypedResults.BadRequest(result.Value);
+            }
+            
             return TypedResults.Ok();
         }).WithRequestValidation<SubmitSolutionDto>().RequireAuthorization(nameof(Roles.AnonymousUser));
 
