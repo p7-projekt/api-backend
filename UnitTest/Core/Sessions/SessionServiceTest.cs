@@ -2,6 +2,7 @@ using Core.Exercises.Contracts;
 using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
+using Core.Shared;
 using Core.Shared.Contracts;
 using Infrastructure.Authentication;
 using Microsoft.Extensions.Logging;
@@ -205,8 +206,70 @@ public class SessionServiceTest
         
         Assert.True(result.IsFailed);
     }
+
+    [Fact]
+    public async Task GetSessionByIdAsync_ShouldReturn_FailInstructorAccess()
+    {
+        var loggerSub = Substitute.For<ILogger<SessionService>>();
+        var sessionRepoSub = Substitute.For<ISessionRepository>();
+        var tokenServiceSub = Substitute.For<IAnonTokenService>();
+        var exerciseRepoSub = Substitute.For<IExerciseRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub);
+        sessionRepoSub.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
+        
+        var result = await sessionService.GetSessionByIdAsync(1, 1, Roles.Instructor);
+        
+        Assert.True(result.IsFailed);
+    }
     
+    [Fact]
+    public async Task GetSessionByIdAsync_ShouldReturn_FailAnonUserAccess()
+    {
+        var loggerSub = Substitute.For<ILogger<SessionService>>();
+        var sessionRepoSub = Substitute.For<ISessionRepository>();
+        var tokenServiceSub = Substitute.For<IAnonTokenService>();
+        var exerciseRepoSub = Substitute.For<IExerciseRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub);
+        sessionRepoSub.VerifyParticipantAccess(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
+        
+        var result = await sessionService.GetSessionByIdAsync(1, 1, Roles.AnonymousUser);
+        
+        Assert.True(result.IsFailed);
+    }
     
+    [Fact]
+    public async Task GetSessionByIdAsync_ShouldReturn_FailNoSession()
+    {
+        var loggerSub = Substitute.For<ILogger<SessionService>>();
+        var sessionRepoSub = Substitute.For<ISessionRepository>();
+        var tokenServiceSub = Substitute.For<IAnonTokenService>();
+        var exerciseRepoSub = Substitute.For<IExerciseRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub);
+        sessionRepoSub.VerifyParticipantAccess(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+
+        sessionRepoSub.GetSessionOverviewAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(Task.FromResult<Session?>(null));
+        
+        var result = await sessionService.GetSessionByIdAsync(1, 1, Roles.AnonymousUser);
+        
+        Assert.True(result.IsFailed);
+    }
+    
+    [Fact]
+    public async Task GetSessionByIdAsync_ShouldReturn_Ok()
+    {
+        var loggerSub = Substitute.For<ILogger<SessionService>>();
+        var sessionRepoSub = Substitute.For<ISessionRepository>();
+        var tokenServiceSub = Substitute.For<IAnonTokenService>();
+        var exerciseRepoSub = Substitute.For<IExerciseRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub);
+        sessionRepoSub.VerifyParticipantAccess(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        var session = new Session();
+        sessionRepoSub.GetSessionOverviewAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(session);
+        
+        var result = await sessionService.GetSessionByIdAsync(1, 1, Roles.AnonymousUser);
+        
+        Assert.True(result.IsSuccess);
+    }
     
     
 }
