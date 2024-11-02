@@ -80,13 +80,6 @@ public class SessionService : ISessionService
 
     public async Task<Result<JoinSessionResponseDto>> JoinSessionAnonUser(JoinSessionDto dto)
     {
-        // check token exists
-        // var isTokenAndSessionValid = await _sessionRepository.CheckSessionCodeIsValid(dto.SessionCode);
-        // if (!isTokenAndSessionValid)
-        // {
-        //     return Result.Fail($"{nameof(dto.SessionCode)} is invalid!");
-        // }
-        
         // create anon user entry in table
         var session = await _sessionRepository.GetSessionBySessionCodeAsync(dto.SessionCode);
         if (session == null)

@@ -3,6 +3,7 @@ using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
 using Core.Shared.Contracts;
+using Infrastructure.Authentication;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -165,8 +166,45 @@ public class SessionServiceTest
         Assert.True(result.IsSuccess);
         Assert.Contains(result.Value.SessionCode, char.IsLetter);
     }
+
+    [Fact]
+    public async Task JoinSessionAnonUser_ShouldReturn_JoinSessionResponseDto()
+    {
+        var loggerSub = Substitute.For<ILogger<SessionService>>();
+        var sessionRepoSub = Substitute.For<ISessionRepository>();
+        var tokenServiceSub = Substitute.For<IAnonTokenService>();
+        var exerciseRepoSub = Substitute.For<IExerciseRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub);
+
+        var session = new Session();
+        sessionRepoSub.GetSessionBySessionCodeAsync(Arg.Any<string>()).Returns(session);
+        session.ExpirationTimeUtc = DateTime.UtcNow.AddHours(5);
+
+        tokenServiceSub.GenerateAnonymousUserJwt(Arg.Any<int>(), Arg.Any<int>()).Returns("token");
+
+        var dto = new JoinSessionDto("token");
+        var result = await sessionService.JoinSessionAnonUser(dto);
+        
+        Assert.True(result.IsSuccess);
+    }
     
-    
+    [Fact]
+    public async Task JoinSessionAnonUser_ShouldReturn_Fail()
+    {
+        var loggerSub = Substitute.For<ILogger<SessionService>>();
+        var sessionRepoSub = Substitute.For<ISessionRepository>();
+        var tokenServiceSub = Substitute.For<IAnonTokenService>();
+        var exerciseRepoSub = Substitute.For<IExerciseRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub);
+
+        var session = new Session();
+        sessionRepoSub.GetSessionBySessionCodeAsync(Arg.Any<string>()).Returns(Task.FromResult<Session?>(null));
+        
+        var dto = new JoinSessionDto("token");
+        var result = await sessionService.JoinSessionAnonUser(dto);
+        
+        Assert.True(result.IsFailed);
+    }
     
     
     
