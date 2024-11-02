@@ -25,15 +25,15 @@ public class HaskellService
         }
         _httpClient.BaseAddress = new Uri($"http://{haskellURL}");
     }
-    public async Task<Result<HaskellResponse>> SubmitSubmission(SubmissionDto submission)
+    public async Task<Result<SolutionRunnerResponse>> SubmitSubmission(SubmissionDto submission)
     {
         using var response = await _httpClient.PostAsJsonAsync("/submit", submission);
         _logger.LogInformation("HTTP response: {response}, {body}", response.StatusCode, response.Content.ReadAsStringAsync().Result);
 
-        var haskellResponse = new HaskellResponse();
+        var haskellResponse = new SolutionRunnerResponse();
         if (response.IsSuccessStatusCode)
         {
-        var responseBody = await response.Content.ReadFromJsonAsync<MozartHaskellResponseDto>();
+        var responseBody = await response.Content.ReadFromJsonAsync<SolutionResponseDto>();
             switch (responseBody?.Result)
             {
                 case "pass": 
@@ -57,12 +57,12 @@ public class HaskellService
         else if (response.StatusCode == HttpStatusCode.UnprocessableContent)
         {
             _logger.LogError("Wrong format of json provided to solution runner:, {message}", submission.Solution);
-            return Result.Fail("Invalid response.");
+            return Result.Fail("Error occured");
         }
         else
         {
             _logger.LogError("Unknown response from solution runner: {response}", response.Content.ReadAsStringAsync().Result);
-            return Result.Fail("Invalid reponse");
+            return Result.Fail("Unknown error occured");
         }
     }
 }

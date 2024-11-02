@@ -3,38 +3,38 @@ using System.Text.Json.Serialization;
 namespace Core.Solutions.Models;
 
 
-public record MozartHaskellResponseDto(
+public record SolutionResponseDto(
 	string Result,
 	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 	string? Message,
 	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-	List<MozartHaskellTestcaseResultDto>? TestCaseResults);
+	List<SolutionTestcaseResultDto>? TestCaseResults);
 
-public record MozartHaskellTestcaseResultDto(
+public record SolutionTestcaseResultDto(
 	int Id,
 	string TestResult,
 	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 	string? Cause,
 	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-	MozartHaskellTestcaseDetailsDto? Details);
+	SolutionTestcaseDetailsDto? Details);
 
-public record MozartHaskellTestcaseDetailsDto(
-	List<MozartHaskellTestcaseInputParameters> InputParameters,
+public record SolutionTestcaseDetailsDto(
+	List<SolutionTestcaseInputParameters> InputParameters,
 	string Actual,
 	string Expected);
 
-public record MozartHaskellTestcaseInputParameters(string ValueType, string Value);
+public record SolutionTestcaseInputParameters(string ValueType, string Value);
 
 public record HaskellResponseDto(
 	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-	List<MozartHaskellTestcaseResultDto>? TestCaseResults,
+	List<SolutionTestcaseResultDto>? TestCaseResults,
 	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 	string? Message);
 
-public class HaskellResponse
+public class SolutionRunnerResponse
 {
 	public ResponseCode Action { get; set; }
-	public MozartHaskellResponseDto? ResponseDto { get; set; }
+	public SolutionResponseDto? ResponseDto { get; set; }
 }
 
 public enum ResponseCode
