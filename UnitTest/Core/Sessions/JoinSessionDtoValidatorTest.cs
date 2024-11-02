@@ -33,6 +33,9 @@ public class JoinSessionDtoValidatorTest
     [InlineData("134632")]
     [InlineData("  4632")]
     [InlineData("##4632")]
+    [InlineData("KK4S32")]
+    [InlineData("KK41S2")]
+    [InlineData("KK419K")]
     public void JoinSessionValidator_ShouldReturn_Fail(string SessionCode)
     {
         var validator = new JoinSessionDtoValidator();
