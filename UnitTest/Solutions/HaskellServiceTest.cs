@@ -6,10 +6,11 @@ using Core.Solutions.Models;
 using Core.Solutions.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using UnitTest.Setup;
 
 namespace UnitTest.Solutions;
 
-
+[Collection(CollectionDefinitions.Sequential)]
 public class HaskellServiceTest
 {
     public class MockHttpMessageHandler : HttpMessageHandler
@@ -30,6 +31,7 @@ public class HaskellServiceTest
     [Fact]
     public void SubmitSolution_ShouldReturn_ExceptionMissedEnvironmentVariable()
     {
+        Environment.SetEnvironmentVariable("MOZART_HASKELL", null);
         var httpClientSub = Substitute.For<HttpClient>();
         var loggerSub = Substitute.For<ILogger<HaskellService>>();
         Assert.Throws<NullReferenceException>(() => new HaskellService(httpClientSub, loggerSub));
