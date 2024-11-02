@@ -57,7 +57,7 @@ public class SessionService : ISessionService
             sessionCode = GenerateSessionCode();
             session.SessionCode = sessionCode;
             var limit = 10;
-            while (await _sessionRepository.InsertSessionAsync(session, authorId) == 0 && limit > 0)
+            while (await _sessionRepository.InsertSessionAsync(session, authorId) == (int)ErrorCodes.UniqueConstraintViolation && limit > 0)
             {
                 sessionCode = GenerateSessionCode();
                 session.SessionCode = sessionCode;
