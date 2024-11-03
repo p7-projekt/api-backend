@@ -4,7 +4,7 @@ using API.Endpoints.Shared;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
 using Core.Sessions.Contracts;
-using Core.Sessions.Models;
+using Core.Sessions.Models; 
 using Core.Shared;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;

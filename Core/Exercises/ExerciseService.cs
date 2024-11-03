@@ -72,7 +72,7 @@ public class ExerciseService : IExerciseService
         return Result.Ok(exercises.ToList());
     }
 
-    public async Task<Result> UpdateExercise(int exerciseId, int authorId, ExerciseDto dto)
+    public async Task<Result<SolutionRunnerResponse>> UpdateExercise(int exerciseId, int authorId, ExerciseDto dto)
     {
         var result = await _exerciseRepository.VerifyExerciseAuthorAsync(exerciseId, authorId);
         if (!result)
@@ -83,10 +83,16 @@ public class ExerciseService : IExerciseService
         
         // Should without a doubt be refactored at some point
         var submissionResult = await _haskellService.SubmitSubmission(new SubmissionDto(dto));
+
         if (submissionResult.IsFailed) 
         {
             _logger.LogInformation("Failed to validate exercise: {exercise}", dto);
             return Result.Fail("Solution of the exercise did not pass the testcases");
+        }
+
+        if (!submissionResult.Value.Action.Equals(ResponseCode.Pass))
+        {
+            return submissionResult;
         }
 
         var updateResult = await _exerciseRepository.UpdateExerciseAsync(dto, exerciseId);
@@ -95,6 +101,6 @@ public class ExerciseService : IExerciseService
             return Result.Fail("Exercise not updated");
         }
 
-        return Result.Ok();
+        return submissionResult;
     }
 }
