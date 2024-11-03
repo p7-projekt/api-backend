@@ -72,14 +72,14 @@ public static class ExerciseEndpoints
             return TypedResults.Ok(result.Value);
         });
 
-        exerciseV1.MapPut("/{exerciseId:int}", async Task<Results<Ok, BadRequest<string>, BadRequest<HaskellResponseDto>>> ([FromBody] ExerciseDto dto, ClaimsPrincipal principal, int exerciseId, IExerciseService exerciseService) =>
+        exerciseV1.MapPut("/{exerciseId:int}", async Task<Results<Ok, BadRequest <HaskellResponseDto>, IResult>> ([FromBody] ExerciseDto dto, ClaimsPrincipal principal, int exerciseId, IExerciseService exerciseService) =>
         {
             var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
 
             var result = await exerciseService.UpdateExercise(exerciseId, Convert.ToInt32(userId), dto);
             if (result.IsFailed)
             {
-                return TypedResults.BadRequest(result.ToString());
+                return TypedResults.Problem(statusCode: 500, title: "invalid request", detail: result.Errors.First().Message);
             }
 
             switch (result.Value.Action)
