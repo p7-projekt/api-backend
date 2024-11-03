@@ -13,20 +13,7 @@ namespace UnitTest.Solutions;
 [Collection(CollectionDefinitions.Sequential)]
 public class HaskellServiceTest
 {
-    public class MockHttpMessageHandler : HttpMessageHandler
-    {
-        private readonly HttpResponseMessage _responseMessage;
-
-        public MockHttpMessageHandler(HttpResponseMessage responseMessage)
-        {
-            _responseMessage = responseMessage;
-        }
-
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            return Task.FromResult(_responseMessage);
-        }
-    }
+    
     
     [Fact]
     public void SubmitSolution_ShouldReturn_ExceptionMissedEnvironmentVariable()
@@ -172,5 +159,20 @@ public class HaskellServiceTest
         
         Assert.True(result.IsSuccess);
         Assert.Equal(ResponseCode.Error, result.Value.Action);
+    }
+}
+
+public class MockHttpMessageHandler : HttpMessageHandler
+{
+    private readonly HttpResponseMessage _responseMessage;
+
+    public MockHttpMessageHandler(HttpResponseMessage responseMessage)
+    {
+        _responseMessage = responseMessage;
+    }
+
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(_responseMessage);
     }
 }
