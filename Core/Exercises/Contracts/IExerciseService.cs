@@ -1,4 +1,5 @@
 ﻿using Core.Exercises.Models;
+using Core.Solutions.Models;
 using FluentResults;
 using System;
 using System.Collections.Generic;
@@ -13,5 +14,5 @@ public interface IExerciseService
     Task<Result<List<GetExercisesResponseDto>>> GetExercises(int userId);
     Task<Result> DeleteExercise(int exerciseId, int userId);
     Task<Result<GetExerciseResponseDto>> GetExerciseById(int exerciseId);
-    Task<Result> UpdateExercise(int exerciseId, int authorId, ExerciseDto dto);
+    Task<Result<SolutionRunnerResponse>> UpdateExercise(int exerciseId, int authorId, ExerciseDto dto);
 }

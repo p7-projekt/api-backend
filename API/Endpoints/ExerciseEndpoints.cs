@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Core.Exercises.Contracts;
 using Core.Solutions.Services;
-using FluentResults;
 
 namespace API.Endpoints;
 
@@ -73,7 +72,7 @@ public static class ExerciseEndpoints
             return TypedResults.Ok(result.Value);
         });
 
-        exerciseV1.MapPut("/{exerciseId:int}", async Task<Results<Ok, BadRequest<string>>> ([FromBody] ExerciseDto dto, ClaimsPrincipal principal, int exerciseId, IExerciseService exerciseService) =>
+        exerciseV1.MapPut("/{exerciseId:int}", async Task<Results<Ok, BadRequest<string>, BadRequest<HaskellResponseDto>>> ([FromBody] ExerciseDto dto, ClaimsPrincipal principal, int exerciseId, IExerciseService exerciseService) =>
         {
             var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
 
@@ -82,7 +81,18 @@ public static class ExerciseEndpoints
             {
                 return TypedResults.BadRequest(result.ToString());
             }
-            return TypedResults.Ok();
+
+            switch (result.Value.Action)
+            {
+                case ResponseCode.Pass:
+                    return TypedResults.Ok();
+                case ResponseCode.Failure:
+                    return TypedResults.BadRequest(new HaskellResponseDto(result.Value.ResponseDto!.TestCaseResults, null));
+                case ResponseCode.Error:
+                    return TypedResults.BadRequest(new HaskellResponseDto(null, result.Value.ResponseDto!.Message));
+                default:
+                    throw new Exception("Unexpected result received when updating exercises");
+            }
 
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ExerciseDto>();
 
