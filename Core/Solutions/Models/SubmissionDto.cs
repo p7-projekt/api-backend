@@ -63,7 +63,7 @@ public record TestCase
     [JsonPropertyName("outputParameters")]
     public List<Parameter> OutputParameters { get; }
 
-    internal TestCase(int id, List<Parameter> inputParameters, List<Parameter> outputParameters)
+    public TestCase(int id, List<Parameter> inputParameters, List<Parameter> outputParameters)
     {
         Id = id;
         InputParameters = inputParameters;
