@@ -24,24 +24,21 @@ public static class ExerciseEndpoints
 
         var exerciseV1 = app.MapGroup("v{version:apiVersion}/exercises").WithApiVersionSet(apiVersionSet).WithTags("Exercise");
         
-        exerciseV1.MapPost("/", async Task<Results<Created, BadRequest<HaskellResponseDto>, IResult>>([FromBody]ExerciseDto dto, ISolutionRunnerService solutionRunner, ClaimsPrincipal principal, HaskellService service, IExerciseRepository exerciseRepo) =>
+        exerciseV1.MapPost("/", async Task<Results<Created, BadRequest<HaskellResponseDto>, IResult>>([FromBody]ExerciseDto dto, ClaimsPrincipal principal, IExerciseService service) =>
         {
-            var result = await service.SubmitSubmission(new SubmissionDto(dto));
+            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+            var result = await service.CreateExercise(dto, Convert.ToInt32(userId));
+
             if (result.IsFailed)
             {
-                return TypedResults.Problem(statusCode: 500, title: "An error occured", detail: result.Errors.First().Message);
+                return TypedResults.Problem(statusCode: 500, title: "Internal server error");
             }
 
-            switch (result.Value.Action)
+            if(result.Value != null)
             {
-                case ResponseCode.Failure:
-                    return TypedResults.BadRequest(new HaskellResponseDto(result.Value.ResponseDto!.TestCaseResults, null));
-                case ResponseCode.Error:
-                    return TypedResults.BadRequest(new HaskellResponseDto(null, result.Value.ResponseDto!.Message));
+                return TypedResults.BadRequest(result.Value);
             }
 
-            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
-            await exerciseRepo.InsertExerciseAsync(dto, Convert.ToInt32(userId));
             return TypedResults.Created();
 
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ExerciseDto>();

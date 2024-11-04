@@ -5,6 +5,7 @@ using Core.Exercises.Contracts;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
 using Core.Solutions.Services;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Core.Exercises;
 
@@ -102,5 +103,31 @@ public class ExerciseService : IExerciseService
         }
 
         return submissionResult;
+    }
+
+    public async Task<Result<HaskellResponseDto>> CreateExercise(ExerciseDto dto, int authorId)
+    {
+        var result = await _haskellService.SubmitSubmission(new SubmissionDto(dto));
+        if (result.IsFailed)
+        {
+            return Result.Fail("Internal error");
+        }
+
+        switch (result.Value.Action)
+        {
+            case ResponseCode.Failure:
+                return Result.Ok(new HaskellResponseDto(result.Value.ResponseDto!.TestCaseResults, null));
+            case ResponseCode.Error:
+                return Result.Ok(new HaskellResponseDto(null, result.Value.ResponseDto!.Message));
+        }
+
+        var insertResult = await _exerciseRepository.InsertExerciseAsync(dto, authorId);
+        if(insertResult.IsFailed)
+        {
+            _logger.LogError("Failed to insert exercise: {exercise}", dto);
+            return Result.Fail("Internal error");
+        }
+
+        return Result.Ok();
     }
 }
