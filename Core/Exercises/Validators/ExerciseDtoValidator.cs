@@ -110,8 +110,8 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                     switch (dto.InputParameterType[i].ToLower())
                     {
                         case "bool": var tempInBool = bool.Parse(testcase.InputParams[i]); break;
-                        case "int": var tempInInt = int.Parse(testcase.InputParams[i]); break;
-                        case "float": var tempInFloat = float.Parse(testcase.InputParams[i]); break;
+                        case "int": var tempInInt = Int64.Parse(testcase.InputParams[i]); break;
+                        case "float": var tempInFloat = double.Parse(testcase.InputParams[i]); break;
                         case "string": break;
                         case "char": if (testcase.InputParams[i].Length != 1) { _logger.LogInformation("Empty input param for testcase");  return false; }; break;
                         default: _logger.LogInformation("Invalid input"); return false;
@@ -122,8 +122,8 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                     switch (dto.OutputParamaterType[i].ToLower())
                     {
                         case "bool": var tempOutBool = bool.Parse(testcase.OutputParams[i]); break;
-                        case "int": var tempOutInt = int.Parse(testcase.OutputParams[i]); break;
-                        case "float": var tempOutFloat = float.Parse(testcase.OutputParams[i]); break;
+                        case "int": var tempOutInt = Int64.Parse(testcase.OutputParams[i]); break;
+                        case "float": var tempOutFloat = double.Parse(testcase.OutputParams[i]); break;
                         case "string": break;
                         case "char": if (testcase.OutputParams[i].Length != 1) { _logger.LogInformation("Empty output param for testcase"); return false; }; break;
                         default: _logger.LogInformation("Invalid output"); return false;

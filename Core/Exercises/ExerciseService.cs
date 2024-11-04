@@ -50,13 +50,13 @@ public class ExerciseService : IExerciseService
         }
         var tempTestcases = await _solutionRepository.GetTestCasesByExerciseIdAsync(exerciseId) ?? new List<Testcase>();
         exercise.TestCases = tempTestcases.Select(x => x.ToTestcaseDto()).ToList();
-        exercise.InputParameterType = tempTestcases.First().Input.Select(x => x.ParameterType).ToList();
-        exercise.OutputParamaterType = tempTestcases.First().Output.Select(x => x.ParameterType).ToList();
         if (exercise.TestCases.Count() == 0)
         {
             _logger.LogDebug("Failed to retreive testcases of exercise with id: {exercise_id}", exerciseId);
             return Result.Fail("Failed to retreive exercise");
         }
+        exercise.InputParameterType = tempTestcases.First().Input.Select(x => x.ParameterType).ToList();
+        exercise.OutputParamaterType = tempTestcases.First().Output.Select(x => x.ParameterType).ToList();
 
         return Result.Ok(exercise);
     }
@@ -64,7 +64,7 @@ public class ExerciseService : IExerciseService
     public async Task<Result<List<GetExercisesResponseDto>>> GetExercises(int userId)
     {
         var exercises = await _exerciseRepository.GetExercisesAsync(userId);
-        if (exercises == null)
+        if (exercises == null || exercises.Count() == 0)
         {
             return Result.Fail("Exercises not found");
         }
