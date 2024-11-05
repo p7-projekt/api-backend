@@ -1,16 +1,18 @@
+using Core.Shared;
 using Infrastructure.Authentication;
 using Infrastructure.Authentication.Contracts;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace IntegrationTest.Setup;
 
 public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class
 {
-	
+
 	protected override IHost CreateHost(IHostBuilder builder)
 	{
 		builder.ConfigureHostConfiguration(config =>
