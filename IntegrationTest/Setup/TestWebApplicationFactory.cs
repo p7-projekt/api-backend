@@ -1,4 +1,6 @@
+using Core.Sessions.Contracts;
 using Core.Shared;
+using Infrastructure;
 using Infrastructure.Authentication;
 using Infrastructure.Authentication.Contracts;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -37,6 +39,8 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
 			// 	services.Remove(descriptor);
 			// }
 			var iTokenSub = Substitute.For<ITokenService>();
+			var iSesSub = Substitute.For<ISessionRepository>();
+			services.AddScoped<ISessionRepository>(_ => iSesSub);
 			services.AddScoped<ITokenService>(_ => iTokenSub);
 		});
 		
