@@ -1,4 +1,5 @@
 using System.Data;
+using Core.Shared;
 using Dapper;
 using FluentResults;
 using Infrastructure.Authentication.Contracts;
@@ -29,6 +30,16 @@ public class UserRepository : IUserRepository
 		            """;
 		var user = await con.QuerySingleAsync<User>(query, new { id = userId });
 		return user;
+	}
+
+	public async Task<int> GetAnonUserSessionByIdAsync(int userId)
+	{
+		using var con = await _connection.CreateConnectionAsync();
+		var query = """
+		            SELECT session_id FROM anon_users WHERE user_id = @UserId;
+		            """;
+		var sessionId = await con.QuerySingleAsync<int>(query, new { userId });
+		return sessionId;
 	}
 
 	public async Task<User?> GetUserByEmailAsync(string email)

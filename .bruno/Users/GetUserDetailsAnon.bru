@@ -1,0 +1,15 @@
+meta {
+  name: GetUserDetailsAnon
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseURL}}/{{currentVersion}}/users/4
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{anonToken}}
+}

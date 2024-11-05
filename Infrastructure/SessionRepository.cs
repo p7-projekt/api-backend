@@ -1,3 +1,6 @@
+using System.Data;
+using Core.Exercises.Models;
+using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
 using Dapper;
@@ -31,12 +34,30 @@ public class SessionRepository : ISessionRepository
         await con.ExecuteAsync(query);
     }
 
-    public async Task<int> InsertSessionAsync(Session session)
+    private async Task<bool> VerifyExerciseIdsAsync(List<int> exerciseIds, int authorId, IDbConnection con, IDbTransaction transaction)
+    {
+        var query = """
+                    SELECT COUNT(*) FROM EXERCISE WHERE exercise_id = ANY(@Ids) AND author_id = @AuthorId;
+                    """;
+        var result = await con.QuerySingleAsync<int>(query, new { Ids = exerciseIds.ToArray(), @AuthorID = authorId } ,transaction);
+        return exerciseIds.Count == result;
+    }
+    public async Task<int> InsertSessionAsync(Session session, int authorId)
     {
         using var con = await _connection.CreateConnectionAsync();
         using var transaction = con.BeginTransaction();
         try
         {
+
+            var exercisesExist = await VerifyExerciseIdsAsync(session.Exercises, session.AuthorId, con, transaction);
+            if (!exercisesExist)
+            {
+                _logger.LogWarning(
+                    "Exercises did not exist for author {authorid}, tyring to create session {sessionTitle}", authorId,
+                    session.Title);
+                transaction.Rollback();
+                return (int)SessionService.ErrorCodes.ExerciseDoesNotExist;
+            }
 
             var query = """
                         INSERT INTO session (title, description, author_id, expirationtime_utc, session_code) VALUES (@Title, @Description, @Author, @ExpirationTime, @SessionCode) RETURNING session_id;
@@ -61,17 +82,21 @@ public class SessionRepository : ISessionRepository
             _logger.LogInformation("User: {userid} created Session: {sessionid}.", session.AuthorId, sessionId);
             return sessionId;
         }
-        catch (PostgresException e) when (e.SqlState == PostgresExceptions.UniqueConstraintViolation.ToString())
+        catch (PostgresException e)
         {
             transaction.Rollback();
-            _logger.LogWarning("Session code not unique!");
-            return 0;
-        }
-        catch (PostgresException e) when (e.SqlState == PostgresExceptions.ForeignKeyViolation.ToString())
-        {
-            transaction.Rollback();
-            _logger.LogWarning("Exercises id's doesnt exist!");
-            throw;
+            switch (e.SqlState)
+            {
+                case PostgresExceptions.UniqueConstraintViolation:
+                    _logger.LogWarning("Session code not unique!");
+                    return (int)SessionService.ErrorCodes.UniqueConstraintViolation;
+                
+                case PostgresExceptions.ForeignKeyViolation:
+                    _logger.LogWarning("Exercises id's doesnt exist!");
+                    return (int)SessionService.ErrorCodes.ExerciseDoesNotExist;
+                default:
+                    throw;
+            }
         }
         catch (Exception e)
         {
@@ -103,6 +128,82 @@ public class SessionRepository : ISessionRepository
         var result = await con.ExecuteScalarAsync<int>(query, new { UserId = userId, SessionId = sessionId });
         return result == 1;
     }
+
+    public async Task<bool> VerifyAuthor(int userId, int sessionId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var query = """
+                    SELECT COUNT(*) FROM app_users
+                    JOIN session
+                    ON session.author_id = app_users.user_id
+                    WHERE app_users.user_id = @UserId AND session.session_id = @SessionId;
+                    """;
+        var result = await con.QuerySingleAsync<int>(query, new { UserId = userId, SessionId = sessionId });
+        return result == 1;
+    }
+
+    public async Task<Session?> GetSessionOverviewAsync(int sessionId, int userId)
+    {
+        var query = """
+                    SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc, app_users.name AS authorname  
+                    FROM session
+                    JOIN app_users ON app_users.user_id = session.author_id
+                    WHERE session_id = @SessionId;
+                    """;
+        using var con = await _connection.CreateConnectionAsync();
+        var session = await con.QueryFirstOrDefaultAsync<Session>(query, new { sessionId });
+        if (session == null)
+        {
+            return null;
+        }
+        var exercisesQuery = """
+                             SELECT e.exercise_id AS exerciseid, 
+                                    title AS exercisetitle,
+                                    CASE 
+                                        WHEN s.user_id IS NOT NULL THEN true
+                                        ELSE false
+                                    END AS solved
+                             FROM exercise AS e
+                             JOIN exercise_in_session AS eis
+                                ON e.exercise_id = eis.exercise_id
+                             LEFT JOIN solved AS s 
+                                ON e.exercise_id = s.exercise_id AND s.user_id = @UserId
+                             WHERE eis.session_id = @SessionId;
+                             """;
+        var exercises = await con.QueryAsync<SolvedExercise>(exercisesQuery, new { SessionId = sessionId, UserId = userId });
+        session.ExerciseDetails = exercises.ToList();
+        
+        return session;
+    }
+
+    
+    public async Task<Session?> GetSessionBySessionCodeAsync(string sessionCode)
+    {
+        var query = """
+                    SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc, app_users.name AS authorname  
+                    FROM session
+                    JOIN app_users ON app_users.user_id = session.author_id
+                    WHERE session_code = @SessionCode;
+                    """;
+        using var con = await _connection.CreateConnectionAsync();
+        var session = await con.QueryFirstOrDefaultAsync<Session>(query, new { sessionCode });
+        if (session == null)
+        {
+            return null;
+        }
+        
+        var exercisesQuery = """
+                             SELECT e.exercise_id AS exerciseid, title AS exercisetitle FROM exercise AS e
+                             JOIN exercise_in_session AS eis
+                             ON e.exercise_id = eis.exercise_id
+                             WHERE eis.session_id = @SessionId;
+                             """;
+        var exercises = await con.QueryAsync<SolvedExercise>(exercisesQuery, new { SessionId = session.Id });
+        session.ExerciseDetails = exercises.ToList();
+            
+        
+        return session;
+    }
     
     public async Task<Session?> GetSessionByIdAsync(int sessionId)
     {
@@ -124,20 +225,32 @@ public class SessionRepository : ISessionRepository
                              ON e.exercise_id = eis.exercise_id
                              WHERE eis.session_id = @SessionId;
                              """;
-        var exercises = await con.QueryAsync<ExerciseDetails>(exercisesQuery, new { sessionId });
+        var exercises = await con.QueryAsync<SolvedExercise>(exercisesQuery, new { sessionId });
         session.ExerciseDetails = exercises.ToList();
         
         return session;
     }
 
-    public async Task<bool> CheckSessionCodeIsValid(string sessionCode, int sessionId)
+    public async Task<IEnumerable<Session>?> GetSessionsAsync(int authorId)
     {
         using var con = await _connection.CreateConnectionAsync();
         var query = """
-                    SELECT COUNT(*) FROM session WHERE session_code = @SessionCode AND session_id = @SessionId;
+                    SELECT session_id AS id, title, expirationtime_utc AS ExpirationTimeUtc, session_code as sessioncode  FROM session WHERE author_id = @Id;
                     """;
-        var result = await con.ExecuteScalarAsync<int>(query, new { SessionCode = sessionCode, SessionId = sessionId });
-        _logger.LogInformation("Requesting check on session id {sessionid} with session code {sessioncode}", sessionId, sessionCode);
+        var results = await con.QueryAsync<Session>(query, new { Id = authorId });
+        return results;
+    }
+
+    public async Task<bool> DeleteSessionAsync(int sessionId, int authorId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var query = """
+                    DELETE FROM session WHERE session_id = @SessionId
+                    AND EXISTS (
+                        SELECT 1 FROM session WHERE session_id = @SessionId AND author_id = @AuthorId
+                    )
+                    """;
+        var result = await con.ExecuteAsync(query, new { SessionId = sessionId, AuthorId = authorId });
         return result == 1;
     }
 }

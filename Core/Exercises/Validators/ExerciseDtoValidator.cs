@@ -25,6 +25,11 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         RuleFor(x => x.Testcases).Must(HaveAllParameters).WithMessage("All testcases must have both input and output");
         RuleFor(x => x.Testcases).Must(HasSameParameterAmount).WithMessage("All testcases must have the same amount of parameters");
         RuleFor(x => x).Must(ParametersValuesHaveCorrectTypes).WithMessage("All testcase parameters must be of correct type");
+        RuleForEach(x => x.Testcases).ChildRules(testcase =>
+        {
+            testcase.RuleFor(y => y.PublicVisible).NotNull().WithMessage("The visibility of each testcase must be determined");
+        });
+        RuleFor(x => x.Testcases).Must(y => y.Any(z => z.PublicVisible)).WithMessage("At least one test case must be marked as publically visible");
     }
 
     private bool ParametersAreValidType(string[] parameters)
@@ -52,16 +57,16 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         return true;
     }
 
-    private bool HaveAllParameters(List<Testcase> testcases)
+    private bool HaveAllParameters(List<TestcaseDto> testcases)
     {
         foreach (var testcase in testcases)
         {
-            if (testcase.inputParams == null || testcase.inputParams.Length == 0)
+            if (testcase.InputParams == null || testcase.InputParams.Length == 0)
             {
                 _logger.LogInformation("Empty input paramter for; {}", testcase);
                 return false;
             }
-            if (testcase.outputParams == null || testcase.outputParams.Length == 0)
+            if (testcase.OutputParams == null || testcase.OutputParams.Length == 0)
             {
                 _logger.LogInformation("Empty output paramter for; {}", testcase);
                 return false;
@@ -70,16 +75,16 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         return true;
     }
 
-    private bool HasSameParameterAmount(List<Testcase> testcases)
+    private bool HasSameParameterAmount(List<TestcaseDto> testcases)
     {
         try
         {
             var temp = testcases.First();
-            var inputParams = temp.inputParams.Length;
-            var outputParams = temp.outputParams.Length;
+            var inputParams = temp.InputParams.Length;
+            var outputParams = temp.OutputParams.Length;
             foreach (var testcase in testcases)
             {
-                if (testcase.inputParams.Length != inputParams || testcase.outputParams.Length != outputParams)
+                if (testcase.InputParams.Length != inputParams || testcase.OutputParams.Length != outputParams)
                 {
                     _logger.LogInformation("Inconsistency in parameter amount across test cases");
                     return false;
@@ -104,11 +109,11 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                 {
                     switch (dto.InputParameterType[i].ToLower())
                     {
-                        case "bool": var tempInBool = bool.Parse(testcase.inputParams[i]); break;
-                        case "int": var tempInInt = int.Parse(testcase.inputParams[i]); break;
-                        case "float": var tempInFloat = float.Parse(testcase.inputParams[i]); break;
+                        case "bool": var tempInBool = bool.Parse(testcase.InputParams[i]); break;
+                        case "int": var tempInInt = int.Parse(testcase.InputParams[i]); break;
+                        case "float": var tempInFloat = float.Parse(testcase.InputParams[i]); break;
                         case "string": break;
-                        case "char": if (testcase.inputParams[i].Length != 1) { _logger.LogInformation("Empty input param for testcase");  return false; }; break;
+                        case "char": if (testcase.InputParams[i].Length != 1) { _logger.LogInformation("Empty input param for testcase");  return false; }; break;
                         default: _logger.LogInformation("Invalid input"); return false;
                     }
                 }
@@ -116,11 +121,11 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                 {
                     switch (dto.OutputParamaterType[i].ToLower())
                     {
-                        case "bool": var tempOutBool = bool.Parse(testcase.outputParams[i]); break;
-                        case "int": var tempOutInt = int.Parse(testcase.outputParams[i]); break;
-                        case "float": var tempOutFloat = float.Parse(testcase.outputParams[i]); break;
+                        case "bool": var tempOutBool = bool.Parse(testcase.OutputParams[i]); break;
+                        case "int": var tempOutInt = int.Parse(testcase.OutputParams[i]); break;
+                        case "float": var tempOutFloat = float.Parse(testcase.OutputParams[i]); break;
                         case "string": break;
-                        case "char": if (testcase.outputParams[i].Length != 1) { _logger.LogInformation("Empty output param for testcase"); return false; }; break;
+                        case "char": if (testcase.OutputParams[i].Length != 1) { _logger.LogInformation("Empty output param for testcase"); return false; }; break;
                         default: _logger.LogInformation("Invalid output"); return false;
                     }
                 }
@@ -146,9 +151,10 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                 throw;
             }
         }
-
         _logger.LogInformation("Exercise validated. Title: {}", dto.Name);
         return true;
     }
+
 }
+
 

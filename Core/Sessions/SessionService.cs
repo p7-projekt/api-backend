@@ -1,5 +1,7 @@
+using Core.Exercises.Contracts;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
+using Core.Shared;
 using Core.Shared.Contracts;
 using FluentResults;
 using Microsoft.Extensions.Logging;
@@ -19,14 +21,35 @@ public class SessionService : ISessionService
         _tokenService = tokenService;
     }
 
+    public async Task<Result> DeleteSession(int sessionId, int userId)
+    {
+        var result = await _sessionRepository.DeleteSessionAsync(sessionId, userId);
+        if (!result)
+        {
+            return Result.Fail("Session could not be deleted");
+        }
+        return Result.Ok();
+    }
+    
+    public async Task<Result<List<GetSessionsResponseDto>>> GetSessions(int userId)
+    {
+        var sessions = await _sessionRepository.GetSessionsAsync(userId);
+        if (sessions == null)
+        {
+            return Result.Fail("Sessions not found");
+        }
+
+        return Result.Ok(sessions.Select(x => x.ConvertToGetSessionsResponse()).ToList());
+    }
+    
     public async Task<Result<CreateSessionResponseDto>> CreateSessionAsync(CreateSessionDto sessionDto, int authorId)
     {
         var sessionCode = GenerateSessionCode();
         var session = sessionDto.ConvertToSession();
         session.AuthorId = authorId;
         session.SessionCode = sessionCode;
-
-        var sessionId = await _sessionRepository.InsertSessionAsync(session);
+        
+        var sessionId = await _sessionRepository.InsertSessionAsync(session, authorId);
         if (sessionId == (int)ErrorCodes.UniqueConstraintViolation)
         {
             // sessionCode not unique
@@ -34,7 +57,7 @@ public class SessionService : ISessionService
             sessionCode = GenerateSessionCode();
             session.SessionCode = sessionCode;
             var limit = 10;
-            while (await _sessionRepository.InsertSessionAsync(session) == 0 && limit > 0)
+            while (await _sessionRepository.InsertSessionAsync(session, authorId) == (int)ErrorCodes.UniqueConstraintViolation && limit > 0)
             {
                 sessionCode = GenerateSessionCode();
                 session.SessionCode = sessionCode;
@@ -47,43 +70,41 @@ public class SessionService : ISessionService
                 return Result.Fail("Error creating session");
             }
             _logger.LogInformation("Succesfully created a unique a unqiue session code: {sessionCode}", sessionCode);
+        } else if (sessionId == (int)ErrorCodes.ExerciseDoesNotExist)
+        {
+            return Result.Fail("Exercises for Author could not be found");
         }
 
         return new CreateSessionResponseDto(sessionId, sessionCode);
     }
 
-    public async Task<Result<JoinSessionResponseDto>> JoinSessionAnonUser(JoinSessionDto dto, int sessionId)
+    public async Task<Result<JoinSessionResponseDto>> JoinSessionAnonUser(JoinSessionDto dto)
     {
-        // check token exists
-        var isTokenAndSessionValid = await _sessionRepository.CheckSessionCodeIsValid(dto.SessionCode, sessionId);
-        if (!isTokenAndSessionValid)
-        {
-            return Result.Fail($"{nameof(dto.SessionCode)} is invalid!");
-        }
-        
         // create anon user entry in table
-        var session = await _sessionRepository.GetSessionByIdAsync(sessionId);
+        var session = await _sessionRepository.GetSessionBySessionCodeAsync(dto.SessionCode);
         if (session == null)
         {
             return Result.Fail("Invalid session");
         }
-        var student = await _sessionRepository.CreateAnonUser(sessionId);
+        var student = await _sessionRepository.CreateAnonUser(session.Id);
         
         var timeOffset = session.ExpirationTimeUtc - DateTime.UtcNow;
         
         var createToken = _tokenService.GenerateAnonymousUserJwt((int)Math.Ceiling(timeOffset.TotalMinutes), student);
-        return new JoinSessionResponseDto(createToken);
+        return new JoinSessionResponseDto(createToken, DateTime.UtcNow.AddMinutes((int)Math.Ceiling(timeOffset.TotalMinutes)));
     }
 
-    public async Task<Result<GetSessionResponseDto>> GetSessionByIdAsync(int sessionId, int userId)
+    public async Task<Result<GetSessionResponseDto>> GetSessionByIdAsync(int sessionId, int userId, Roles role)
     {
-        var session = await _sessionRepository.GetSessionByIdAsync(sessionId);
-        if (session == null)
+        var access = false;
+        if (role == Roles.Instructor)
         {
-            _logger.LogInformation("Session {sessionid}, request by {userid} does not exist", sessionId, userId);
-            return Result.Fail("Session does not exist");
+            access = await _sessionRepository.VerifyAuthor(userId, sessionId);
         }
-        var access = await _sessionRepository.VerifyParticipantAccess(userId, sessionId);
+        else
+        {
+            access = await _sessionRepository.VerifyParticipantAccess(userId, sessionId);
+        }
         if (!access)
         {
             _logger.LogInformation("User {userid} does not have access to {sessionid}", userId, sessionId);
@@ -91,6 +112,13 @@ public class SessionService : ISessionService
         }
         
         
+        var session = await _sessionRepository.GetSessionOverviewAsync(sessionId, userId);
+        if (session == null)
+        {
+            _logger.LogInformation("Session {sessionid}, request by {userid} does not exist", sessionId, userId);
+            return Result.Fail("Session does not exist");
+        }
+
         
         return session.ConvertToGetResponse();
     }
@@ -109,6 +137,7 @@ public class SessionService : ISessionService
     
     public enum ErrorCodes
     {
-        UniqueConstraintViolation = 0
+        UniqueConstraintViolation = 0,
+        ExerciseDoesNotExist = -1
     }
 }

@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Core.Shared;
 using Infrastructure.Authentication;
 using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Exceptions;

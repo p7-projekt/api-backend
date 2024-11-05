@@ -1,3 +1,4 @@
+using Core.Shared;
 using FluentResults;
 using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Models;
@@ -46,7 +47,18 @@ public class UserService : IUserService
 			return Result.Fail("User not found");
 		}
 
-		return Result.Ok(new GetUserResponseDto(result.Email, result.Name));
+		return Result.Ok(new GetUserResponseDto(result.Email, result.Name, null));
+	}
+
+	public async Task<Result<GetUserResponseDto>> GetAnonUserByIdAsync(int userId)
+	{
+		var sessionId = await _userRepository.GetAnonUserSessionByIdAsync(userId);
+		if (sessionId == 0)
+		{
+			return Result.Fail("Error receiving user");
+		}
+
+		return new GetUserResponseDto(null, null, sessionId.ToString());
 	}
 
 	public async Task<Result<LoginResponse>> LoginAsync(LoginDto loginDto)

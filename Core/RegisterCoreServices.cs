@@ -1,8 +1,10 @@
 using System.Reflection;
-using Core.Contracts.Services;
+using Core.Exercises;
+using Core.Exercises.Contracts;
 using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Solutions;
+using Core.Solutions.Contracts;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
@@ -16,6 +18,7 @@ public static class RegisterCoreServices
         services.AddValidatorsFromAssemblies(new [] {Assembly.GetExecutingAssembly() });
         services.AddScoped<ISolutionRunnerService, SolutionRunnnerService>();
         services.AddScoped<ISessionService, SessionService>();
+        services.AddScoped<IExerciseService, ExerciseService>();
 
         services.AddQuartzHostedService(options =>
         {
@@ -31,7 +34,7 @@ public static class RegisterCoreServices
                         schedule => schedule.WithIntervalInMinutes(5).RepeatForever());
                 });
         });
-
+        
         return services;
     }
 }

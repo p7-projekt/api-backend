@@ -8,6 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Exercises\Contracts\Services\**" />
+      <EmbeddedResource Remove="Exercises\Contracts\Services\**" />
+      <None Remove="Exercises\Contracts\Services\**" />
+    </ItemGroup>
+
+    <ItemGroup>
       <PackageReference Include="FluentResults" Version="3.16.0" />
       <PackageReference Include="FluentValidation" Version="11.10.0" />
       <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.10.0" />

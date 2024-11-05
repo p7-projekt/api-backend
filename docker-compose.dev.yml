@@ -12,7 +12,7 @@ services:
 
   mozart-haskell:
     container_name: p7-mozart-haskell
-    image: p7project/mozart-haskell:alpha
+    image: p7project/mozart-haskell:gamma
     restart: on-failure
     ports:
       - 8080:8080
