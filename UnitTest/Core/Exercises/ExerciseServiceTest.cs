@@ -6,6 +6,7 @@ using Core.Solutions.Models;
 using Core.Solutions.Services;
 using FluentResults;
 using Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System;
@@ -295,7 +296,7 @@ public class ExerciseServiceTest
     }
 
     [Fact]
-    public async Task UpdateExercise_FailedSolution_ShouldReturn_Fail()
+    public async Task UpdateExercise_FailedSolution_ShouldReturn_OkWithFailure()
     {
         Environment.SetEnvironmentVariable("MOZART_HASKELL", "url");
         var exerciseRepo = Substitute.For<IExerciseRepository>();
@@ -322,7 +323,7 @@ public class ExerciseServiceTest
     }
 
     [Fact]
-    public async Task UpdateExercise_FailedCompilationOrTimeout_ShouldReturn_Fail()
+    public async Task UpdateExercise_FailedCompilationOrTimeout_ShouldReturn_OkWithError()
     {
         Environment.SetEnvironmentVariable("MOZART_HASKELL", "url");
         var exerciseRepo = Substitute.For<IExerciseRepository>();
@@ -370,6 +371,136 @@ public class ExerciseServiceTest
 
         var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
         var result = await exerciseService.UpdateExercise(1, 1, dto);
+
+        Assert.True(result.IsFailed);
+    }
+
+    [Fact]
+    public async Task CreateExercise_ShouldReturn_Ok()
+    {
+        Environment.SetEnvironmentVariable("MOZART_HASKELL", "url");
+        var exerciseRepo = Substitute.For<IExerciseRepository>();
+        var logger = Substitute.For<ILogger<ExerciseService>>();
+        var solutionRepo = Substitute.For<ISolutionRepository>();
+        var response = new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = new StringContent("{\"Result\": \"pass\"}", Encoding.UTF8, "application/json")
+        };
+        var httpClientSub = new MockHttpMessageHandler(response);
+        var client = new HttpClient(httpClientSub);
+        var haskellService = new HaskellService(client, haskellLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+
+        exerciseRepo.InsertExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Ok());
+
+        var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
+        var result = await exerciseService.CreateExercise(dto, 1);
+
+        Assert.True(result.IsSuccess);
+        Assert.Null(result.Value);
+    }
+
+    [Fact]
+    public async Task CreateExercise_IncorrectStatusCodeFromSolutionRunner_ShouldReturn_Fail()
+    {
+        Environment.SetEnvironmentVariable("MOZART_HASKELL", "url");
+        var exerciseRepo = Substitute.For<IExerciseRepository>();
+        var logger = Substitute.For<ILogger<ExerciseService>>();
+        var solutionRepo = Substitute.For<ISolutionRepository>();
+        var response = new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.UnprocessableContent,
+            Content = new StringContent("{\"Result\": \"pass\"}", Encoding.UTF8, "application/json")
+        };
+        var httpClientSub = new MockHttpMessageHandler(response);
+        var client = new HttpClient(httpClientSub);
+        var haskellService = new HaskellService(client, haskellLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+
+        exerciseRepo.InsertExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Ok());
+
+        var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
+        var result = await exerciseService.CreateExercise(dto, 1);
+
+        Assert.True(result.IsFailed);
+    }
+
+    [Fact]
+    public async Task CreatExercise_FailedSolution_ShouldReturn_OkWithFailure()
+    {
+        Environment.SetEnvironmentVariable("MOZART_HASKELL", "url");
+        var exerciseRepo = Substitute.For<IExerciseRepository>();
+        var logger = Substitute.For<ILogger<ExerciseService>>();
+        var solutionRepo = Substitute.For<ISolutionRepository>();
+        var response = new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = new StringContent("{\"Result\": \"failure\"}", Encoding.UTF8, "application/json")
+        };
+        var httpClientSub = new MockHttpMessageHandler(response);
+        var client = new HttpClient(httpClientSub);
+        var haskellService = new HaskellService(client, haskellLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+
+        exerciseRepo.InsertExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Ok());
+
+        var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
+        var result = await exerciseService.CreateExercise(dto, 1);
+
+        Assert.True(result.IsSuccess);
+        Assert.IsType<HaskellResponseDto>(result.Value);
+        Assert.Null(result.Value.Message);
+    }
+
+    [Fact]
+    public async Task CreateExercise_FailedCompilationOrTimeout_ShouldReturn_OkWithError()
+    {
+        Environment.SetEnvironmentVariable("MOZART_HASKELL", "url");
+        var exerciseRepo = Substitute.For<IExerciseRepository>();
+        var logger = Substitute.For<ILogger<ExerciseService>>();
+        var solutionRepo = Substitute.For<ISolutionRepository>();
+        var response = new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = new StringContent("{\"Result\": \"error\"}", Encoding.UTF8, "application/json")
+        };
+        var httpClientSub = new MockHttpMessageHandler(response);
+        var client = new HttpClient(httpClientSub);
+        var haskellService = new HaskellService(client, haskellLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+
+        exerciseRepo.InsertExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Ok());
+
+        var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
+        var result = await exerciseService.CreateExercise(dto, 1);
+
+        Assert.True(result.IsSuccess);
+        Assert.IsType<HaskellResponseDto>(result.Value);
+        Assert.Null(result.Value.TestCaseResults);
+    }
+
+    [Fact]
+    public async Task CreateExercise_InsertFailed_ShouldReturn_Fail()
+    {
+        Environment.SetEnvironmentVariable("MOZART_HASKELL", "url");
+        var exerciseRepo = Substitute.For<IExerciseRepository>();
+        var logger = Substitute.For<ILogger<ExerciseService>>();
+        var solutionRepo = Substitute.For<ISolutionRepository>();
+        var response = new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = new StringContent("{\"Result\": \"pass\"}", Encoding.UTF8, "application/json")
+        };
+        var httpClientSub = new MockHttpMessageHandler(response);
+        var client = new HttpClient(httpClientSub);
+        var haskellService = new HaskellService(client, haskellLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+
+        exerciseRepo.InsertExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Fail("Failed insert, transacation rolled back"));
+
+        var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
+        var result = await exerciseService.CreateExercise(dto, 1);
 
         Assert.True(result.IsFailed);
     }
