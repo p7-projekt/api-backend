@@ -31,17 +31,8 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
 		builder.ConfigureServices(services =>
 		{
 			Environment.SetEnvironmentVariable(AuthConstants.JwtSecret, "sdafdafdfasdfasdfasdfasfdasfdafdf"); 
-			// var descriptor = services.SingleOrDefault(
-			// 	d => d.ServiceType == typeof(ITokenService));
-   //          
-			// if (descriptor != null)
-			// {
-			// 	services.Remove(descriptor);
-			// }
-			var iTokenSub = Substitute.For<ITokenService>();
 			var iSesSub = Substitute.For<ISessionRepository>();
 			services.AddScoped<ISessionRepository>(_ => iSesSub);
-			services.AddScoped<ITokenService>(_ => iTokenSub);
 		});
 		
 		return base.CreateHost(builder);
