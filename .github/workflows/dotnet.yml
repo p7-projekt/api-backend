@@ -36,7 +36,7 @@ jobs:
         dotnet tool install --global dotnet-reportgenerator-globaltool
         reportgenerator "-reports:./TestResults/*/coverage.cobertura.xml" "-targetdir:./coverage" -reporttypes:Html
     - name: Deploy to GitHub Pages
-      if: success()  # Only deploy if the tests pass
+      if: github.event_name == 'push' && success() 
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"

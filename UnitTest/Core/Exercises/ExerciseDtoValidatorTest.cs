@@ -8,18 +8,18 @@ using Core.Exercises.Models;
 using Core.Exercises.Validators;
 using Xunit.Sdk;
 
-namespace ExerciseDtoValidatorTest;
+namespace UnitTest.Core.Exercises;
 
 public class ExerciseDtoValidatorTest
 {
     private readonly ILogger<ExerciseDtoValidator> _loggerSubstitute = Substitute.For<ILogger<ExerciseDtoValidator>>();
     [Theory]
     [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "INT", "int" }, new string[] { "int" }, new string[] { "2", "2" }, new string[] { "4" }, true, new string[] { "10", "10" }, new string[] { "20" }, true)]
-    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "string", "string" }, new string[] { "int" }, new string[] { "This is a string", "This is another string" }, new string[] { "4" }, true, new string[] { "Second case 1", "Second case 2" }, new string[] { "20" }, true)]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "string", "string" }, new string[] { "float" }, new string[] { "This is a string", "This is another string" }, new string[] { "4.13" }, true, new string[] { "Second case 1", "Second case 2" }, new string[] { "20" }, true)]
     [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "float", "int" }, new string[] { "string" }, new string[] { "3.14", "14" }, new string[] { "correct" }, true, new string[] { "5.01", "0" }, new string[] { "Also Correct" }, true)]
     [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "bool", "char" }, new string[] { "char" }, new string[] { "false", "b" }, new string[] { "h" }, false, new string[] { "true", "u" }, new string[] { "l" }, true)]
     [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "string", "float" }, new string[] { "bOOl" }, new string[] { "This is a string", "4.20" }, new string[] { "true" }, true, new string[] { "Second testcase", "100100.5" }, new string[] { "false" }, false)]
-    public void ExerciseDtoValidatorTest_ShouldBe_Valid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam, bool publicVisible1,  string[] testcase2InParam, string[] testcase2OutParam, bool publicVisible2)
+    public void ExerciseDtoValidatorTest_ShouldBe_Valid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam, bool publicVisible1, string[] testcase2InParam, string[] testcase2OutParam, bool publicVisible2)
     {
         var validator = new ExerciseDtoValidator(_loggerSubstitute);
         var testcase1 = new TestcaseDto(testcase1InParam, testcase1OutParam, publicVisible1);
@@ -35,11 +35,11 @@ public class ExerciseDtoValidatorTest
     [Theory]
     [InlineData("", "Concise exercise description", "x + y", new string[] { "int", "int" }, new string[] { "int" }, new string[] { "2", "2" }, new string[] { "4" }, true)]
     [InlineData(null, "Concise exercise description", "x + y", new string[] { "int", "int" }, new string[] { "int" }, new string[] { "2", "2" }, new string[] { "4" }, true)]
-    public void ExerciseDtoValidatorTest_MissingTitel_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam, bool publicVisibile) 
+    public void ExerciseDtoValidatorTest_MissingTitel_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam, bool publicVisibile)
     {
         var validator = new ExerciseDtoValidator(_loggerSubstitute);
         var testcase1 = new TestcaseDto(testcase1InParam, testcase1OutParam, publicVisibile);
-        var testcases = new List<TestcaseDto> { testcase1};
+        var testcases = new List<TestcaseDto> { testcase1 };
         var dto = new ExerciseDto(title, description, solution, inputParams, outputParams, testcases);
 
         var result = validator.Validate(dto);
@@ -63,7 +63,7 @@ public class ExerciseDtoValidatorTest
 
     [Theory]
     [InlineData("Add numbers", "", "x + y", new string[] { "int", "int" }, new string[] { "int" }, new string[] { "2", "2" }, new string[] { "4" }, true)]
-    [InlineData("Add numbers", null,"x + y", new string[] { "int", "int" }, new string[] { "int" }, new string[] { "2", "2" }, new string[] { "4" }, true)]
+    [InlineData("Add numbers", null, "x + y", new string[] { "int", "int" }, new string[] { "int" }, new string[] { "2", "2" }, new string[] { "4" }, true)]
     public void ExerciseDtoValidatorTest_MissingDescription_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam, bool publicVisible)
     {
         var validator = new ExerciseDtoValidator(_loggerSubstitute);
@@ -169,11 +169,11 @@ public class ExerciseDtoValidatorTest
     }
 
     [Theory]
-    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int", "int" }, new string[] { "int", "bool" }, new string[] { "2", "2", "5" }, new string[] { "4", "false" }, true, new string[] { "10", "10", "20" }, new string[] { "20" }, true, new string[] {"1", "2", "3"}, new string[] {"5", "false"}, true)]
-    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int", "int" }, new string[] { "int", "bool" }, new string[] { "2", "2", "5" }, new string[] { "4", "false" }, true, new string[] { "20" }, new string[] { "20", "true" }, true, new string[] {"1", "2", "3"}, new string[] {"5", "false"}, true)]
-    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int", "int" }, new string[] { "int", "bool" }, new string[] { "2", "2", "5" }, new string[] { "false" }, true, new string[] { "10", "10", "20" }, new string[] { "20", "true" }, true,  new string[] {"1", "2"}, new string[] {"5"}, true)]
-    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int", "int" }, new string[] { "int", "bool" }, new string[] { "2", "2"}, new string[] { "4", "false" }, true, new string[] { "10", "10", "20" }, new string[] { "20", "true" }, true, new string[] {"1", "2", "3"}, new string[] {"5", "false"}, true)]
-    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int", "int" }, new string[] { "int", "bool" }, new string[] { "2", "2", "5" }, new string[] { "4", "false" }, true, new string[] { "10", "10", "20" }, new string[] { "20", "true" }, true, new string[] {"1", "2", "3", "4"}, new string[] {"5", "false"}, true)]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int", "int" }, new string[] { "int", "bool" }, new string[] { "2", "2", "5" }, new string[] { "4", "false" }, true, new string[] { "10", "10", "20" }, new string[] { "20" }, true, new string[] { "1", "2", "3" }, new string[] { "5", "false" }, true)]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int", "int" }, new string[] { "int", "bool" }, new string[] { "2", "2", "5" }, new string[] { "4", "false" }, true, new string[] { "20" }, new string[] { "20", "true" }, true, new string[] { "1", "2", "3" }, new string[] { "5", "false" }, true)]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int", "int" }, new string[] { "int", "bool" }, new string[] { "2", "2", "5" }, new string[] { "false" }, true, new string[] { "10", "10", "20" }, new string[] { "20", "true" }, true, new string[] { "1", "2" }, new string[] { "5" }, true)]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int", "int" }, new string[] { "int", "bool" }, new string[] { "2", "2" }, new string[] { "4", "false" }, true, new string[] { "10", "10", "20" }, new string[] { "20", "true" }, true, new string[] { "1", "2", "3" }, new string[] { "5", "false" }, true)]
+    [InlineData("Add numbers", "Concise exercise description", "x + y", new string[] { "int", "int", "int" }, new string[] { "int", "bool" }, new string[] { "2", "2", "5" }, new string[] { "4", "false" }, true, new string[] { "10", "10", "20" }, new string[] { "20", "true" }, true, new string[] { "1", "2", "3", "4" }, new string[] { "5", "false" }, true)]
     public void ExerciseDtoValidatorTest_InconsistentParameterAmount_ShouldBe_Invalid(string title, string description, string solution, string[] inputParams, string[] outputParams, string[] testcase1InParam, string[] testcase1OutParam, bool publicVisible1, string[] testcase2InParam, string[] testcase2OutParam, bool publicVisible2, string[] testcase3InParam, string[] testcase3OutParam, bool publicVisible3)
     {
         var validator = new ExerciseDtoValidator(_loggerSubstitute);

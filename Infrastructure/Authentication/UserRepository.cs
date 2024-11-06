@@ -38,7 +38,7 @@ public class UserRepository : IUserRepository
 		var query = """
 		            SELECT session_id FROM anon_users WHERE user_id = @UserId;
 		            """;
-		var sessionId = await con.QuerySingleAsync<int>(query, new { userId });
+		var sessionId = await con.QuerySingleOrDefaultAsync<int>(query, new { userId });
 		return sessionId;
 	}
 

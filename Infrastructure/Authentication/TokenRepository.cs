@@ -1,4 +1,5 @@
 using Dapper;
+using FluentResults;
 using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Models;
 using Infrastructure.Persistence.Contracts;
@@ -36,7 +37,7 @@ public class TokenRepository : ITokenRepository
 		await con.ExecuteAsync(query, new { userId });
 	}
 	
-	public async Task<RefreshToken?> GetAccessTokenByRefreshTokenAsync(string refreshToken)
+	public async Task<Result<RefreshToken>> GetAccessTokenByRefreshTokenAsync(string refreshToken)
 	{
 		// check token exists based on userid
 		var query = """
@@ -46,15 +47,15 @@ public class TokenRepository : ITokenRepository
 		var token = await con.QuerySingleOrDefaultAsync<RefreshToken>(query, new {refreshToken = refreshToken});
 		if (token == null)
 		{
-			return null;
+			return Result.Fail("Failed to retrieve a token");
 		}
 		_logger.LogInformation("Refresh token: {token} exists for userid: {userid}", refreshToken, token.UserId);
 		// check expiration 
 		if (!await CheckValidRefreshToken(token.Token))
 		{
-			return null;
+			return Result.Fail("Token was not valid");
 		}
-		return token;
+		return Result.Ok(token);
 	}
 	
 	private async Task<bool> CheckValidRefreshToken(string refreshToken)

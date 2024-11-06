@@ -99,21 +99,22 @@ public class TokenService : ITokenService
     public async Task<Result<LoginResponse>> GenerateJwtFromRefreshToken(RefreshDto refreshToken)
     {
         var token = await _tokenRepository.GetAccessTokenByRefreshTokenAsync(refreshToken.RefreshToken);
-        if (token == null)
+        if (token.IsFailed)
         {
             _logger.LogInformation("Invalid refresh token: {token}", refreshToken);
             return Result.Fail("Invalid refresh token");
         }
-        var userRoles = (await _userRepository.GetRolesByUserIdAsync(token.UserId)).ToList();
+        var userRoles = (await _userRepository.GetRolesByUserIdAsync(token.Value.UserId)).ToList();
         if (!userRoles.Any())
         {
-            _logger.LogInformation("User not found, userid: {userid}", token.UserId);
+            _logger.LogInformation("User not found, userid: {userid}", token.Value.UserId);
+            return Result.Fail("No user roles found");
         }
 
         var userRoleEnums = userRoles.Select(x => RolesConvert.Convert(x.RoleName)).ToList();
         
-        var jwt = GenerateJwt(token.UserId, userRoleEnums);
-        return new LoginResponse(jwt, token.Token, token.Expires);
+        var jwt = GenerateJwt(token.Value.UserId, userRoleEnums);
+        return new LoginResponse(jwt, token.Value.Token, token.Value.Expires);
     }
     
 }

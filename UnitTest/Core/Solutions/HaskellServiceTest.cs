@@ -8,13 +8,13 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using UnitTest.Setup;
 
-namespace UnitTest.Solutions;
+namespace UnitTest.Core.Solutions;
 
 [Collection(CollectionDefinitions.Sequential)]
 public class HaskellServiceTest
 {
-    
-    
+
+
     [Fact]
     public void SubmitSolution_ShouldReturn_ExceptionMissedEnvironmentVariable()
     {
@@ -42,7 +42,7 @@ public class HaskellServiceTest
                 new Testcase()
             }, "hello");
         var result = await haskellService.SubmitSubmission(dto);
-        
+
         Assert.True(result.IsFailed);
     }
     [Fact]
@@ -63,10 +63,10 @@ public class HaskellServiceTest
                 new Testcase()
             }, "hello");
         var result = await haskellService.SubmitSubmission(dto);
-        
+
         Assert.True(result.IsFailed);
     }
-    
+
     [Fact]
     public async Task SubmitSolution_ShouldReturn_FailException()
     {
@@ -86,9 +86,9 @@ public class HaskellServiceTest
                 new Testcase()
             }, "hello");
         await Assert.ThrowsAsync<Exception>(async () => await haskellService.SubmitSubmission(dto));
-        
+
     }
-    
+
     [Fact]
     public async Task SubmitSolution_ShouldReturn_OkPass()
     {
@@ -108,11 +108,11 @@ public class HaskellServiceTest
                 new Testcase()
             }, "hello");
         var result = await haskellService.SubmitSubmission(dto);
-        
+
         Assert.True(result.IsSuccess);
         Assert.Equal(ResponseCode.Pass, result.Value.Action);
     }
-    
+
     [Fact]
     public async Task SubmitSolution_ShouldReturn_OkFailure()
     {
@@ -132,11 +132,11 @@ public class HaskellServiceTest
                 new Testcase()
             }, "hello");
         var result = await haskellService.SubmitSubmission(dto);
-        
+
         Assert.True(result.IsSuccess);
         Assert.Equal(ResponseCode.Failure, result.Value.Action);
     }
-    
+
     [Fact]
     public async Task SubmitSolution_ShouldReturn_OkError()
     {
@@ -156,7 +156,7 @@ public class HaskellServiceTest
                 new Testcase()
             }, "hello");
         var result = await haskellService.SubmitSubmission(dto);
-        
+
         Assert.True(result.IsSuccess);
         Assert.Equal(ResponseCode.Error, result.Value.Action);
     }
