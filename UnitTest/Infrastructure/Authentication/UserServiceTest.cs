@@ -1,10 +1,13 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Core.Shared;
+using FluentResults;
 using Infrastructure.Authentication;
 using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Npgsql.PostgresTypes;
 using NSubstitute;
 
 namespace UnitTest.Infrastructure.Authentication;
@@ -93,6 +96,111 @@ public class UserServiceTest
 		
 		// Assert
 		Assert.True(result.IsFailed);
-	} 
-	
+	}
+
+	[Fact]
+	public async Task CreateUserAsync_ShouldReturn_Ok()
+	{
+        var passwordMock = Substitute.For<IPasswordHasher<User>>();
+        var userRepoMock = Substitute.For<IUserRepository>();
+        var loggerMock = Substitute.For<ILogger<UserService>>();
+        var tokenMock = Substitute.For<ITokenService>();
+        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
+
+		userRepoMock.CreateUserAsync(Arg.Any<User>(), Arg.Any<Roles>()).Returns(Result.Ok());
+
+		var dto = new CreateUserDto("Validmail@mail.com", "Password1!", "Password1!", "James");
+
+		var result = await userService.CreateUserAsync(dto);
+
+		Assert.True(result.IsSuccess);
+    }
+
+    [Fact]
+    public async Task CreateUserAsync_FailOccurInRepository_ShouldReturn_Fail()
+    {
+        var passwordMock = Substitute.For<IPasswordHasher<User>>();
+        var userRepoMock = Substitute.For<IUserRepository>();
+        var loggerMock = Substitute.For<ILogger<UserService>>();
+        var tokenMock = Substitute.For<ITokenService>();
+        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
+
+        userRepoMock.CreateUserAsync(Arg.Any<User>(), Arg.Any<Roles>()).Returns(Result.Fail("Failed to create new user"));
+
+        var dto = new CreateUserDto("Validmail@mail.com", "Password1!", "Password1!", "James");
+
+        var result = await userService.CreateUserAsync(dto);
+
+        Assert.True(result.IsFailed);
+    }
+
+	[Fact]
+	public async Task GetAppUserByIdAsync_ShouldReturn_Ok()
+	{
+        var passwordMock = Substitute.For<IPasswordHasher<User>>();
+        var userRepoMock = Substitute.For<IUserRepository>();
+        var loggerMock = Substitute.For<ILogger<UserService>>();
+        var tokenMock = Substitute.For<ITokenService>();
+        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
+
+		var user = new User { Email = "validmail@mail.com", Name = "James" };
+		userRepoMock.GetAppUserByIdAsync(Arg.Any<int>()).Returns(user);
+
+		var result = await userService.GetAppUserByIdAsync(1, 1);
+
+		Assert.True(result.IsSuccess);
+		Assert.IsType<GetUserResponseDto>(result.Value);
+    }
+
+    [Fact]
+    public async Task GetAppUserByIdAsync_InconsistentIds_ShouldReturn_Fail()
+    {
+        var passwordMock = Substitute.For<IPasswordHasher<User>>();
+        var userRepoMock = Substitute.For<IUserRepository>();
+        var loggerMock = Substitute.For<ILogger<UserService>>();
+        var tokenMock = Substitute.For<ITokenService>();
+        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
+
+        var user = new User { Email = "validmail@mail.com", Name = "James" };
+        userRepoMock.GetAppUserByIdAsync(Arg.Any<int>()).Returns(user);
+
+		var id1 = 1;
+		var id2 = 2;
+        var result = await userService.GetAppUserByIdAsync(id1, id2);
+
+        Assert.True(result.IsFailed);
+    }
+
+	[Fact]
+	public async Task GetAnonUserByIdAsync_ShouldReturn_Ok()
+	{
+        var passwordMock = Substitute.For<IPasswordHasher<User>>();
+        var userRepoMock = Substitute.For<IUserRepository>();
+        var loggerMock = Substitute.For<ILogger<UserService>>();
+        var tokenMock = Substitute.For<ITokenService>();
+        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
+
+		userRepoMock.GetAnonUserSessionByIdAsync(Arg.Any<int>()).Returns(1);
+
+		var result = await userService.GetAnonUserByIdAsync(1);
+
+		Assert.True(result.IsSuccess);
+		Assert.IsType<GetUserResponseDto>(result.Value);
+    }
+
+    [Fact]
+    public async Task GetAnonUserByIdAsync_NoUserFound_ShouldReturn_Fail()
+    {
+        var passwordMock = Substitute.For<IPasswordHasher<User>>();
+        var userRepoMock = Substitute.For<IUserRepository>();
+        var loggerMock = Substitute.For<ILogger<UserService>>();
+        var tokenMock = Substitute.For<ITokenService>();
+        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
+
+        userRepoMock.GetAnonUserSessionByIdAsync(Arg.Any<int>()).Returns(0);
+
+        var result = await userService.GetAnonUserByIdAsync(1);
+
+        Assert.True(result.IsFailed);
+    }
 }

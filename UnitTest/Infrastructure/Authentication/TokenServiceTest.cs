@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Core.Shared;
+using FluentResults;
 using Infrastructure.Authentication;
 using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Exceptions;
@@ -156,4 +157,89 @@ public class TokenServiceTest
 		// Assert
 		Assert.True(result.IsSuccess);
 	}
+
+	[Fact]
+	public async Task GenerateJwtFromRefreshToken_ShouldReturn_Ok()
+	{
+        Environment.SetEnvironmentVariable(AuthConstants.JwtSecret, "MySecretJwtKeyForJwtTokens-----------!");
+        var _loggerSubstitute = Substitute.For<ILogger<TokenService>>();
+		var _userRepoSubstitute = Substitute.For<IUserRepository>();
+		var _tokenRepoSubstitute = Substitute.For<ITokenRepository>();
+		var service = new TokenService(_loggerSubstitute, _tokenRepoSubstitute, _userRepoSubstitute);
+
+		var rf = new RefreshToken
+		{
+			Id = 0,
+			UserId = 1,
+			Token = "token",
+			CreatedAt = DateTime.UtcNow,
+			Expires = DateTime.UtcNow.AddMinutes(1)
+		};
+		_tokenRepoSubstitute.GetAccessTokenByRefreshTokenAsync(Arg.Any<string>()).Returns(rf);
+
+		Role[] role = { new Role { RoleName = "Instructor" } };
+		_userRepoSubstitute.GetRolesByUserIdAsync(Arg.Any<int>()).Returns(role);
+
+		var dto = new RefreshDto("ArbitraryToken");
+		var result = await service.GenerateJwtFromRefreshToken(dto);
+
+		Assert.True(result.IsSuccess);
+		Assert.IsType<LoginResponse>(result.Value);
+    }
+
+    [Fact]
+    public async Task GenerateJwtFromRefreshToken_ErrorInTokenRepo_ShouldReturn_Fail()
+    {
+        Environment.SetEnvironmentVariable(AuthConstants.JwtSecret, "MySecretJwtKeyForJwtTokens-----------!");
+        var _loggerSubstitute = Substitute.For<ILogger<TokenService>>();
+        var _userRepoSubstitute = Substitute.For<IUserRepository>();
+        var _tokenRepoSubstitute = Substitute.For<ITokenRepository>();
+        var service = new TokenService(_loggerSubstitute, _tokenRepoSubstitute, _userRepoSubstitute);
+
+        var rf = new RefreshToken
+        {
+            Id = 0,
+            UserId = 1,
+            Token = "token",
+            CreatedAt = DateTime.UtcNow,
+            Expires = DateTime.UtcNow.AddMinutes(1)
+        };
+        _tokenRepoSubstitute.GetAccessTokenByRefreshTokenAsync(Arg.Any<string>()).Returns(Result.Fail("failed to retrieve token, or token was invalid"));
+
+        Role[] role = { new Role { RoleName = "Instructor" } };
+        _userRepoSubstitute.GetRolesByUserIdAsync(Arg.Any<int>()).Returns(role);
+
+        var dto = new RefreshDto("ArbitraryToken");
+        var result = await service.GenerateJwtFromRefreshToken(dto);
+
+        Assert.True(result.IsFailed);
+    }
+
+    [Fact]
+    public async Task GenerateJwtFromRefreshToken_NoRolesFound_ShouldReturn_Fail()
+    {
+        Environment.SetEnvironmentVariable(AuthConstants.JwtSecret, "MySecretJwtKeyForJwtTokens-----------!");
+        var _loggerSubstitute = Substitute.For<ILogger<TokenService>>();
+        var _userRepoSubstitute = Substitute.For<IUserRepository>();
+        var _tokenRepoSubstitute = Substitute.For<ITokenRepository>();
+        var service = new TokenService(_loggerSubstitute, _tokenRepoSubstitute, _userRepoSubstitute);
+
+        var rf = new RefreshToken
+        {
+            Id = 0,
+            UserId = 1,
+            Token = "token",
+            CreatedAt = DateTime.UtcNow,
+            Expires = DateTime.UtcNow.AddMinutes(1)
+        };
+        _tokenRepoSubstitute.GetAccessTokenByRefreshTokenAsync(Arg.Any<string>()).Returns(rf);
+
+        Role[] role = { };
+        _userRepoSubstitute.GetRolesByUserIdAsync(Arg.Any<int>()).Returns(role);
+
+        var dto = new RefreshDto("ArbitraryToken");
+        var result = await service.GenerateJwtFromRefreshToken(dto);
+
+        Assert.True(result.IsFailed);
+    }
 }

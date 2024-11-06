@@ -21,7 +21,7 @@ public class UserService : IUserService
 		_tokenService = tokenService;
 	}
 
-	public async Task CreateUserAsync(CreateUserDto dto)
+	public async Task<Result> CreateUserAsync(CreateUserDto dto)
 	{
 		var user = new User();
 		user.CreatedAt = DateTime.UtcNow;
@@ -31,7 +31,14 @@ public class UserService : IUserService
 		user.PasswordHash = passwordHash;
 
 		var createUser = await _userRepository.CreateUserAsync(user, Roles.Instructor);
+		if (createUser.IsFailed) 
+		{
+			_logger.LogError("Failed to register new user with email: {}", user.Email);
+			return Result.Fail("Failed to register new user");
+		}
 		_logger.LogInformation("User created: {email} with role: {role}", user.Email, Roles.Instructor);
+
+		return Result.Ok();
 	}
 
 	public async Task<Result<GetUserResponseDto>> GetAppUserByIdAsync(int id, int userIdParameter)
@@ -42,7 +49,7 @@ public class UserService : IUserService
 		}
 		var result = await _userRepository.GetAppUserByIdAsync(id);
 		_logger.LogInformation("Selecting user with userid: {userid}", id);
-		if (result == null)
+		if (result == null) // It seems null cannot be returned from the repository function - this may need rethinking
 		{
 			return Result.Fail("User not found");
 		}

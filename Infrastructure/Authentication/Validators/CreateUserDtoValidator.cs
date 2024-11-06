@@ -17,6 +17,7 @@ public class CreateUserDtoValidator : AbstractValidator<CreateUserDto>
 		RuleFor(x => x.Password).Cascade(CascadeMode.Continue).Must(CheckUpperCase).WithMessage("Password must contain at least one upper case letter").Must(CheckLowerCase).WithMessage("Password must contain at least one lower case letter").Must(CheckDigit).WithMessage("Password must contain at least one digit").Must(CheckSpecialCharacter).WithMessage("Password must contain at least one special character");
 		RuleFor(x => x.ConfirmPassword).NotEmpty().WithMessage("Confirm password is required");
 		RuleFor(x => x.ConfirmPassword).NotEmpty().Equal(x => x.Password).WithMessage("Passwords do not match");
+		RuleFor(x => x.Name).NotEmpty().WithMessage("The user must have a name");
 	}
 	
 	private async Task<bool> IsEmailAvailableAsync(string email, CancellationToken cancellationToken)
