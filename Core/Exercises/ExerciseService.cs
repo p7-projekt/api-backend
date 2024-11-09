@@ -13,10 +13,10 @@ public class ExerciseService : IExerciseService
     private readonly IExerciseRepository _exerciseRepository;
     private readonly ILogger<ExerciseService> _logger;
     private readonly ISolutionRepository _solutionRepository;
-    private readonly HaskellService _haskellService;
+    private readonly IHaskellService _haskellService;
 
 
-    public ExerciseService(IExerciseRepository exerciseRepository, ILogger<ExerciseService> logger, ISolutionRepository solutionRepository, HaskellService haskellService)
+    public ExerciseService(IExerciseRepository exerciseRepository, ILogger<ExerciseService> logger, ISolutionRepository solutionRepository, IHaskellService haskellService)
     {
         _exerciseRepository = exerciseRepository;
         _logger = logger;

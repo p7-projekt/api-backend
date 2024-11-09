@@ -9,10 +9,10 @@ namespace Core.Solutions;
 public class SolutionRunnnerService : ISolutionRunnerService
 {
     private readonly ILogger<SolutionRunnnerService> _logger;
-    private readonly HaskellService _haskellService;
+    private readonly IHaskellService _haskellService;
     private readonly ISolutionRepository _solutionRepository;
 
-    public SolutionRunnnerService(ILogger<SolutionRunnnerService> logger, HaskellService haskellService, ISolutionRepository solutionRepository)
+    public SolutionRunnnerService(ILogger<SolutionRunnnerService> logger, IHaskellService haskellService, ISolutionRepository solutionRepository)
     {
         _logger = logger;
         _haskellService = haskellService;

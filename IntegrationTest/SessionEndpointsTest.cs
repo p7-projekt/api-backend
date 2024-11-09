@@ -12,12 +12,12 @@ using NSubstitute;
 namespace IntegrationTest;
 
 [Collection(CollectionDefinitions.NonParallelCollectionName)]
-public class SessionEndpoints: IClassFixture<TestWebApplicationFactory<Program>>
+public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Program>>
 {
 	private readonly HttpClient _client;
 	private readonly TestWebApplicationFactory<Program> _factory;
 
-	public SessionEndpoints(TestWebApplicationFactory<Program> factory)
+	public SessionEndpointsTest(TestWebApplicationFactory<Program> factory)
 	{
 		_factory = factory;
 		_client = factory.CreateClient();
