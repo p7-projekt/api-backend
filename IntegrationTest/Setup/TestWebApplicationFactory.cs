@@ -33,6 +33,10 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
 			Environment.SetEnvironmentVariable(AuthConstants.JwtSecret, "sdafdafdfasdfasdfasdfasfdasfdafdf"); 
 			var iSesSub = Substitute.For<ISessionRepository>();
 			services.AddScoped<ISessionRepository>(_ => iSesSub);
+			var ItokenRepoSub = Substitute.For<ITokenRepository>();
+			var IUserRepo = Substitute.For<IUserRepository>();
+			services.AddScoped<ITokenRepository>(_ => ItokenRepoSub);
+			services.AddScoped<IUserRepository>(_ => IUserRepo);
 		});
 		
 		return base.CreateHost(builder);

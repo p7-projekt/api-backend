@@ -33,7 +33,7 @@ public class UserService : IUserService
 		var createUser = await _userRepository.CreateUserAsync(user, Roles.Instructor);
 		if (createUser.IsFailed) 
 		{
-			_logger.LogError("Failed to register new user with email: {}", user.Email);
+			_logger.LogError("Failed to register new user with email: {email}", user.Email);
 			return Result.Fail("Failed to register new user");
 		}
 		_logger.LogInformation("User created: {email} with role: {role}", user.Email, Roles.Instructor);
