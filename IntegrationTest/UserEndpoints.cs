@@ -14,14 +14,11 @@ namespace IntegrationTest;
 public class UserEndpoints : IClassFixture<TestWebApplicationFactory<Program>>
 {
 	private readonly TestWebApplicationFactory<Program> _factory;
-	private readonly ITestOutputHelper _testOutputHelper;
 	private readonly HttpClient _client;
 
-	public UserEndpoints(TestWebApplicationFactory<Program> factory, ITestOutputHelper testOutputHelper)
+	public UserEndpoints(TestWebApplicationFactory<Program> factory)
 	{
-		Environment.SetEnvironmentVariable("ConnectionString", "con");
 		_factory = factory;
-		_testOutputHelper = testOutputHelper;
 		_client = factory.CreateClient();
 	}
 
@@ -81,9 +78,4 @@ public class UserEndpoints : IClassFixture<TestWebApplicationFactory<Program>>
 		
 		Assert.True(response.IsSuccessStatusCode);
 	}
-	
-	
-	
-	
-	
 }

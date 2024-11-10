@@ -19,7 +19,6 @@ public class AuthenticationEndpoints : IClassFixture<TestWebApplicationFactory<P
 	private readonly TestWebApplicationFactory<Program> _factory;
 	public AuthenticationEndpoints(TestWebApplicationFactory<Program> factory)
 	{
-		Environment.SetEnvironmentVariable("ConnectionString", "con");
 		_factory = factory;
 		_client = factory.CreateClient();
 	}
@@ -124,7 +123,6 @@ public class AuthenticationEndpoints : IClassFixture<TestWebApplicationFactory<P
 	public async Task Register_ShouldTrigger_RequestValidation()
 	{
 		using var scope = _factory.Services.CreateScope();
-		var userRepo = scope.ServiceProvider.GetService<IUserRepository>();
 		var dto = new CreateUserDto("", "Pass!Word212", "Pass!Word212", "Name");
 		
 		var response = await _client.PostAsJsonAsync("/register", dto);
