@@ -69,16 +69,13 @@ public class SolutionRepository : ISolutionRepository
 		}
 	}
 
-	public async Task<bool> CheckAnonUserExistsInSessionAsync(int userId)
+	public async Task<bool> CheckAnonUserExistsInSessionAsync(int userId, int sessionId)
 	{
 		using var con = await _dbConnection.CreateConnectionAsync();
 		var query = """
-		            SELECT COUNT(*) FROM exercise_in_session AS eis
-		                JOIN anon_users AS au
-		                ON au.session_id = eis.session_id
-		            WHERE au.user_id = @UserId;
+		            SELECT Count(*) FROM anon_users WHERE user_id = @UserID AND session_id = @SessionId
 		            """;
-		var result = await con.ExecuteScalarAsync<int>(query, new { UserId = userId });
+		var result = await con.ExecuteScalarAsync<int>(query, new { UserId = userId, SessionId = sessionId });
 		return result > 0;
 	}
 

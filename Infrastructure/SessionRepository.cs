@@ -4,6 +4,7 @@ using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
 using Dapper;
+using FluentResults;
 using Infrastructure.Authentication.Contracts;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Contracts;
@@ -177,7 +178,7 @@ public class SessionRepository : ISessionRepository
     }
 
     
-    public async Task<Session?> GetSessionBySessionCodeAsync(string sessionCode)
+    public async Task<Result<Session>> GetSessionBySessionCodeAsync(string sessionCode)
     {
         var query = """
                     SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc, app_users.name AS authorname  
@@ -189,7 +190,7 @@ public class SessionRepository : ISessionRepository
         var session = await con.QueryFirstOrDefaultAsync<Session>(query, new { sessionCode });
         if (session == null)
         {
-            return null;
+            return Result.Fail("Failed to find session"); 
         }
         
         var exercisesQuery = """
@@ -202,7 +203,7 @@ public class SessionRepository : ISessionRepository
         session.ExerciseDetails = exercises.ToList();
             
         
-        return session;
+        return Result.Ok(session);
     }
     
     public async Task<Session?> GetSessionByIdAsync(int sessionId)

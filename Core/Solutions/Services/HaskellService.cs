@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Core.Solutions.Services;
 
-public class HaskellService
+public class HaskellService : IHaskellService
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<HaskellService> _logger;

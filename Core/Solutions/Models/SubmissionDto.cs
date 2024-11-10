@@ -8,9 +8,9 @@ public record SubmissionDto
     public string Solution { get; }
 
     [JsonPropertyName("testCases")]
-    public List<TestCase> TestCases { get; }
+    public List<SubmissionTestCase> TestCases { get; }
 
-    public SubmissionDto(string solution, List<TestCase> testCases)
+    public SubmissionDto(string solution, List<SubmissionTestCase> testCases)
     {
         Solution = solution;
         TestCases = testCases;
@@ -18,7 +18,7 @@ public record SubmissionDto
     public SubmissionDto(ExerciseDto dto)
     {
         Solution = dto.Solution;
-        TestCases = new List<TestCase>();
+        TestCases = new List<SubmissionTestCase>();
 
         int i = 0;
         foreach (var testCase in dto.Testcases)
@@ -35,7 +35,7 @@ public record SubmissionDto
                 outputParams.Add(new Parameter(dto.OutputParamaterType[j], testCase.OutputParams[j]));
             }
 
-            TestCases.Add(new TestCase(i, inputParams, outputParams));
+            TestCases.Add(new SubmissionTestCase(i, inputParams, outputParams));
             i++;
         }
     }
@@ -44,7 +44,7 @@ public record SubmissionDto
 public static class SubmissionMapper {
     public static SubmissionDto ToSubmission(List<Testcase> testCases, string solution)
     {
-        var testDtos = testCases.Select(x => new TestCase(x.TestCaseId, 
+        var testDtos = testCases.Select(x => new SubmissionTestCase(x.TestCaseId, 
             x.Input.Select(y => new Parameter(y.ParameterType, y.ParameterValue)).ToList(),
             x.Output.Select(y => new Parameter(y.ParameterType, y.ParameterValue)).ToList()
             )).ToList();
@@ -52,7 +52,7 @@ public static class SubmissionMapper {
     }
 }
 
-public record TestCase
+public record SubmissionTestCase
 {
     [JsonPropertyName("id")]
     public int Id { get; init; }
@@ -63,7 +63,7 @@ public record TestCase
     [JsonPropertyName("outputParameters")]
     public List<Parameter> OutputParameters { get; }
 
-    public TestCase(int id, List<Parameter> inputParameters, List<Parameter> outputParameters)
+    public SubmissionTestCase(int id, List<Parameter> inputParameters, List<Parameter> outputParameters)
     {
         Id = id;
         InputParameters = inputParameters;

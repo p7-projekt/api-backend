@@ -69,7 +69,7 @@ public class SessionService : ISessionService
                 _logger.LogInformation("Failed to create session for {userid}", authorId);
                 return Result.Fail("Error creating session");
             }
-            _logger.LogInformation("Succesfully created a unique a unqiue session code: {sessionCode}", sessionCode);
+            _logger.LogInformation("Succesfully created a unique session code: {sessionCode}", sessionCode);
         } else if (sessionId == (int)ErrorCodes.ExerciseDoesNotExist)
         {
             return Result.Fail("Exercises for Author could not be found");
@@ -82,13 +82,13 @@ public class SessionService : ISessionService
     {
         // create anon user entry in table
         var session = await _sessionRepository.GetSessionBySessionCodeAsync(dto.SessionCode);
-        if (session == null)
+        if (session.IsFailed)
         {
             return Result.Fail("Invalid session");
         }
-        var student = await _sessionRepository.CreateAnonUser(session.Id);
+        var student = await _sessionRepository.CreateAnonUser(session.Value.Id);
         
-        var timeOffset = session.ExpirationTimeUtc - DateTime.UtcNow;
+        var timeOffset = session.Value.ExpirationTimeUtc - DateTime.UtcNow;
         
         var createToken = _tokenService.GenerateAnonymousUserJwt((int)Math.Ceiling(timeOffset.TotalMinutes), student);
         return new JoinSessionResponseDto(createToken, DateTime.UtcNow.AddMinutes((int)Math.Ceiling(timeOffset.TotalMinutes)));
