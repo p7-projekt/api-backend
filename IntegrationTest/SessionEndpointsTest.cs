@@ -66,10 +66,9 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
     	sessionSub!.GetSessionsAsync(Arg.Any<int>()).Returns(new List<Session>{new Session{Title = "Hello"}}); 
     	var userId = 1;
     	var roles = new List<Roles> { Roles.AnonymousUser};
-    	_client.AddRoleAuth(1, roles);
+    	_client.AddRoleAuth(userId, roles);
     	
     	var response = await _client.GetAsync("/v1/sessions");
-    	
     	
     	Assert.Equal(HttpStatusCode.Forbidden,response.StatusCode);
     }

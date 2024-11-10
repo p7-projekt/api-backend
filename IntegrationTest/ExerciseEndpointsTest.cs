@@ -1,8 +1,6 @@
 ﻿using API;
 using Core.Exercises.Contracts;
 using Core.Exercises.Models;
-using Core.Sessions.Contracts;
-using Core.Sessions.Models;
 using Core.Shared;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
@@ -13,14 +11,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace IntegrationTest;
 
@@ -150,6 +143,24 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
     }
 
     [Fact]
+    public async Task CreateExercise_NoAuthentication_ShouldReturn_401()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var haskellServiceSub = scope.ServiceProvider.GetService<IHaskellService>();
+        var exerciseRepoSub = scope.ServiceProvider.GetService<IExerciseRepository>();
+
+        var solutionRunnerResponse = new SolutionRunnerResponse { Action = ResponseCode.Pass };
+        haskellServiceSub!.SubmitSubmission(Arg.Any<SubmissionDto>()).Returns(solutionRunnerResponse);
+        exerciseRepoSub!.InsertExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Any<int>()).Returns(Result.Ok());
+
+        var requestBody = CreateExerciseRequestBody();
+
+        var response = await _client.PostAsync("/v1/exercises", requestBody);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
     public async Task GetExercisesByAuthor_ShouldReturn_GetExercisesResponseDtoList()
     {
         using var scope = _factory.Services.CreateScope();
@@ -185,6 +196,20 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var response = await _client.GetAsync("/v1/exercises");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetExercisesByAuthor_NoAuthentication_ShouldReturn_401()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var exerciseRepoSub = scope.ServiceProvider.GetService<IExerciseRepository>();
+
+        var exerciseRepoResponse = new List<GetExercisesResponseDto> { new GetExercisesResponseDto(1, "Add numbers") };
+        exerciseRepoSub!.GetExercisesAsync(Arg.Any<int>()).Returns(exerciseRepoResponse);
+
+        var response = await _client.GetAsync("/v1/exercises");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]
@@ -337,6 +362,25 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
     }
 
     [Fact]
+    public async Task UpdateExercise_NoAuthentication_ShouldReturn_401()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var haskellServiceSub = scope.ServiceProvider.GetService<IHaskellService>();
+        var exerciseRepoSub = scope.ServiceProvider.GetService<IExerciseRepository>();
+
+        exerciseRepoSub.VerifyExerciseAuthorAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        var solutionRunnerResponse = new SolutionRunnerResponse { Action = ResponseCode.Pass };
+        haskellServiceSub.SubmitSubmission(Arg.Any<SubmissionDto>()).Returns(solutionRunnerResponse);
+        exerciseRepoSub.UpdateExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Any<int>()).Returns(Result.Ok());
+
+        var requestBody = CreateExerciseRequestBody();
+
+        var response = await _client.PutAsync("v1/exercises/1", requestBody);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
     public async Task DeleteExercise_ShouldReturn_204()
     {
         using var scope = _factory.Services.CreateScope();
@@ -370,6 +414,20 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var response = await _client.DeleteAsync("/v1/exercises/1");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteExercise_NoAuthentication_ShouldReturn_401()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var exerciseRepoSub = scope.ServiceProvider.GetService<IExerciseRepository>();
+
+        exerciseRepoSub.VerifyExerciseAuthorAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        exerciseRepoSub.DeleteExerciseAsync(Arg.Any<int>()).Returns(true);
+
+        var response = await _client.DeleteAsync("/v1/exercises/1");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]
@@ -461,6 +519,32 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var response = await _client.PostAsync("/v1/exercises/1/submission", jsonBody);
 
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task SubmitSolutionProposal_NoAuthorization_ShouldReturn_401()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var solutionRepoSub = scope.ServiceProvider.GetService<ISolutionRepository>();
+        var haskellServiceSub = scope.ServiceProvider.GetService<IHaskellService>();
+
+        solutionRepoSub.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        var testcasesResponse = new List<Testcase> { new Testcase { TestCaseId = 1, IsPublicVisible = true, Input = { new TestParameter { ParameterType = "int", ParameterValue = "1" } }, Output = { new TestParameter { ParameterType = "int", ParameterValue = "1" } } } };
+        solutionRepoSub.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(testcasesResponse);
+        var solutionRunnerResponse = new SolutionRunnerResponse { Action = ResponseCode.Pass };
+        haskellServiceSub.SubmitSubmission(Arg.Any<SubmissionDto>()).Returns(solutionRunnerResponse);
+        solutionRepoSub.InsertSolvedRelation(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+
+        var requestBody = new SubmitSolutionDto(1, "x + y");
+        var jsonBody = new StringContent(
+            System.Text.Json.JsonSerializer.Serialize(requestBody),
+            Encoding.UTF8,
+            "application/json"
+        );
+
+        var response = await _client.PostAsync("/v1/exercises/1/submission", jsonBody);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     private StringContent CreateExerciseRequestBody()
