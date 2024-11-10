@@ -198,7 +198,7 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
         _client.AddRoleAuth(userId, roles);
         var requestBody = CreateSessionDtoInput();
 
-        var response = await _client.PostAsync("/v1/sessions", requestBody);
+        var response = await _client.PostAsJsonAsync("/v1/sessions", requestBody);
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<CreateSessionResponseDto>();
@@ -219,7 +219,7 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
         _client.AddRoleAuth(userId, roles);
         var requestBody = CreateSessionDtoInput();
 
-        var response = await _client.PostAsync("/v1/sessions", requestBody);
+        var response = await _client.PostAsJsonAsync("/v1/sessions", requestBody);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -234,7 +234,7 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
 
         var requestBody = CreateSessionDtoInput();
 
-        var response = await _client.PostAsync("/v1/sessions", requestBody);
+        var response = await _client.PostAsJsonAsync("/v1/sessions", requestBody);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -249,13 +249,9 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
         sessionRepoSub.GetSessionBySessionCodeAsync(Arg.Any<string>()).Returns(sessionResponse);
         sessionRepoSub.CreateAnonUser(Arg.Any<int>()).Returns(1);
 
-        var requestBody = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(new JoinSessionDto("AA1234")),
-            Encoding.UTF8,
-            "application/json"
-        );
+        var requestBody = new JoinSessionDto("AA1234");
 
-        var response = await _client.PostAsync("/join", requestBody);
+        var response = await _client.PostAsJsonAsync("/join", requestBody);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<JoinSessionResponseDto>();
@@ -272,13 +268,9 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
         sessionRepoSub.GetSessionBySessionCodeAsync(Arg.Any<string>()).Returns(Result.Fail("Found no session on session code"));
         sessionRepoSub.CreateAnonUser(Arg.Any<int>()).Returns(1);
 
-        var requestBody = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(new JoinSessionDto("AA1234")),
-            Encoding.UTF8,
-            "application/json"
-        );
+        var requestBody = new JoinSessionDto("AA1234");
 
-        var response = await _client.PostAsync("/join", requestBody);
+        var response = await _client.PostAsJsonAsync("/join", requestBody);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -307,19 +299,13 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
         };
     }
 
-    private StringContent CreateSessionDtoInput()
+    private CreateSessionDto CreateSessionDtoInput()
     {
-        var requestBody = new CreateSessionDto(
+        return new CreateSessionDto(
             Title: "Number sum",
             Description: "Basic exercise",
             ExpiresInHours: 5,
             ExerciseIds: new List<int> { 101 }
-        );
-
-        return new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(requestBody),
-            Encoding.UTF8,
-            "application/json"
         );
     }
 }

@@ -46,7 +46,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         _client.AddRoleAuth(userId, roles);
         var requestBody = CreateExerciseRequestBody();
 
-        var response = await _client.PostAsync("/v1/exercises", requestBody);
+        var response = await _client.PostAsJsonAsync("/v1/exercises", requestBody);
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
     }
@@ -67,7 +67,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         _client.AddRoleAuth(userId, roles);
         var requestBody = CreateExerciseRequestBody();
 
-        var response = await _client.PostAsync("/v1/exercises", requestBody);
+        var response = await _client.PostAsJsonAsync("/v1/exercises", requestBody);
 
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
     }
@@ -88,7 +88,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         _client.AddRoleAuth(userId, roles);
         var requestBody = CreateExerciseRequestBody();
 
-        var response = await _client.PostAsync("/v1/exercises", requestBody);
+        var response = await _client.PostAsJsonAsync("/v1/exercises", requestBody);
 
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
     }
@@ -113,7 +113,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         _client.AddRoleAuth(userId, roles);
         var requestBody = CreateExerciseRequestBody();
 
-        var response = await _client.PostAsync("/v1/exercises", requestBody);
+        var response = await _client.PostAsJsonAsync("/v1/exercises", requestBody);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -138,7 +138,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         _client.AddRoleAuth(userId, roles);
         var requestBody = CreateExerciseRequestBody();
 
-        var response = await _client.PostAsync("/v1/exercises", requestBody);
+        var response = await _client.PostAsJsonAsync("/v1/exercises", requestBody);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -156,7 +156,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
 
         var requestBody = CreateExerciseRequestBody();
 
-        var response = await _client.PostAsync("/v1/exercises", requestBody);
+        var response = await _client.PostAsJsonAsync("/v1/exercises", requestBody);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -285,13 +285,13 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         _client.AddRoleAuth(userId, roles);
         var requestBody = CreateExerciseRequestBody();
 
-        var response = await _client.PutAsync("v1/exercises/1", requestBody);
+        var response = await _client.PutAsJsonAsync("v1/exercises/1", requestBody);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
     [Fact]
-    public async Task UpdateExercise_RepositoryError_ShouldReturn_400()
+    public async Task UpdateExercise_RepositoryError_ShouldReturn_500()
     {
         using var scope = _factory.Services.CreateScope();
         var haskellServiceSub = scope.ServiceProvider.GetService<IHaskellService>();
@@ -307,7 +307,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         _client.AddRoleAuth(userId, roles);
         var requestBody = CreateExerciseRequestBody();
 
-        var response = await _client.PutAsync("v1/exercises/1", requestBody);
+        var response = await _client.PutAsJsonAsync("v1/exercises/1", requestBody);
 
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
     }
@@ -333,7 +333,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         _client.AddRoleAuth(userId, roles);
         var requestBody = CreateExerciseRequestBody();
 
-        var response = await _client.PutAsync("v1/exercises/1", requestBody);
+        var response = await _client.PutAsJsonAsync("v1/exercises/1", requestBody);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -359,7 +359,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         _client.AddRoleAuth(userId, roles);
         var requestBody = CreateExerciseRequestBody();
 
-        var response = await _client.PutAsync("v1/exercises/1", requestBody);
+        var response = await _client.PutAsJsonAsync("v1/exercises/1", requestBody);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -378,7 +378,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
 
         var requestBody = CreateExerciseRequestBody();
 
-        var response = await _client.PutAsync("v1/exercises/1", requestBody);
+        var response = await _client.PutAsJsonAsync("v1/exercises/1", requestBody);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -451,13 +451,8 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var roles = new List<Roles> { Roles.AnonymousUser };
         _client.AddRoleAuth(userId, roles);
         var requestBody = new SubmitSolutionDto(1, "x + y");
-        var jsonBody = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(requestBody),
-            Encoding.UTF8,
-            "application/json"
-        );
 
-        var response = await _client.PostAsync("/v1/exercises/1/submission", jsonBody);
+        var response = await _client.PostAsJsonAsync("/v1/exercises/1/submission", requestBody);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
@@ -484,13 +479,8 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var roles = new List<Roles> { Roles.AnonymousUser };
         _client.AddRoleAuth(userId, roles);
         var requestBody = new SubmitSolutionDto(1, "x + y");
-        var jsonBody = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(requestBody),
-            Encoding.UTF8,
-            "application/json"
-        );
 
-        var response = await _client.PostAsync("/v1/exercises/1/submission", jsonBody);
+        var response = await _client.PostAsJsonAsync("/v1/exercises/1/submission", requestBody);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -513,13 +503,8 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var roles = new List<Roles> { Roles.AnonymousUser };
         _client.AddRoleAuth(userId, roles);
         var requestBody = new SubmitSolutionDto(1, "x + y");
-        var jsonBody = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(requestBody),
-            Encoding.UTF8,
-            "application/json"
-        );
 
-        var response = await _client.PostAsync("/v1/exercises/1/submission", jsonBody);
+        var response = await _client.PostAsJsonAsync("/v1/exercises/1/submission", requestBody);
 
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
     }
@@ -539,20 +524,15 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         solutionRepoSub.InsertSolvedRelation(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
 
         var requestBody = new SubmitSolutionDto(1, "x + y");
-        var jsonBody = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(requestBody),
-            Encoding.UTF8,
-            "application/json"
-        );
 
-        var response = await _client.PostAsync("/v1/exercises/1/submission", jsonBody);
+        var response = await _client.PostAsJsonAsync("/v1/exercises/1/submission", requestBody);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
-    private StringContent CreateExerciseRequestBody()
+    private object CreateExerciseRequestBody()
     {
-        var requestBody = new
+        return new
         {
             Name = "Sum of Two Numbers",
             Description = "A function that calculates the sum of two integers.",
@@ -565,12 +545,6 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
                 new { InputParams = new[] { "-1" }, OutputParams = new[] { "1" }, PublicVisible = false }
             }
         };
-
-        return new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(requestBody),
-            Encoding.UTF8,
-            "application/json"
-        );
     }
 
 }
