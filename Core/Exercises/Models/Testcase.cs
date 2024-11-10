@@ -3,13 +3,10 @@ namespace Core.Exercises.Models;
 public class Testcase
 {
 	public int TestCaseId { get; set; }
-
 	public int ExerciseId { get; set; }
-
 	public int TestCaseNumber { get; set; }
 	public bool IsPublicVisible { get; set; }
 	public List<TestParameter> Input { get; set; } = new();
-
 	public List<TestParameter> Output { get; set; } = new();
 }
 

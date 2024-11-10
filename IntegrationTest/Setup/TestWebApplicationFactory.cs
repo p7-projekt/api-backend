@@ -1,6 +1,7 @@
 using Core.Exercises.Contracts;
 using Core.Sessions.Contracts;
 using Core.Shared;
+using Core.Solutions.Contracts;
 using Core.Solutions.Models;
 using Infrastructure;
 using Infrastructure.Authentication;
@@ -35,10 +36,12 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
 			Environment.SetEnvironmentVariable(AuthConstants.JwtSecret, "sdafdafdfasdfasdfasdfasfdasfdafdf"); 
 			var iSesSub = Substitute.For<ISessionRepository>();
             var iExeciseSub = Substitute.For<IExerciseRepository>();
-			var iHaskellSubstitute = Substitute.For<IHaskellService>();
+			var iHaskellSub = Substitute.For<IHaskellService>();
+			var isolutionSub = Substitute.For<ISolutionRepository>();
             services.AddScoped<ISessionRepository>(_ => iSesSub);
 			services.AddScoped<IExerciseRepository>(_ => iExeciseSub);
-			services.AddScoped<IHaskellService>(_ => iHaskellSubstitute);
+			services.AddScoped<IHaskellService>(_ => iHaskellSub);
+			services.AddScoped<ISolutionRepository>(_ => isolutionSub);
 		});
 		
 		return base.CreateHost(builder);
