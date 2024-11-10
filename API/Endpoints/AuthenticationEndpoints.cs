@@ -37,23 +37,16 @@ public static class AuthenticationEndpoints
 			}
 			return TypedResults.Ok(result.Value);
 		});
-		// For showcase ####################################################################################
-		authGroup.MapGet("/secret",  Ok<string> (ClaimsPrincipal claimsPrincipal) =>
+		authGroup.MapPost("/register", async Task<Results<Ok, BadRequest<ValidationProblemDetails>>>([FromBody] CreateUserDto userDto, IUserService service) =>
 		{
-			var user = claimsPrincipal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
-			var roles = claimsPrincipal.Claims.First(c => c.Type == ClaimTypes.Role).Value;
-			return TypedResults.Ok($"Hello user: {user} with role {roles}");
-		}).RequireAuthorization(nameof(Roles.Instructor));
+			var result = await service.CreateUserAsync(userDto);
+			if (result.IsFailed)
+			{
+				return TypedResults.BadRequest(
+					CreateBadRequest.CreateValidationProblemDetails(result.Errors, "Login failed", "errors"));
+			}
 
-		authGroup.MapGet("/anontoken", Ok<string> (ITokenService service) =>
-		{
-			var token = service.GenerateAnonymousUserJwt(5, 1);
-			return TypedResults.Ok(token);
-		});
-		//###################################################################################################
-		authGroup.MapPost("/register", async ([FromBody] CreateUserDto userDto, IUserService service) =>
-		{
-			await service.CreateUserAsync(userDto);
+			return TypedResults.Ok();
 		}).WithRequestValidation<CreateUserDto>();
 
 		return app;
