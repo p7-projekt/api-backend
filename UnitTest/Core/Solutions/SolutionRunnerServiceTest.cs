@@ -31,7 +31,7 @@ public class SolutionRunnerServiceTest
         var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
         var dto = new SubmitSolutionDto(1, "test");
 
-        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>()).Returns(false);
+        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
 
         var result = await runner.SubmitSolutionAsync(dto, exerciseId: 1, userId: 2);
 
@@ -53,7 +53,7 @@ public class SolutionRunnerServiceTest
         var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
         var dto = new SubmitSolutionDto(1, "test");
 
-        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>()).Returns(true);
+        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(null));
 
         var result = await runner.SubmitSolutionAsync(dto, exerciseId: 1, userId: 2);
@@ -76,7 +76,7 @@ public class SolutionRunnerServiceTest
         var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
         var dto = new SubmitSolutionDto(1, "test");
 
-        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>()).Returns(true);
+        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(new List<Testcase>()));
 
         var result = await runner.SubmitSolutionAsync(dto, exerciseId: 1, userId: 2);
@@ -100,7 +100,7 @@ public class SolutionRunnerServiceTest
         var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
         var dto = new SubmitSolutionDto(1, "test");
 
-        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>()).Returns(true);
+        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(new List<Testcase>()));
 
         var result = await runner.SubmitSolutionAsync(dto, exerciseId: 1, userId: 2);
@@ -125,7 +125,7 @@ public class SolutionRunnerServiceTest
         var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
         var dto = new SubmitSolutionDto(1, "test");
 
-        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>()).Returns(true);
+        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(new List<Testcase>()));
 
         var result = await runner.SubmitSolutionAsync(dto, exerciseId: 1, userId: 2);
@@ -150,7 +150,7 @@ public class SolutionRunnerServiceTest
         var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
         var dto = new SubmitSolutionDto(1, "test");
 
-        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>()).Returns(true);
+        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(new List<Testcase>()));
         solutionRepo.InsertSolvedRelation(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
 
@@ -175,7 +175,7 @@ public class SolutionRunnerServiceTest
         var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
         var dto = new SubmitSolutionDto(1, "test");
 
-        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>()).Returns(true);
+        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(new List<Testcase>()));
         solutionRepo.InsertSolvedRelation(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
 

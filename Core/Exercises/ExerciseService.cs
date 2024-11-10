@@ -81,13 +81,12 @@ public class ExerciseService : IExerciseService
             return Result.Fail("Exercise not updated");
         }
         
-        // Should without a doubt be refactored at some point
         var submissionResult = await _haskellService.SubmitSubmission(new SubmissionDto(dto));
 
         if (submissionResult.IsFailed) 
         {
             _logger.LogInformation("Failed to validate exercise: {exercise}", dto);
-            return Result.Fail("Solution of the exercise did not pass the testcases");
+            return Result.Fail("Internal error occurred on solution runner");
         }
 
         if (!submissionResult.Value.Action.Equals(ResponseCode.Pass))
