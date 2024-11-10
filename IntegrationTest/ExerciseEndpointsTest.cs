@@ -17,6 +17,7 @@ using System.Text;
 
 namespace IntegrationTest;
 
+[Collection(CollectionDefinitions.NonParallelCollectionName)]
 public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Program>>
 {
     private readonly HttpClient _client;
@@ -177,6 +178,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var responseContent = await response.Content.ReadFromJsonAsync<List<GetExercisesResponseDto>>();
+        Assert.IsType<List<GetExercisesResponseDto>>(responseContent);
         Assert.Equal(responseContent!.First(), exerciseRepoResponse.First());
     }
 
@@ -228,6 +230,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var responseContent = await response.Content.ReadFromJsonAsync<GetExerciseResponseDto>();
+        Assert.IsType<GetExerciseResponseDto>(responseContent);
         Assert.Equal(exerciseRepoResponse.Title, responseContent.Title);
         Assert.Equal(solutionRepoResponse.First().Input.First().ParameterValue, responseContent.TestCases.First().InputParams.First());
     }

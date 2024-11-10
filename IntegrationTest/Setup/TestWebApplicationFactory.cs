@@ -37,11 +37,11 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
 			var iSesSub = Substitute.For<ISessionRepository>();
             var iExeciseSub = Substitute.For<IExerciseRepository>();
 			var iHaskellSub = Substitute.For<IHaskellService>();
-			var isolutionSub = Substitute.For<ISolutionRepository>();
+			var iSolutionSub = Substitute.For<ISolutionRepository>();
             services.AddScoped<ISessionRepository>(_ => iSesSub);
 			services.AddScoped<IExerciseRepository>(_ => iExeciseSub);
 			services.AddScoped<IHaskellService>(_ => iHaskellSub);
-			services.AddScoped<ISolutionRepository>(_ => isolutionSub);
+			services.AddScoped<ISolutionRepository>(_ => iSolutionSub);
 		});
 		
 		return base.CreateHost(builder);

@@ -1,13 +1,18 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using API;
+using Core.Exercises.Models;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
 using Core.Shared;
+using FluentResults;
+using Infrastructure.Authentication.Models;
 using IntegrationTest.Setup;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using NSubstitute;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace IntegrationTest;
 
@@ -35,12 +40,10 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
 		
 		var response = await _client.GetAsync("/v1/sessions");
 		
-		
 		Assert.True(response.IsSuccessStatusCode);
 		var body = await response.Content.ReadFromJsonAsync<List<GetSessionResponseDto>>();
 		Assert.Single(body!);
 		Assert.Equal("Hello", body!.First().Title);
-		
 	}
 	
 	[Fact]
@@ -54,7 +57,6 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
     	_client.AddRoleAuth(userId, roles);
     	
     	var response = await _client.GetAsync("/v1/sessions");
-    	
     	
     	Assert.Equal(HttpStatusCode.NotFound,response.StatusCode);
     }
@@ -71,5 +73,253 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
     	var response = await _client.GetAsync("/v1/sessions");
     	
     	Assert.Equal(HttpStatusCode.Forbidden,response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteSession_ShouldReturn_204()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var sessionRepoSub = scope.ServiceProvider.GetService<ISessionRepository>();
+
+        sessionRepoSub.DeleteSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+
+        var userId = 1;
+        var roles = new List<Roles> { Roles.Instructor };
+        _client.AddRoleAuth(userId, roles);
+
+        var response = await _client.DeleteAsync("/v1/sessions/1");
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteSession_RepositoryFailedToDelete_ShouldReturn_404()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var sessionRepoSub = scope.ServiceProvider.GetService<ISessionRepository>();
+
+        sessionRepoSub.DeleteSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
+
+        var userId = 1;
+        var roles = new List<Roles> { Roles.Instructor };
+        _client.AddRoleAuth(userId, roles);
+
+        var response = await _client.DeleteAsync("/v1/sessions/1");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteSession_NoAuthorization_ShouldReturn_401()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var sessionRepoSub = scope.ServiceProvider.GetService<ISessionRepository>();
+
+        sessionRepoSub.DeleteSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+
+        var response = await _client.DeleteAsync("/v1/sessions/1");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Theory]
+    [InlineData(Roles.Instructor)]
+    [InlineData(Roles.AnonymousUser)]
+    public async Task GetExeciseById_ValidRoles_ShouldReturn_GetSessionResponseDto(Roles role)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var sessionRepoSub = scope.ServiceProvider.GetService<ISessionRepository>();
+
+        sessionRepoSub.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        sessionRepoSub.VerifyParticipantAccess(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        var sessionResponse = CreateSessionResponse();
+        sessionRepoSub.GetSessionOverviewAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(sessionResponse);
+
+        var userId = 1;
+        var roles = new List<Roles> { role };
+        _client.AddRoleAuth(userId, roles);
+
+        var response = await _client.GetAsync("/v1/sessions/1");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode); 
+        var body = await response.Content.ReadFromJsonAsync<GetSessionResponseDto>();
+        Assert.IsType<GetSessionResponseDto>(body);
+        Assert.Equal(sessionResponse.Title, body.Title);
+    }
+
+    [Theory]
+    [InlineData(Roles.Instructor)]
+    [InlineData(Roles.AnonymousUser)]
+    public async Task GetExeciseById_RoleVerificationFails_ShouldReturn_404(Roles role)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var sessionRepoSub = scope.ServiceProvider.GetService<ISessionRepository>();
+
+        sessionRepoSub.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
+        sessionRepoSub.VerifyParticipantAccess(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
+        var sessionResponse = CreateSessionResponse();
+        sessionRepoSub.GetSessionOverviewAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(sessionResponse);
+
+        var userId = 1;
+        var roles = new List<Roles> { role };
+        _client.AddRoleAuth(userId, roles);
+
+        var response = await _client.GetAsync("/v1/sessions/1");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetExeciseById_NoAuthentication_ShouldReturn_401()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var sessionRepoSub = scope.ServiceProvider.GetService<ISessionRepository>();
+
+        sessionRepoSub.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        sessionRepoSub.VerifyParticipantAccess(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        var sessionResponse = CreateSessionResponse();
+        sessionRepoSub.GetSessionOverviewAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(sessionResponse);
+
+        var response = await _client.GetAsync("/v1/sessions/1");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateSession_ShouldReturn_SessionCode()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var sessionRepoSub = scope.ServiceProvider.GetService<ISessionRepository>();
+
+        sessionRepoSub.InsertSessionAsync(Arg.Any<Session>(), Arg.Any<int>()).Returns(1);
+
+        var userId = 1;
+        var roles = new List<Roles> { Roles.Instructor };
+        _client.AddRoleAuth(userId, roles);
+        var requestBody = CreateSessionDtoInput();
+
+        var response = await _client.PostAsync("/v1/sessions", requestBody);
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<CreateSessionResponseDto>();
+        Assert.IsType<CreateSessionResponseDto>(body);
+        Assert.NotNull(body.SessionCode);
+    }
+
+    [Fact]
+    public async Task CreateSession_NoExercisesFound_ShouldReturn_400()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var sessionRepoSub = scope.ServiceProvider.GetService<ISessionRepository>();
+
+        sessionRepoSub.InsertSessionAsync(Arg.Any<Session>(), Arg.Any<int>()).Returns(-1);
+
+        var userId = 1;
+        var roles = new List<Roles> { Roles.Instructor };
+        _client.AddRoleAuth(userId, roles);
+        var requestBody = CreateSessionDtoInput();
+
+        var response = await _client.PostAsync("/v1/sessions", requestBody);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateSession_NoAuthorization_ShouldReturn_401()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var sessionRepoSub = scope.ServiceProvider.GetService<ISessionRepository>();
+
+        sessionRepoSub.InsertSessionAsync(Arg.Any<Session>(), Arg.Any<int>()).Returns(1);
+
+        var requestBody = CreateSessionDtoInput();
+
+        var response = await _client.PostAsync("/v1/sessions", requestBody);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task JoinSession_ShouldReturn_JoinSessionResponseDto()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var sessionRepoSub = scope.ServiceProvider.GetService<ISessionRepository>();
+        var sessionResponse = CreateSessionResponse();
+
+        sessionRepoSub.GetSessionBySessionCodeAsync(Arg.Any<string>()).Returns(sessionResponse);
+        sessionRepoSub.CreateAnonUser(Arg.Any<int>()).Returns(1);
+
+        var requestBody = new StringContent(
+            System.Text.Json.JsonSerializer.Serialize(new JoinSessionDto("AA1234")),
+            Encoding.UTF8,
+            "application/json"
+        );
+
+        var response = await _client.PostAsync("/join", requestBody);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<JoinSessionResponseDto>();
+        Assert.IsType<JoinSessionResponseDto>(body);
+    }
+
+    [Fact]
+    public async Task JoinSession_FailedToFindSession_ShouldReturn_400()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var sessionRepoSub = scope.ServiceProvider.GetService<ISessionRepository>();
+        var sessionResponse = CreateSessionResponse();
+
+        sessionRepoSub.GetSessionBySessionCodeAsync(Arg.Any<string>()).Returns(Result.Fail("Found no session on session code"));
+        sessionRepoSub.CreateAnonUser(Arg.Any<int>()).Returns(1);
+
+        var requestBody = new StringContent(
+            System.Text.Json.JsonSerializer.Serialize(new JoinSessionDto("AA1234")),
+            Encoding.UTF8,
+            "application/json"
+        );
+
+        var response = await _client.PostAsync("/join", requestBody);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    private Session CreateSessionResponse()
+    {
+        return new Session
+        {
+            Id = 1,
+            Title = "Sum Numbers",
+            Description = "A training session focused on basic concepts.",
+            AuthorId = 101,
+            AuthorName = "John Doe",
+            ExpirationTimeUtc = DateTime.UtcNow.AddHours(7),
+            SessionCode = "AA1234",
+            Exercises = new List<int> { 1, },
+            ExerciseDetails = new List<SolvedExercise>
+            {
+                new SolvedExercise
+                {
+                    ExerciseId = 1,
+                    ExerciseTitle = "Introduction to C#",
+                    Solved = true
+                }
+            }       
+        };
+    }
+
+    private StringContent CreateSessionDtoInput()
+    {
+        var requestBody = new CreateSessionDto(
+            Title: "Number sum",
+            Description: "Basic exercise",
+            ExpiresInHours: 5,
+            ExerciseIds: new List<int> { 101 }
+        );
+
+        return new StringContent(
+            System.Text.Json.JsonSerializer.Serialize(requestBody),
+            Encoding.UTF8,
+            "application/json"
+        );
     }
 }
