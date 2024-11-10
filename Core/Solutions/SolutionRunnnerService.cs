@@ -9,31 +9,21 @@ namespace Core.Solutions;
 public class SolutionRunnnerService : ISolutionRunnerService
 {
     private readonly ILogger<SolutionRunnnerService> _logger;
-    private readonly HaskellService _haskellService;
+    private readonly IHaskellService _haskellService;
     private readonly ISolutionRepository _solutionRepository;
 
-    public SolutionRunnnerService(ILogger<SolutionRunnnerService> logger, HaskellService haskellService, ISolutionRepository solutionRepository)
+    public SolutionRunnnerService(ILogger<SolutionRunnnerService> logger, IHaskellService haskellService, ISolutionRepository solutionRepository)
     {
         _logger = logger;
         _haskellService = haskellService;
         _solutionRepository = solutionRepository;
     }
 
-    // public async Task<Result<>> ConfirmSolutionAsync(ExerciseDto dto)
-    // {
-    //     var result = await _haskellService.SubmitSubmission(new SubmissionDto(dto));
-    //     if (result.IsFailed)
-    //     {
-    //         return result;
-    //     }
-    //     return await _haskellService.SubmitSubmission(new SubmissionDto(dto));
-    // }
-
     public async Task<Result<HaskellResponseDto>> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId)
     {
         // validate anon user is part of a given session
         // Short circuit if user is not part of the session
-        var userExistsInSession = await _solutionRepository.CheckAnonUserExistsInSessionAsync(userId);
+        var userExistsInSession = await _solutionRepository.CheckAnonUserExistsInSessionAsync(userId, dto.SessionId);
         if (!userExistsInSession)
         {
             _logger.LogWarning("User {UserId} does not exist in Session {SessionId}", userId, dto.SessionId);

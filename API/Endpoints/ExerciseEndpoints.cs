@@ -44,20 +44,20 @@ public static class ExerciseEndpoints
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ExerciseDto>();
         
         exerciseV1.MapGet("/", async Task<Results<Ok<List<GetExercisesResponseDto>>, BadRequest, NotFound>> (ClaimsPrincipal principal, IExerciseService exerciseService) => 
+        {
+            var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
+            if (userId == null)
             {
-                var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
-                if (userId == null)
-                {
-                    return TypedResults.BadRequest();
-                }
+                return TypedResults.BadRequest();
+            }
 
-                var results = await exerciseService.GetExercises(Convert.ToInt32(userId));
-                if (results.IsFailed)
-                {
-                    return TypedResults.NotFound();
-                }
-                return TypedResults.Ok(results.Value);
-            }).RequireAuthorization(nameof(Roles.Instructor));
+            var results = await exerciseService.GetExercises(Convert.ToInt32(userId));
+            if (results.IsFailed)
+            {
+                return TypedResults.NotFound();
+            }
+            return TypedResults.Ok(results.Value);
+        }).RequireAuthorization(nameof(Roles.Instructor));
 
         exerciseV1.MapGet("/{exerciseId:int}", async Task<Results<Ok<GetExerciseResponseDto>, BadRequest>> (int exerciseId, IExerciseService exerciseService) =>
         {
@@ -94,20 +94,20 @@ public static class ExerciseEndpoints
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ExerciseDto>();
 
         exerciseV1.MapDelete("/{exerciseId:int}", async Task<Results<NoContent, NotFound>> (ClaimsPrincipal principal, int exerciseId, IExerciseService exerciseService) =>
+        {
+            var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
+            if (userId == null)
             {
-                var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
-                if (userId == null)
-                {
-                    return TypedResults.NotFound();
-                }
+                return TypedResults.NotFound();
+            }
 
-                var results = await exerciseService.DeleteExercise(exerciseId, Convert.ToInt32(userId));
-                if (results.IsFailed)
-                {
-                    return TypedResults.NotFound();
-                }
-                return TypedResults.NoContent();
-            }).RequireAuthorization(nameof(Roles.Instructor));
+            var results = await exerciseService.DeleteExercise(exerciseId, Convert.ToInt32(userId));
+            if (results.IsFailed)
+            {
+                return TypedResults.NotFound();
+            }
+            return TypedResults.NoContent();
+        }).RequireAuthorization(nameof(Roles.Instructor));
         
         exerciseV1.MapPost("/{exerciseId:int}/submission", async Task<IResult> ([FromBody] SubmitSolutionDto dto, int exerciseId, ISolutionRunnerService service, ClaimsPrincipal principal) =>
         {

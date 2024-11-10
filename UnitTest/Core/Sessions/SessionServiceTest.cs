@@ -4,6 +4,7 @@ using Core.Sessions.Contracts;
 using Core.Sessions.Models;
 using Core.Shared;
 using Core.Shared.Contracts;
+using FluentResults;
 using Infrastructure.Authentication;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -199,7 +200,7 @@ public class SessionServiceTest
         var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub);
 
         var session = new Session();
-        sessionRepoSub.GetSessionBySessionCodeAsync(Arg.Any<string>()).Returns(Task.FromResult<Session?>(null));
+        sessionRepoSub.GetSessionBySessionCodeAsync(Arg.Any<string>()).Returns(Result.Fail("Failed to get session"));
         
         var dto = new JoinSessionDto("token");
         var result = await sessionService.JoinSessionAnonUser(dto);

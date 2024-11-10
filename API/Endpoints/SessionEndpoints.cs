@@ -24,13 +24,13 @@ public static class SessionEndpoints
             .WithTags("Sessions");
 
         sessionV1Group.MapDelete("/{sessionId:int}",
-            async Task<Results<NoContent, NotFound>> (ClaimsPrincipal principal, int sessionId,
+            async Task<Results<NoContent, NotFound, BadRequest>> (ClaimsPrincipal principal, int sessionId,
                 ISessionService service) =>
             {
                 var userId = principal.FindFirst( ClaimTypes.UserData)?.Value;
                 if (userId == null)
                 {
-                    return TypedResults.NotFound();
+                    return TypedResults.BadRequest();
                 }
                 
                 var results = await service.DeleteSession(sessionId, Convert.ToInt32(userId));

@@ -13,10 +13,10 @@ public class ExerciseService : IExerciseService
     private readonly IExerciseRepository _exerciseRepository;
     private readonly ILogger<ExerciseService> _logger;
     private readonly ISolutionRepository _solutionRepository;
-    private readonly HaskellService _haskellService;
+    private readonly IHaskellService _haskellService;
 
 
-    public ExerciseService(IExerciseRepository exerciseRepository, ILogger<ExerciseService> logger, ISolutionRepository solutionRepository, HaskellService haskellService)
+    public ExerciseService(IExerciseRepository exerciseRepository, ILogger<ExerciseService> logger, ISolutionRepository solutionRepository, IHaskellService haskellService)
     {
         _exerciseRepository = exerciseRepository;
         _logger = logger;
@@ -81,13 +81,12 @@ public class ExerciseService : IExerciseService
             return Result.Fail("Exercise not updated");
         }
         
-        // Should without a doubt be refactored at some point
         var submissionResult = await _haskellService.SubmitSubmission(new SubmissionDto(dto));
 
         if (submissionResult.IsFailed) 
         {
             _logger.LogInformation("Failed to validate exercise: {exercise}", dto);
-            return Result.Fail("Solution of the exercise did not pass the testcases");
+            return Result.Fail("Internal error occurred on solution runner");
         }
 
         if (!submissionResult.Value.Action.Equals(ResponseCode.Pass))
