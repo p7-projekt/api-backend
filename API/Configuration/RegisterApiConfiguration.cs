@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text;
 using Asp.Versioning;
 using Core.Shared;
@@ -46,7 +47,7 @@ public static class RegisterApiConfiguration
                     else
                     {
                         policy.WithOrigins("localhost:5173")
-                            .WithMethods(HttpMethods.Get, HttpMethods.Patch, HttpMethods.Delete, HttpMethods.Post)
+                            .WithMethods(HttpMethods.Get, HttpMethods.Patch, HttpMethods.Delete, HttpMethods.Post, HttpMethods.Put)
                             .AllowAnyHeader();
                     }
                 }
