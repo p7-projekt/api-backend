@@ -46,6 +46,8 @@ public class Program
             app.UseSwaggerUI();
             app.Services.DevelopmentSeed();
         }
+        // Seed admin account
+        app.Services.SeedAdminAccount();
         
         app.UseExceptionHandler();
         app.UseHttpsRedirection();

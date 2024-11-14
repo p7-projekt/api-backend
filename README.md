@@ -1,5 +1,18 @@
 # api-backend
 
+## Production
+
+```env
+JWT_KEY=XXXXXXXXXXXXXXX(atleast 128 bits)
+MOZART_HASKELL=HOST:PORT
+SEED_ADMIN="true"/"false"
+# if seed admin then
+ADMIN_MAIL="someEmail@email.dk"
+ADMIN_PASS="YourPass!1231"
+```
+
+## Development
+
 Compose env format:
 
 ```env
@@ -10,7 +23,6 @@ POSTGRES_USER=xx
 POSTGRES_PASSWORD=xx
 POSTGRES_PORT=xx
 ```
-
 
 To access the most recent test-coverage report, go to: https://p7-projekt.github.io/api-backend/
 

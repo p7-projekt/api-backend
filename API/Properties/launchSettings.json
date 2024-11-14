@@ -18,7 +18,11 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "JWT_KEY": "8a6e4bde-3a4b-4691-9223-1662e4d3b4c4",
-        "MOZART_HASKELL": "localhost:8080"
+        "MOZART_HASKELL": "localhost:8080",
+        "SEED_ADMIN": "true",
+        "ADMIN_MAIL": "admin@p7.dk",
+        "ADMIN_PASS": "Admin!1234"
+        
       }
     },
     "https": {

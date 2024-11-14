@@ -1,6 +1,10 @@
 using System.Reflection;
+using Core.Shared;
 using Dapper;
+using Infrastructure.Authentication.Contracts;
+using Infrastructure.Authentication.Models;
 using Infrastructure.Persistence.Contracts;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -8,6 +12,42 @@ namespace Infrastructure.Persistence;
 
 public static class SeedDatabase
 {
+    public static IServiceProvider SeedAdminAccount(this IServiceProvider serviceProvider)
+    {
+        if (!string.Equals(Environment.GetEnvironmentVariable("SEED_ADMIN"), "true", StringComparison.OrdinalIgnoreCase))
+        {
+            return serviceProvider;
+        }
+        using var scope = serviceProvider.CreateScope();
+        var userRepo = scope.ServiceProvider.GetService<IUserRepository>();
+        var loggerFactory = scope.ServiceProvider.GetService<ILoggerFactory>();
+        var logger = loggerFactory?.CreateLogger("AdminAccountSeed");
+        var passwordHasher = new PasswordHasher<User>();
+        var user = new User
+        {
+            CreatedAt = DateTime.UtcNow,
+            Name = "Admin",
+            Email = Environment.GetEnvironmentVariable("ADMIN_MAIL") ??
+                    throw new NullReferenceException("ADMIN_MAIL")
+        };
+        var hashedPassword = passwordHasher.HashPassword(user, 
+            Environment.GetEnvironmentVariable("ADMIN_PASS") ?? throw new NullReferenceException("ADMIN_PASS"));
+        user.PasswordHash = hashedPassword;
+        var result = userRepo!.IsEmailAvailableAsync(user.Email).WaitAsync(CancellationToken.None).Result;
+        if (!result)
+        {
+            return serviceProvider;
+        }
+        var createUser = userRepo.CreateUserAsync(user, Roles.Instructor).Result;
+        if (createUser.IsFailed)
+        {
+            logger!.LogWarning($"Failed to create user {user.Email}"); 
+            return serviceProvider;
+        }
+        logger!.LogInformation($"User {user.Email} has been created");
+        return serviceProvider;
+    }
+    
     public static IServiceProvider DevelopmentSeed(this IServiceProvider serviceProvider)
     {
         if (!string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Development",

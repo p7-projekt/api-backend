@@ -30,13 +30,13 @@ public class UserService : IUserService
 		var passwordHash = _passwordHasher.HashPassword(user, dto.Password);
 		user.PasswordHash = passwordHash;
 
-		var createUser = await _userRepository.CreateUserAsync(user, Roles.Instructor);
+		var createUser = await _userRepository.CreateUserAsync(user, Roles.Student);
 		if (createUser.IsFailed) 
 		{
 			_logger.LogError("Failed to register new user with email: {email}", user.Email);
 			return Result.Fail("Failed to register new user");
 		}
-		_logger.LogInformation("User created: {email} with role: {role}", user.Email, Roles.Instructor);
+		_logger.LogInformation("User created: {email} with role: {role}", user.Email, Roles.Student);
 
 		return Result.Ok();
 	}

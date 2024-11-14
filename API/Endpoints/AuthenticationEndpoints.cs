@@ -37,13 +37,15 @@ public static class AuthenticationEndpoints
 			}
 			return TypedResults.Ok(result.Value);
 		});
+		
+		// Registers a student user
 		authGroup.MapPost("/register", async Task<Results<Ok, BadRequest<ValidationProblemDetails>>>([FromBody] CreateUserDto userDto, IUserService service) =>
 		{
 			var result = await service.CreateUserAsync(userDto);
 			if (result.IsFailed)
 			{
 				return TypedResults.BadRequest(
-					CreateBadRequest.CreateValidationProblemDetails(result.Errors, "Login failed", "errors"));
+					CreateBadRequest.CreateValidationProblemDetails(result.Errors, "Registration failed", "errors"));
 			}
 
 			return TypedResults.Ok();
