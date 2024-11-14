@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using API.Configuration;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
 using Core.Shared;
@@ -51,7 +52,7 @@ public static class UserEndpoints
 				} 
 
 				return TypedResults.Ok(user.Value);
-			}).RequireAuthorization(nameof(Roles.AnonymousUser));
+			}).RequireAuthorization(nameof(Policies.AllowAllRoles));
 
 		return app;
 	}
