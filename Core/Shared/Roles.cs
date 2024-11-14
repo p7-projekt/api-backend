@@ -3,6 +3,7 @@ namespace Core.Shared;
 public enum Roles
 {
 	Instructor,
+	Student,
 	AnonymousUser,
 	None
 }
@@ -19,6 +20,9 @@ public class RolesConvert
 				break;
 			case nameof(Roles.AnonymousUser):
 				currentRole = Roles.AnonymousUser;
+				break;
+			case nameof(Roles.Student):
+				currentRole = Roles.Student;
 				break;
 		}
 

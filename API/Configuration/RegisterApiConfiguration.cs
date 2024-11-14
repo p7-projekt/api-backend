@@ -53,13 +53,8 @@ public static class RegisterApiConfiguration
                 }
                 );
         });
-        
-        // authentication - Authorization
-        services.AddAuthorization(opt =>
-        {
-            opt.AddPolicy(nameof(Roles.Instructor), policy => policy.RequireRole(nameof(Roles.Instructor)));
-            opt.AddPolicy(nameof(Roles.AnonymousUser), policy => policy.RequireRole(nameof(Roles.Instructor), nameof(Roles.AnonymousUser)));
-        });
+
+        services.AddRolePolicies(); 
         services.AddAuthentication(opt =>
         {
             opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -80,6 +75,18 @@ public static class RegisterApiConfiguration
             };
         });
         
+        return services;
+    }
+
+    private static IServiceCollection AddRolePolicies(this IServiceCollection services)
+    {
+        services.AddAuthorization(opt =>
+        {
+            opt.AddPolicy(nameof(Roles.Instructor), policy => policy.RequireRole(nameof(Roles.Instructor)));
+            opt.AddPolicy(nameof(Roles.Student), policy => policy.RequireRole(nameof(Roles.Student)));
+            opt.AddPolicy(nameof(Roles.AnonymousUser), policy => policy.RequireRole(nameof(Roles.AnonymousUser)));
+        });
+
         return services;
     }
 }
