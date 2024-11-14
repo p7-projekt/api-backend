@@ -86,15 +86,14 @@ public static class RegisterApiConfiguration
             opt.AddPolicy(nameof(Roles.Student), policy => policy.RequireRole(nameof(Roles.Student)));
             
             opt.AddPolicy(nameof(Roles.AnonymousUser), policy => policy.RequireRole(nameof(Roles.AnonymousUser)));
-            opt.AddPolicy(nameof(Policies.AllowAllRoles), policy => policy.RequireRole(nameof(Roles.Instructor), nameof(Roles.Student), nameof(Roles.AnonymousUser)));
+            opt.AddPolicy(Policies.AllowAllRoles, policy => policy.RequireRole(nameof(Roles.Instructor), nameof(Roles.Student), nameof(Roles.AnonymousUser)));
         });
 
         return services;
     }
 }
 
-public enum Policies
+public static class Policies
 {
-    AllowAllRoles,
-    
+    public const string AllowAllRoles = "AllowAllRoles";
 }

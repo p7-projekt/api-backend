@@ -52,7 +52,7 @@ public static class UserEndpoints
 				} 
 
 				return TypedResults.Ok(user.Value);
-			}).RequireAuthorization(nameof(Policies.AllowAllRoles));
+			}).RequireAuthorization(Policies.AllowAllRoles);
 
 		return app;
 	}

@@ -80,7 +80,7 @@ public static class SessionEndpoints
 
             return TypedResults.Ok(result.Value);
             
-        }).RequireAuthorization(nameof(Policies.AllowAllRoles));
+        }).RequireAuthorization(Policies.AllowAllRoles);
         
         // Create session
         sessionV1Group.MapPost("/", async Task<Results<Created<CreateSessionResponseDto>, BadRequest<ValidationProblemDetails>>> ([FromBody] CreateSessionDto dto, ClaimsPrincipal principal, ISessionService service) =>
