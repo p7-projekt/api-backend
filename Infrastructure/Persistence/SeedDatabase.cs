@@ -14,10 +14,12 @@ public static class SeedDatabase
 {
     public static IServiceProvider SeedAdminAccount(this IServiceProvider serviceProvider)
     {
-        if (!string.Equals(Environment.GetEnvironmentVariable("SEED_ADMIN"), "true", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(Environment.GetEnvironmentVariable("SEED_ADMIN"), "true",
+                StringComparison.OrdinalIgnoreCase))
         {
             return serviceProvider;
         }
+
         using var scope = serviceProvider.CreateScope();
         var userRepo = scope.ServiceProvider.GetService<IUserRepository>();
         var loggerFactory = scope.ServiceProvider.GetService<ILoggerFactory>();
@@ -30,7 +32,7 @@ public static class SeedDatabase
             Email = Environment.GetEnvironmentVariable("ADMIN_MAIL") ??
                     throw new NullReferenceException("ADMIN_MAIL")
         };
-        var hashedPassword = passwordHasher.HashPassword(user, 
+        var hashedPassword = passwordHasher.HashPassword(user,
             Environment.GetEnvironmentVariable("ADMIN_PASS") ?? throw new NullReferenceException("ADMIN_PASS"));
         user.PasswordHash = hashedPassword;
         var result = userRepo!.IsEmailAvailableAsync(user.Email).WaitAsync(CancellationToken.None).Result;
@@ -38,63 +40,66 @@ public static class SeedDatabase
         {
             return serviceProvider;
         }
+
         var createUser = userRepo.CreateUserAsync(user, Roles.Instructor).Result;
         if (createUser.IsFailed)
         {
-            logger!.LogWarning($"Failed to create user {user.Email}"); 
+            logger!.LogWarning($"Failed to create user {user.Email}");
             return serviceProvider;
         }
+
         logger!.LogInformation($"User {user.Email} has been created");
         return serviceProvider;
     }
-    
-    public static IServiceProvider DevelopmentSeed(this IServiceProvider serviceProvider)
+}
+
+/*public static IServiceProvider DevelopmentSeed(this IServiceProvider serviceProvider)
+{
+    if (!string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Development",
+            StringComparison.OrdinalIgnoreCase))
     {
-        if (!string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Development",
-                StringComparison.OrdinalIgnoreCase))
-        {
-            return serviceProvider;
-        }
-        using var scope = serviceProvider.CreateScope();
-        var loggerFactory = scope.ServiceProvider.GetService<ILoggerFactory>();
-        var logger = loggerFactory?.CreateLogger("DevelopmentSeed");
-        var dbFactory = serviceProvider.GetService<IDbConnectionFactory>();
-        if (IsDatabaseSeeded(dbFactory!))
-        {
-            logger!.LogInformation("Database does already contain data.");
-            return serviceProvider;
-        }
-        logger!.LogInformation("Database is not seeded seeding...");
-        var seedQueries = GetSeedQueries(logger!);
-        using var con = dbFactory!.CreateConnectionAsync().WaitAsync(CancellationToken.None).Result;
-        con.Query(seedQueries);
-        logger!.LogInformation("Database is seeded!");
         return serviceProvider;
     }
-
-    private static bool IsDatabaseSeeded(IDbConnectionFactory factory)
+    using var scope = serviceProvider.CreateScope();
+    var loggerFactory = scope.ServiceProvider.GetService<ILoggerFactory>();
+    var logger = loggerFactory?.CreateLogger("DevelopmentSeed");
+    var dbFactory = serviceProvider.GetService<IDbConnectionFactory>();
+    if (IsDatabaseSeeded(dbFactory!))
     {
-        using var con = factory.CreateConnectionAsync().WaitAsync(CancellationToken.None).Result;
-        var query = "SELECT COUNT(*) FROM exercise;";
-        var result = con.Query<int>(query);
-        if (result.First() > 0)
-        {
-            return true;
-        }
-
-        return false;
+        logger!.LogInformation("Database does already contain data.");
+        return serviceProvider;
     }
-    private static string GetSeedQueries(ILogger logger)
-    {
-        var assembly = Assembly.GetExecutingAssembly();
-        var dummydata = assembly.GetManifestResourceNames().Single(str => str.EndsWith("DummyData.sql"));
-        using var stream = assembly.GetManifestResourceStream(dummydata);
-        if (stream == null)
-        {
-            logger.LogWarning("Could not find DummyData.sql");
-            return string.Empty;
-        }
-        using var reader = new StreamReader(stream);
-        return reader.ReadToEnd();
-    }
+    logger!.LogInformation("Database is not seeded seeding...");
+    var seedQueries = GetSeedQueries(logger!);
+    using var con = dbFactory!.CreateConnectionAsync().WaitAsync(CancellationToken.None).Result;
+    con.Query(seedQueries);
+    logger!.LogInformation("Database is seeded!");
+    return serviceProvider;
 }
+
+private static bool IsDatabaseSeeded(IDbConnectionFactory factory)
+{
+    using var con = factory.CreateConnectionAsync().WaitAsync(CancellationToken.None).Result;
+    var query = "SELECT COUNT(*) FROM exercise;";
+    var result = con.Query<int>(query);
+    if (result.First() > 0)
+    {
+        return true;
+    }
+
+    return false;
+}
+private static string GetSeedQueries(ILogger logger)
+{
+    var assembly = Assembly.GetExecutingAssembly();
+    var dummydata = assembly.GetManifestResourceNames().Single(str => str.EndsWith("DummyData.sql"));
+    using var stream = assembly.GetManifestResourceStream(dummydata);
+    if (stream == null)
+    {
+        logger.LogWarning("Could not find DummyData.sql");
+        return string.Empty;
+    }
+    using var reader = new StreamReader(stream);
+    return reader.ReadToEnd();
+}
+}*/
