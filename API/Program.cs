@@ -44,7 +44,7 @@ public class Program
         {
             app.UseSwagger();
             app.UseSwaggerUI();
-            app.Services.DevelopmentSeed();
+            // app.Services.DevelopmentSeed();
         }
         // Seed admin account
         app.Services.SeedAdminAccount();
