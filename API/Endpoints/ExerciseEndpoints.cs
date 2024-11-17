@@ -124,7 +124,7 @@ public static class ExerciseEndpoints
             }
             
             return TypedResults.Ok();
-        }).WithRequestValidation<SubmitSolutionDto>().RequireAuthorization(nameof(Roles.AnonymousUser));
+        }).WithRequestValidation<SubmitSolutionDto>().RequireAuthorization(Policies.AllowSubmissions);
 
         return app;
     }

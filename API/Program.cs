@@ -1,6 +1,7 @@
 using API.Configuration;
 using API.Endpoints;
 using Core;
+using Core.Solutions.Contracts;
 using Core.Solutions.Models;
 using Core.Solutions.Services;
 using Infrastructure;
@@ -20,8 +21,10 @@ public class Program
         });
         
         // Supported languages
-        builder.Services.AddHttpClient<IHaskellService, HaskellService>()
-            .SetHandlerLifetime(TimeSpan.FromSeconds(30));
+        builder.Services.AddHttpClient<ILanguageService, LanguageService>()
+            .SetHandlerLifetime(TimeSpan.FromSeconds(30)); 
+        // builder.Services.AddHttpClient<IHaskellService, HaskellService>()
+            // .SetHandlerLifetime(TimeSpan.FromSeconds(30));
         
         // Add services to the container.
         builder.Services.AddCoreServices();

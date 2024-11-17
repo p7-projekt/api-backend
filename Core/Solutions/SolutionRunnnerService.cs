@@ -9,14 +9,15 @@ namespace Core.Solutions;
 public class SolutionRunnnerService : ISolutionRunnerService
 {
     private readonly ILogger<SolutionRunnnerService> _logger;
-    private readonly IHaskellService _haskellService;
     private readonly ISolutionRepository _solutionRepository;
+    private readonly LanguageService _languageService;
 
-    public SolutionRunnnerService(ILogger<SolutionRunnnerService> logger, IHaskellService haskellService, ISolutionRepository solutionRepository)
+    public SolutionRunnnerService(ILogger<SolutionRunnnerService> logger, ISolutionRepository solutionRepository, LanguageService languageService)
     {
         _logger = logger;
-        _haskellService = haskellService;
+        
         _solutionRepository = solutionRepository;
+        _languageService = languageService;
     }
 
     public async Task<Result<HaskellResponseDto>> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId)
@@ -29,6 +30,14 @@ public class SolutionRunnnerService : ISolutionRunnerService
             _logger.LogWarning("User {UserId} does not exist in Session {SessionId}", userId, dto.SessionId);
             return Result.Fail($"User {userId} does not exist in the session.");
         }
+        // get selected language 
+        var language = await _solutionRepository.GetSolutionLanguageBySession(dto.LanguageId, dto.SessionId);
+        if (language == null)
+        {
+            _logger.LogWarning("Language {Language} does not exist for exercise id {exerciseid}", dto.LanguageId, exerciseId);
+            return Result.Fail($"Language {dto.LanguageId} does not exist.");
+        }
+        
         // get testcases
         var testcases = await _solutionRepository.GetTestCasesByExerciseIdAsync(exerciseId);
         if (testcases == null)
@@ -38,7 +47,8 @@ public class SolutionRunnnerService : ISolutionRunnerService
         
         // Validate through mozart
         var submission = SubmissionMapper.ToSubmission(testcases, dto.Solution);
-        var result = await _haskellService.SubmitSubmission(submission);
+        _languageService.DetermineStrategy((Language)language.Id);
+        var result = await _languageService.SubmitSubmission(submission);
         if (result.IsFailed)
         {
             return Result.Fail(result.Errors);
@@ -64,4 +74,6 @@ public class SolutionRunnnerService : ISolutionRunnerService
         }
         return Result.Ok();
     }
+
+   
 }

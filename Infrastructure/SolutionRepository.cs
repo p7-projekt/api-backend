@@ -79,6 +79,20 @@ public class SolutionRepository : ISolutionRepository
 		return result > 0;
 	}
 
+	public async Task<LanguageSupport?> GetSolutionLanguageBySession(int languageId, int sessionId)
+	{
+		using var con = await _dbConnection.CreateConnectionAsync();
+		// lis (session_id, language_id) ls (langauge_id, language, version) 
+		var query = """
+		            SELECT ls.language_id AS id, ls.language, ls.version 
+		            FROM language_support AS ls
+		            JOIN language_in_session AS lis
+		            	on lis.language_id = ls.language_id
+		            WHERE lis.session_id = @LanguageId AND lis.language_id = @SessionId
+		            """;
+		return await con.QuerySingleOrDefaultAsync<LanguageSupport>(query, new { LanguageId = languageId, SessionId = sessionId });
+	}
+
 	public async Task<bool> InsertSolvedRelation(int userId, int exerciseId)
 	{
 		using var con = await _dbConnection.CreateConnectionAsync();

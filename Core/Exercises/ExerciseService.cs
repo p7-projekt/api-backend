@@ -2,6 +2,7 @@
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using Core.Exercises.Contracts;
+using Core.Solutions;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
 using Core.Solutions.Services;
@@ -13,15 +14,17 @@ public class ExerciseService : IExerciseService
     private readonly IExerciseRepository _exerciseRepository;
     private readonly ILogger<ExerciseService> _logger;
     private readonly ISolutionRepository _solutionRepository;
-    private readonly IHaskellService _haskellService;
+    // private readonly IHaskellService _haskellService;
+    private readonly LanguageService _languageService;
 
 
-    public ExerciseService(IExerciseRepository exerciseRepository, ILogger<ExerciseService> logger, ISolutionRepository solutionRepository, IHaskellService haskellService)
+    public ExerciseService(IExerciseRepository exerciseRepository, ILogger<ExerciseService> logger, ISolutionRepository solutionRepository, LanguageService languageService)
     {
         _exerciseRepository = exerciseRepository;
         _logger = logger;
         _solutionRepository = solutionRepository;
-        _haskellService = haskellService;
+        _languageService = languageService;
+        _languageService.DetermineStrategy(Language.Haskell);
     }
 
     public async Task<Result> DeleteExercise(int exerciseId, int userId)
@@ -80,8 +83,8 @@ public class ExerciseService : IExerciseService
             _logger.LogInformation("Exercise: {exercise_id} not created by provided author: {author_Id}", exerciseId, authorId);
             return Result.Fail("Exercise not updated");
         }
-        
-        var submissionResult = await _haskellService.SubmitSubmission(new SubmissionDto(dto));
+
+        var submissionResult = await _languageService.SubmitSubmission(new SubmissionDto(dto));
 
         if (submissionResult.IsFailed) 
         {
@@ -105,7 +108,7 @@ public class ExerciseService : IExerciseService
 
     public async Task<Result<HaskellResponseDto>> CreateExercise(ExerciseDto dto, int authorId)
     {
-        var result = await _haskellService.SubmitSubmission(new SubmissionDto(dto));
+        var result = await _languageService.SubmitSubmission(new SubmissionDto(dto));
         if (result.IsFailed)
         {
             return Result.Fail("Internal error");
