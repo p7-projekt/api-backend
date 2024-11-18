@@ -12,7 +12,7 @@ namespace UnitTest.Core.Solutions;
 
 public class SolutionRunnerServiceTest
 {
-    private readonly ILogger<SolutionRunnnerService> loggerSub = Substitute.For<ILogger<SolutionRunnnerService>>();
+    private readonly ILogger<SolutionRunnerService> loggerSub = Substitute.For<ILogger<SolutionRunnerService>>();
     private readonly ILogger<HaskellService> haskellLoggerSub = Substitute.For<ILogger<HaskellService>>();
 
     [Fact]
@@ -28,7 +28,7 @@ public class SolutionRunnerServiceTest
         var client = new HttpClient(httpClientSub);
         var solutionRepo = Substitute.For<ISolutionRepository>();
         var haskellService = new HaskellService(client, haskellLoggerSub);
-        var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
+        var runner = new SolutionRunnerService(loggerSub, haskellService, solutionRepo);
         var dto = new SubmitSolutionDto(1, "test");
 
         solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
@@ -50,7 +50,7 @@ public class SolutionRunnerServiceTest
         var client = new HttpClient(httpClientSub);
         var solutionRepo = Substitute.For<ISolutionRepository>();
         var haskellService = new HaskellService(client, haskellLoggerSub);
-        var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
+        var runner = new SolutionRunnerService(loggerSub, haskellService, solutionRepo);
         var dto = new SubmitSolutionDto(1, "test");
 
         solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
@@ -73,7 +73,7 @@ public class SolutionRunnerServiceTest
         var client = new HttpClient(httpClientSub);
         var solutionRepo = Substitute.For<ISolutionRepository>();
         var haskellService = new HaskellService(client, haskellLoggerSub);
-        var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
+        var runner = new SolutionRunnerService(loggerSub, haskellService, solutionRepo);
         var dto = new SubmitSolutionDto(1, "test");
 
         solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
@@ -97,7 +97,7 @@ public class SolutionRunnerServiceTest
         var client = new HttpClient(httpClientSub);
         var solutionRepo = Substitute.For<ISolutionRepository>();
         var haskellService = new HaskellService(client, haskellLoggerSub);
-        var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
+        var runner = new SolutionRunnerService(loggerSub, haskellService, solutionRepo);
         var dto = new SubmitSolutionDto(1, "test");
 
         solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
@@ -122,7 +122,7 @@ public class SolutionRunnerServiceTest
         var client = new HttpClient(httpClientSub);
         var solutionRepo = Substitute.For<ISolutionRepository>();
         var haskellService = new HaskellService(client, haskellLoggerSub);
-        var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
+        var runner = new SolutionRunnerService(loggerSub, haskellService, solutionRepo);
         var dto = new SubmitSolutionDto(1, "test");
 
         solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
@@ -147,7 +147,7 @@ public class SolutionRunnerServiceTest
         var client = new HttpClient(httpClientSub);
         var solutionRepo = Substitute.For<ISolutionRepository>();
         var haskellService = new HaskellService(client, haskellLoggerSub);
-        var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
+        var runner = new SolutionRunnerService(loggerSub, haskellService, solutionRepo);
         var dto = new SubmitSolutionDto(1, "test");
 
         solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
@@ -172,7 +172,7 @@ public class SolutionRunnerServiceTest
         var client = new HttpClient(httpClientSub);
         var solutionRepo = Substitute.For<ISolutionRepository>();
         var haskellService = new HaskellService(client, haskellLoggerSub);
-        var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
+        var runner = new SolutionRunnerService(loggerSub, haskellService, solutionRepo);
         var dto = new SubmitSolutionDto(1, "test");
 
         solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);

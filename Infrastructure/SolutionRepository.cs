@@ -24,7 +24,8 @@ public class SolutionRepository : ISolutionRepository
 		try
 		{
 			var query = """
-			            SELECT testcase_id AS testcaseid, exercise_id as exerciseid, testcase_no as testcasenumber, public_visible as IsPublicVisible FROM testcase WHERE exercise_id = @ExerciseId;
+			            SELECT testcase_id AS testcaseid, exercise_id as exerciseid, testcase_no as testcasenumber,
+			            public_visible as IsPublicVisible FROM testcase WHERE exercise_id = @ExerciseId;
 			            """;
 			var testCases = (await con.QueryAsync<Testcase>(query, new { exerciseId })).ToList();
 			
@@ -88,7 +89,7 @@ public class SolutionRepository : ISolutionRepository
 		            FROM language_support AS ls
 		            JOIN language_in_session AS lis
 		            	on lis.language_id = ls.language_id
-		            WHERE lis.session_id = @LanguageId AND lis.language_id = @SessionId
+		            WHERE lis.session_id = @SessionId AND lis.language_id = @LanguageId
 		            """;
 		return await con.QuerySingleOrDefaultAsync<LanguageSupport>(query, new { LanguageId = languageId, SessionId = sessionId });
 	}

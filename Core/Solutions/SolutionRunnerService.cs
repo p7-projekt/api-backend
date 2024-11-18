@@ -1,18 +1,17 @@
 ﻿using Core.Solutions.Contracts;
 using Core.Solutions.Models;
-using Core.Solutions.Services;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Solutions;
 
-public class SolutionRunnnerService : ISolutionRunnerService
+public class SolutionRunnerService : ISolutionRunnerService
 {
-    private readonly ILogger<SolutionRunnnerService> _logger;
+    private readonly ILogger<SolutionRunnerService> _logger;
     private readonly ISolutionRepository _solutionRepository;
     private readonly ILanguageService _languageService;
 
-    public SolutionRunnnerService(ILogger<SolutionRunnnerService> logger, ISolutionRepository solutionRepository, ILanguageService languageService)
+    public SolutionRunnerService(ILogger<SolutionRunnerService> logger, ISolutionRepository solutionRepository, ILanguageService languageService)
     {
         _logger = logger;
         
@@ -47,8 +46,7 @@ public class SolutionRunnnerService : ISolutionRunnerService
         
         // Validate through mozart
         var submission = SubmissionMapper.ToSubmission(testcases, dto.Solution);
-        _languageService.DetermineStrategy((Language)language.Id);
-        var result = await _languageService.SubmitSubmission(submission);
+        var result = await _languageService.SubmitSubmission(submission, (Language)language.Id);
         if (result.IsFailed)
         {
             return Result.Fail(result.Errors);
