@@ -3,6 +3,7 @@ using Core.Exercises.Models;
 using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
+using Core.Solutions.Models;
 using Dapper;
 using FluentResults;
 using Infrastructure.Authentication.Contracts;
@@ -59,6 +60,14 @@ public class SessionRepository : ISessionRepository
                 transaction.Rollback();
                 return (int)SessionService.ErrorCodes.ExerciseDoesNotExist;
             }
+            
+            var languagesExists = await VerifyLanguagesIdsAsync(session.Languages);
+            if (!languagesExists)
+            {
+                _logger.LogWarning("Languages {languages}, does not exist", session.Languages);
+                transaction.Rollback();
+                return (int)SessionService.ErrorCodes.LanguagesDoesNotExist;
+            }
 
             var query = """
                         INSERT INTO session (title, description, author_id, expirationtime_utc, session_code) VALUES (@Title, @Description, @Author, @ExpirationTime, @SessionCode) RETURNING session_id;
@@ -78,7 +87,16 @@ public class SessionRepository : ISessionRepository
             await con.ExecuteAsync(exerciseQuery,
                 session.Exercises.Select(x => new { ExerciseId = x, SessionId = sessionId }).ToList(),
                 transaction);
-
+            
+            
+            var sessionLanguage = """
+                                  INSERT INTO language_in_session(session_id, language_id) VALUES (@SessionId, @LanguageId);
+                                  """;
+            foreach (var language in session.Languages)
+            {
+                await con.ExecuteAsync(sessionLanguage, new { SessionId = sessionId, LanguageId = (int)language });
+            }
+            
             transaction.Commit();
             _logger.LogInformation("User: {userid} created Session: {sessionid}.", session.AuthorId, sessionId);
             return sessionId;
@@ -105,6 +123,18 @@ public class SessionRepository : ISessionRepository
             _logger.LogWarning("Exception happend: {exception}, session not created!", e.Message);
             throw;
         }
+    }
+
+    private async Task<bool> VerifyLanguagesIdsAsync(List<Language> languages)
+    {
+        var querry = """
+                     SELECT COUNT(*) 
+                     FROM language_support
+                     WHERE language_id = ANY(ARRAY[@Languages]);
+                     """;
+        using var con = await _connection.CreateConnectionAsync();
+        var result = await con.ExecuteScalarAsync<int>(querry, new { Languages = languages.Select(l => (int)l).ToList() });
+        return languages.Count == result;
     }
     
     public async Task<int> CreateAnonUser(int sessionId)
