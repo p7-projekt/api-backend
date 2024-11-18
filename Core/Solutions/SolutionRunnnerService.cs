@@ -10,9 +10,9 @@ public class SolutionRunnnerService : ISolutionRunnerService
 {
     private readonly ILogger<SolutionRunnnerService> _logger;
     private readonly ISolutionRepository _solutionRepository;
-    private readonly LanguageService _languageService;
+    private readonly ILanguageService _languageService;
 
-    public SolutionRunnnerService(ILogger<SolutionRunnnerService> logger, ISolutionRepository solutionRepository, LanguageService languageService)
+    public SolutionRunnnerService(ILogger<SolutionRunnnerService> logger, ISolutionRepository solutionRepository, ILanguageService languageService)
     {
         _logger = logger;
         
