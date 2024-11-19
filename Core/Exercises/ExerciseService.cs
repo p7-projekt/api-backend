@@ -104,7 +104,7 @@ public class ExerciseService : IExerciseService
         return submissionResult;
     }
 
-    public async Task<Result<HaskellResponseDto>> CreateExercise(ExerciseDto dto, int authorId)
+    public async Task<Result<MozartResponseDto>> CreateExercise(ExerciseDto dto, int authorId)
     {
         var result = await _iMozartService.SubmitSubmission(new SubmissionDto(dto), (Language)dto.SolutionLanguage);
         if (result.IsFailed)
@@ -115,9 +115,9 @@ public class ExerciseService : IExerciseService
         switch (result.Value.Action)
         {
             case ResponseCode.Failure:
-                return Result.Ok(new HaskellResponseDto(result.Value.ResponseDto!.TestCaseResults, null));
+                return Result.Ok(new MozartResponseDto(result.Value.ResponseDto!.TestCaseResults, null));
             case ResponseCode.Error:
-                return Result.Ok(new HaskellResponseDto(null, result.Value.ResponseDto!.Message));
+                return Result.Ok(new MozartResponseDto(null, result.Value.ResponseDto!.Message));
         }
 
         var insertResult = await _exerciseRepository.InsertExerciseAsync(dto, authorId);

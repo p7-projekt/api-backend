@@ -448,7 +448,7 @@ public class ExerciseServiceTest
         var result = await exerciseService.CreateExercise(dto, 1);
 
         Assert.True(result.IsSuccess);
-        Assert.IsType<HaskellResponseDto>(result.Value);
+        Assert.IsType<MozartResponseDto>(result.Value);
         Assert.Null(result.Value.Message);
     }
 
@@ -475,7 +475,7 @@ public class ExerciseServiceTest
         var result = await exerciseService.CreateExercise(dto, 1);
 
         Assert.True(result.IsSuccess);
-        Assert.IsType<HaskellResponseDto>(result.Value);
+        Assert.IsType<MozartResponseDto>(result.Value);
         Assert.Null(result.Value.TestCaseResults);
     }
 

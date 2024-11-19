@@ -14,16 +14,11 @@ namespace API.Endpoints;
 
 public static class ExerciseEndpoints
 {
-    public static WebApplication UseExerciseEndpoints(this WebApplication app)
+    public static WebApplication UseExerciseEndpoints(this WebApplication app, ApiVersionSet apiVersionSet)
     {
-        ApiVersionSet apiVersionSet = app.NewApiVersionSet()
-            .HasApiVersion(new ApiVersion(1))
-            .ReportApiVersions()
-            .Build();
-
-        var exerciseV1 = app.MapGroup("v{version:apiVersion}/exercises").WithApiVersionSet(apiVersionSet).WithTags("Exercise");
-        
-        exerciseV1.MapPost("/", async Task<Results<Created, BadRequest<HaskellResponseDto>, IResult>>([FromBody]ExerciseDto dto, ClaimsPrincipal principal, IExerciseService service) =>
+        var exerciseV1 = app.MapGroup("v{version:apiVersion}/exercises").WithApiVersionSet(apiVersionSet).MapToApiVersion(1).WithTags("Exercise");
+        var exerciseV2 = app.MapGroup("v{version:apiVersion}/exercises").WithApiVersionSet(apiVersionSet).MapToApiVersion(2).WithTags("Exercise");        
+        exerciseV1.MapPost("/", async Task<Results<Created, BadRequest<MozartResponseDto>, IResult>>([FromBody]ExerciseDto dto, ClaimsPrincipal principal, IExerciseService service) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
             var result = await service.CreateExercise(dto, Convert.ToInt32(userId));
@@ -68,7 +63,7 @@ public static class ExerciseEndpoints
             return TypedResults.Ok(result.Value);
         });
 
-        exerciseV1.MapPut("/{exerciseId:int}", async Task<Results<Ok, BadRequest <HaskellResponseDto>, IResult>> ([FromBody] ExerciseDto dto, ClaimsPrincipal principal, int exerciseId, IExerciseService exerciseService) =>
+        exerciseV1.MapPut("/{exerciseId:int}", async Task<Results<Ok, BadRequest <MozartResponseDto>, IResult>> ([FromBody] ExerciseDto dto, ClaimsPrincipal principal, int exerciseId, IExerciseService exerciseService) =>
         {
             var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
 
@@ -83,9 +78,9 @@ public static class ExerciseEndpoints
                 case ResponseCode.Pass:
                     return TypedResults.Ok();
                 case ResponseCode.Failure:
-                    return TypedResults.BadRequest(new HaskellResponseDto(result.Value.ResponseDto!.TestCaseResults, null));
+                    return TypedResults.BadRequest(new MozartResponseDto(result.Value.ResponseDto!.TestCaseResults, null));
                 case ResponseCode.Error:
-                    return TypedResults.BadRequest(new HaskellResponseDto(null, result.Value.ResponseDto!.Message));
+                    return TypedResults.BadRequest(new MozartResponseDto(null, result.Value.ResponseDto!.Message));
                 default:
                     throw new Exception("Unexpected result received when updating exercises");
             }
@@ -108,7 +103,7 @@ public static class ExerciseEndpoints
             return TypedResults.NoContent();
         }).RequireAuthorization(nameof(Roles.Instructor));
         
-        exerciseV1.MapPost("/{exerciseId:int}/submission", async Task<IResult> ([FromBody] SubmitSolutionDto dto, int exerciseId, ISolutionRunnerService service, ClaimsPrincipal principal) =>
+        exerciseV2.MapPost("/{exerciseId:int}/submission", async Task<IResult> ([FromBody] SubmitSolutionDto dto, int exerciseId, ISolutionRunnerService service, ClaimsPrincipal principal) =>
         {
             var userId = Convert.ToInt32(principal.FindFirst(ClaimTypes.UserData)?.Value);
             var result = await service.SubmitSolutionAsync(dto, exerciseId, userId);

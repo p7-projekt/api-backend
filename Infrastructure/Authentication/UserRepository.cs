@@ -118,7 +118,15 @@ public class UserRepository : IUserRepository
 			
 			// Create Anon user
 			await CreateAnonUserAsync(con, transaction, userId, sessionId);
-
+			
+			// insert into user_in_session
+			var query = """
+			            INSERT INTO user_in_session (user_id, session_id)
+			            VALUES 
+			            (@UserId, @SessionId);
+			            """;
+			await con.ExecuteAsync(query, new { UserId = userId, SessionId = sessionId}, transaction);
+			
 			_logger.LogInformation("Committing transaction");
 			transaction.Commit();
 		}

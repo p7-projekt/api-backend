@@ -25,7 +25,7 @@ public record SolutionTestcaseDetailsDto(
 
 public record SolutionTestcaseInputParameters(string ValueType, string Value);
 
-public record HaskellResponseDto(
+public record MozartResponseDto(
 	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 	List<SolutionTestcaseResultDto>? TestCaseResults,
 	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

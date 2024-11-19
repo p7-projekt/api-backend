@@ -95,9 +95,108 @@ public class SolutionRepository : ISolutionRepository
 		return await con.QuerySingleOrDefaultAsync<LanguageSupport>(query, new { LanguageId = languageId, SessionId = sessionId });
 	}
 
-	public async Task<bool> InsertSolvedRelation(int userId, int exerciseId)
+	public async Task<bool> InsertSubmissionRelation(Submission submission) 
 	{
 		using var con = await _dbConnection.CreateConnectionAsync();
+		using var transaction = con.BeginTransaction();
+		try
+		{
+			// verify correct session id in Submission and exercise is in that session
+			var verifySessionExerciseQuery = """
+			                                 SELECT COUNT(*)
+			                                 FROM exercise_in_session AS eis
+			                                 join user_in_session AS uis
+			                                 	on eis.session_id = uis.session_id
+			                                 WHERE eis.exercise_id = @ExerciseId AND eis.session_id = @SessionId AND uis.user_id = @UserId;
+			                                 """;
+			var verification = await con.ExecuteScalarAsync<int>(verifySessionExerciseQuery,
+				new
+				{
+					ExerciseId = submission.ExerciseId, SessionId = submission.SessionId, UserId = submission.UserId
+				}, transaction);
+			if (verification != 1)
+			{
+				transaction.Rollback();
+				return false;
+			}
+
+			// check if there already exist a solution / submission
+			if (submission.Solved)
+			{
+				var existingSubmissionQuery = """
+				                              DELETE FROM submission
+				                              WHERE exercise_id = @ExerciseId 
+				                              AND user_id = @UserId 
+				                              AND session_id = @SessionId;	
+				                              """;
+				
+				await con.ExecuteAsync(existingSubmissionQuery, new {submission.ExerciseId, submission.UserId, submission.SessionId}, transaction);
+			}
+			else
+			{
+				var existingSubmissionQuery = """
+			                                  WITH check_solved AS (
+			                                  SELECT 1
+			                                  FROM submission
+			                                  WHERE exercise_id = @ExerciseId 
+			                                  AND user_id = @UserId 
+			                                  AND session_id = @SessionId
+			                                  AND solved = true
+			                                  )
+			                                  DELETE FROM submission
+			                                  WHERE exercise_id = @ExerciseId 
+			                                  AND user_id = @UserId 
+			                                  AND session_id = @SessionId
+			                                  AND NOT EXISTS (SELECT 1 FROM check_solved);
+			                              """;
+				var rowsAffected = await con.ExecuteAsync(existingSubmissionQuery, new {submission.ExerciseId, submission.UserId, submission.SessionId}, transaction);
+				if (rowsAffected != 1)
+				{
+					// roll back as we have a working solution and this attempt failed
+					transaction.Rollback();
+					// return true as we succeeded but we dont insert.
+					return true;
+				}
+			}
+			
+			
+			// Insert 
+			var insertSubmissionQuery = """
+			                            INSERT INTO submission (user_id, session_id, exercise_id, solution, language_id, solved)
+			                            VALUES
+			                            (@UserId, @SessionId, @ExerciseId, @Solution, @LanguageId, @Solved);
+			                            """;
+			var result = await con.ExecuteAsync(
+				insertSubmissionQuery, new {submission.UserId, submission.SessionId,
+					submission.ExerciseId, submission.Solution, submission.LanguageId, submission.Solved}, transaction);
+			if (result != 1)
+			{
+				transaction.Rollback();
+				return false;
+			}
+			
+			transaction.Commit();
+		}
+		catch (Exception)
+		{
+			_logger.LogError("Error inserting submission for user {user} for session {sessionid} at exercise {exerciseid}",
+				submission.UserId, submission.SessionId, submission.ExerciseId);
+			transaction.Rollback();
+			return false;
+		}
+		
+		return true;
+	}
+	
+	
+	public async Task<bool> InsertSolvedRelation(int userId, int exerciseId, int sessionId)
+	{
+		using var con = await _dbConnection.CreateConnectionAsync();
+		using var transaction = con.BeginTransaction();
+		
+		// check if already attempted / solved
+		// if yes delete entry, then insert
+		// if not create solution and submission
 		var query = """
 		            WITH In_Session AS (SELECT au.user_id AS userid, 
 		                                       eis.session_id AS sessionid, eis.exercise_id AS exerciseid

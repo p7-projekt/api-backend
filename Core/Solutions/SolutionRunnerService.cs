@@ -1,4 +1,5 @@
-﻿using Core.Languages.Models;
+﻿using Core.Exercises.Models;
+using Core.Languages.Models;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
 using FluentResults;
@@ -20,7 +21,7 @@ public class SolutionRunnerService : ISolutionRunnerService
         _iMozartService = iMozartService;
     }
 
-    public async Task<Result<HaskellResponseDto>> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId)
+    public async Task<Result<MozartResponseDto>> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId)
     {
         // validate anon user is part of a given session
         // Short circuit if user is not part of the session
@@ -46,33 +47,50 @@ public class SolutionRunnerService : ISolutionRunnerService
         }
         
         // Validate through mozart
+        var submissionResponse = await ValidateInMozart(testcases, dto);
+        bool solved = submissionResponse is { IsSuccess: true, Value: null };
+        var submission = new Submission
+        {
+            UserId = userId,
+            SessionId = dto.SessionId,
+            ExerciseId = exerciseId,
+            Solution = dto.Solution,
+            LanguageId = language.Id,
+            Solved = solved 
+        };
+        
+        var inserted = await _solutionRepository.InsertSubmissionRelation(submission);
+        if (!inserted)
+        {
+            return Result.Fail("Error inserting submission");
+        }
+        if (!solved)
+        {
+            return submissionResponse;
+        }
+        return Result.Ok();
+    }
+
+    private async Task<Result<MozartResponseDto>> ValidateInMozart(List<Testcase> testcases, SubmitSolutionDto dto)
+    {
         var submission = SubmissionMapper.ToSubmission(testcases, dto.Solution);
-        var result = await _iMozartService.SubmitSubmission(submission, (Language)language.Id);
+        var result = await _iMozartService.SubmitSubmission(submission, (Language)dto.LanguageId);
         if (result.IsFailed)
         {
             return Result.Fail(result.Errors);
         }
 
-        if (result.Value.Action == ResponseCode.Failure)
+        if (result.Value.Action is ResponseCode.Failure or ResponseCode.Error)
         {
-            return new HaskellResponseDto(result.Value.ResponseDto!.TestCaseResults, null);
+            return result.Value.Action switch
+            {
+                ResponseCode.Failure => new MozartResponseDto(result.Value.ResponseDto!.TestCaseResults, null),
+                ResponseCode.Error => new MozartResponseDto(null, result.Value.ResponseDto!.Message),
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
 
-        if (result.Value.Action == ResponseCode.Error)
-        {
-            return new HaskellResponseDto(null, result.Value.ResponseDto!.Message);
-        }
-        
-        
-        // Ensure user is part of a given session, and Create a solved relation 
-        var inserted = await _solutionRepository.InsertSolvedRelation(userId, exerciseId);
-        if (!inserted)
-        {
-            _logger.LogInformation("Failed to insert solved for userid {userid}, for exercise: {exerciseId}, but exercise passed!", userId, exerciseId);
-            return Result.Ok();
-        }
         return Result.Ok();
     }
-
    
 }
