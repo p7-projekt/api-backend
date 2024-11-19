@@ -61,6 +61,7 @@ public class Program
         app.UseAuthenticationEndpoints();
         app.UseSessionEndpoints();
         app.UseUserEndpoints();
+        app.UseClassroomEndpoints();
 
         app.Run();
     }

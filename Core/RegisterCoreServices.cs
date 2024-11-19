@@ -1,4 +1,6 @@
 using System.Reflection;
+using Core.Classrooms;
+using Core.Classrooms.Contracts;
 using Core.Exercises;
 using Core.Exercises.Contracts;
 using Core.Sessions;
@@ -19,6 +21,7 @@ public static class RegisterCoreServices
         services.AddScoped<ISolutionRunnerService, SolutionRunnnerService>();
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<IExerciseService, ExerciseService>();
+        services.AddScoped<IClassroomService, ClassroomService>();
 
         services.AddQuartzHostedService(options =>
         {
