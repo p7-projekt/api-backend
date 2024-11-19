@@ -1,1 +1,7 @@
 INSERT INTO role(name) VALUES ('Student')
+
+CREATE TABLE classroom (
+	id SERIAL PRIMARY KEY,
+	title VARCHAR(100),
+	owner INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL
+);
