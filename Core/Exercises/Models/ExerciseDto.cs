@@ -6,7 +6,7 @@ public record ExerciseDto(
     string Name,
     string Description,
     string Solution,
-    int Language,
+    int SolutionLanguage,
     string[] InputParameterType,
     string[] OutputParamaterType,
     List<TestcaseDto> Testcases

@@ -94,7 +94,7 @@ public class SessionRepository : ISessionRepository
                                   """;
             foreach (var language in session.Languages)
             {
-                await con.ExecuteAsync(sessionLanguage, new { SessionId = sessionId, LanguageId = (int)language });
+                await con.ExecuteAsync(sessionLanguage, new { SessionId = sessionId, LanguageId = (int)language }, transaction);
             }
             
             transaction.Commit();
