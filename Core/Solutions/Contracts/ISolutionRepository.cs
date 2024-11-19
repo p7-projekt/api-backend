@@ -1,4 +1,5 @@
 using Core.Exercises.Models;
+using Core.Languages.Models;
 using Core.Solutions.Models;
 
 namespace Core.Solutions.Contracts;

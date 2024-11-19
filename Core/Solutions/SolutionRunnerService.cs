@@ -1,4 +1,5 @@
-﻿using Core.Solutions.Contracts;
+﻿using Core.Languages.Models;
+using Core.Solutions.Contracts;
 using Core.Solutions.Models;
 using FluentResults;
 using Microsoft.Extensions.Logging;
@@ -9,14 +10,14 @@ public class SolutionRunnerService : ISolutionRunnerService
 {
     private readonly ILogger<SolutionRunnerService> _logger;
     private readonly ISolutionRepository _solutionRepository;
-    private readonly ILanguageService _languageService;
+    private readonly IMozartService _iMozartService;
 
-    public SolutionRunnerService(ILogger<SolutionRunnerService> logger, ISolutionRepository solutionRepository, ILanguageService languageService)
+    public SolutionRunnerService(ILogger<SolutionRunnerService> logger, ISolutionRepository solutionRepository, IMozartService iMozartService)
     {
         _logger = logger;
         
         _solutionRepository = solutionRepository;
-        _languageService = languageService;
+        _iMozartService = iMozartService;
     }
 
     public async Task<Result<HaskellResponseDto>> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId)
@@ -46,7 +47,7 @@ public class SolutionRunnerService : ISolutionRunnerService
         
         // Validate through mozart
         var submission = SubmissionMapper.ToSubmission(testcases, dto.Solution);
-        var result = await _languageService.SubmitSubmission(submission, (Language)language.Id);
+        var result = await _iMozartService.SubmitSubmission(submission, (Language)language.Id);
         if (result.IsFailed)
         {
             return Result.Fail(result.Errors);

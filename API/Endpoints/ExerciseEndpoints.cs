@@ -9,7 +9,6 @@ using Core.Solutions.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Core.Exercises.Contracts;
-using Core.Solutions.Services;
 
 namespace API.Endpoints;
 

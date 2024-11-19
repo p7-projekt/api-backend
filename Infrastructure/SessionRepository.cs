@@ -1,5 +1,6 @@
 using System.Data;
 using Core.Exercises.Models;
+using Core.Languages.Models;
 using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;

@@ -1,8 +1,8 @@
 using Core.Solutions.Contracts;
 
-namespace Core.Solutions.Services;
+namespace Core.Solutions.Strategies;
 
-public class HaskellStrategy : ILanguageStrategy
+public class HaskellStrategy : IMozartStrategy
 {
 	public HaskellStrategy()
 	{

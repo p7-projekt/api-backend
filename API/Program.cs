@@ -21,7 +21,7 @@ public class Program
         });
         
         // Supported languages
-        builder.Services.AddHttpClient<ILanguageService, LanguageService>()
+        builder.Services.AddHttpClient<IMozartService, MozartService>()
             .SetHandlerLifetime(TimeSpan.FromSeconds(30)); 
         // builder.Services.AddHttpClient<IHaskellService, HaskellService>()
             // .SetHandlerLifetime(TimeSpan.FromSeconds(30));
@@ -64,6 +64,7 @@ public class Program
         app.UseAuthenticationEndpoints();
         app.UseSessionEndpoints();
         app.UseUserEndpoints();
+        app.UseLanguageEndpoints();
 
         app.Run();
     }

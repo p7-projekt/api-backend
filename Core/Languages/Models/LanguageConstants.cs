@@ -1,4 +1,4 @@
-namespace Core.Solutions.Models;
+namespace Core.Languages.Models;
 
 
 public enum Language

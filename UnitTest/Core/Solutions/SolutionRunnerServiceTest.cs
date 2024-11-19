@@ -4,7 +4,6 @@ using Core.Exercises.Models;
 using Core.Solutions;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
-using Core.Solutions.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
