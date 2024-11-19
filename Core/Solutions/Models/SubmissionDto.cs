@@ -7,6 +7,9 @@ public record SubmissionDto
     [JsonPropertyName("solution")]
     public string Solution { get; }
 
+    [JsonPropertyName("languageId")]
+    public Language Language { get; set; }
+
     [JsonPropertyName("testCases")]
     public List<SubmissionTestCase> TestCases { get; }
 

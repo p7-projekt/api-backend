@@ -5,6 +5,5 @@ namespace Core.Solutions.Contracts;
 
 public interface ILanguageService
 {
-	Task<Result<SolutionRunnerResponse>> SubmitSubmission(SubmissionDto submission);
-	ILanguageStrategy DetermineStrategy(Language language);
+	Task<Result<SolutionRunnerResponse>> SubmitSubmission(SubmissionDto submission, Language language);
 }

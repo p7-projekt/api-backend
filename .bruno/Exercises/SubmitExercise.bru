@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: {{baseURL}}/{{currentVersion}}/exercises/2/submission
+  url: {{baseURL}}/{{currentVersion}}/exercises/1/submission
   body: json
   auth: bearer
 }
@@ -16,8 +16,8 @@ auth:bearer {
 
 body:json {
   {
-    "sessionId": 1,
-    "solution": "solution x = if x < 0 then x * (-1) else x\n",
-    "languageId": 1
+    "sessionId": 2,
+    "solution": "solution x =\n if x < 0\n then x * (1)\n else x\n",
+    "languageId": 2
   }
 }

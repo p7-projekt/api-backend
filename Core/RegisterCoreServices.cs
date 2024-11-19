@@ -16,7 +16,7 @@ public static class RegisterCoreServices
     public static IServiceCollection AddCoreServices(this IServiceCollection services)
     {
         services.AddValidatorsFromAssemblies(new [] {Assembly.GetExecutingAssembly() });
-        services.AddScoped<ISolutionRunnerService, SolutionRunnnerService>();
+        services.AddScoped<ISolutionRunnerService, SolutionRunnerService>();
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<IExerciseService, ExerciseService>();
 

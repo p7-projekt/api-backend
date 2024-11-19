@@ -5,7 +5,6 @@ using Core.Exercises.Contracts;
 using Core.Solutions;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
-using Core.Solutions.Services;
 
 namespace Core.Exercises;
 
@@ -14,7 +13,6 @@ public class ExerciseService : IExerciseService
     private readonly IExerciseRepository _exerciseRepository;
     private readonly ILogger<ExerciseService> _logger;
     private readonly ISolutionRepository _solutionRepository;
-    // private readonly IHaskellService _haskellService;
     private readonly ILanguageService _languageService;
 
 
@@ -24,7 +22,6 @@ public class ExerciseService : IExerciseService
         _logger = logger;
         _solutionRepository = solutionRepository;
         _languageService = languageService;
-        _languageService.DetermineStrategy(Language.Haskell);
     }
 
     public async Task<Result> DeleteExercise(int exerciseId, int userId)
@@ -84,7 +81,7 @@ public class ExerciseService : IExerciseService
             return Result.Fail("Exercise not updated");
         }
 
-        var submissionResult = await _languageService.SubmitSubmission(new SubmissionDto(dto));
+        var submissionResult = await _languageService.SubmitSubmission(new SubmissionDto(dto), (Language)dto.Language);
 
         if (submissionResult.IsFailed) 
         {
@@ -108,7 +105,7 @@ public class ExerciseService : IExerciseService
 
     public async Task<Result<HaskellResponseDto>> CreateExercise(ExerciseDto dto, int authorId)
     {
-        var result = await _languageService.SubmitSubmission(new SubmissionDto(dto));
+        var result = await _languageService.SubmitSubmission(new SubmissionDto(dto), (Language)dto.Language);
         if (result.IsFailed)
         {
             return Result.Fail("Internal error");

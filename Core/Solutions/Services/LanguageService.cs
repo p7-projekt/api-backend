@@ -20,7 +20,7 @@ public class LanguageService : ILanguageService
 
 	private ILanguageStrategy? _languageStrategy;
 	
-	public ILanguageStrategy DetermineStrategy(Language language)
+	private ILanguageStrategy DetermineStrategy(Language language)
     {
         return language switch
         {
@@ -29,9 +29,10 @@ public class LanguageService : ILanguageService
             _ => throw new ArgumentOutOfRangeException(nameof(language), language, null)
         };
     }
-	public async Task<Result<SolutionRunnerResponse>> SubmitSubmission(SubmissionDto submission)
-    {
-	    _httpClient.BaseAddress = new Uri(_languageStrategy!.Url ?? throw new Exception("Language strategy not configured"));
+	public async Task<Result<SolutionRunnerResponse>> SubmitSubmission(SubmissionDto submission, Language language)
+	{
+		var url = DetermineStrategy(language).Url;
+	    _httpClient.BaseAddress = new Uri(url);
         using var response = await _httpClient.PostAsJsonAsync("/submit", submission);
         _logger.LogInformation("HTTP response: {response}, {body}", response.StatusCode, response.Content.ReadAsStringAsync().Result);
 
