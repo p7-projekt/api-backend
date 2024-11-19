@@ -1,30 +1,30 @@
 using System.Net;
 using System.Net.Http.Json;
+using Core.Languages.Models;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
+using Core.Solutions.Strategies;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Solutions.Services;
 
-public class LanguageService : ILanguageService
+public class MozartService : IMozartService
 {
 	private readonly HttpClient _httpClient;
-	private readonly ILogger<LanguageService> _logger;
+	private readonly ILogger<MozartService> _logger;
 	
-	public LanguageService(HttpClient httpClient, ILogger<LanguageService> logger)
+	public MozartService(HttpClient httpClient, ILogger<MozartService> logger)
 	{
 		_httpClient = httpClient;
 		_logger = logger;
 	}
-
-	private ILanguageStrategy? _languageStrategy;
 	
-	private ILanguageStrategy DetermineStrategy(Language language)
+	private IMozartStrategy DetermineStrategy(Language language)
     {
         return language switch
         {
-            Language.Haskell => _languageStrategy = new HaskellStrategy(),
+            Language.Haskell => new HaskellStrategy(),
             Language.Python => throw new NotImplementedException(),
             _ => throw new ArgumentOutOfRangeException(nameof(language), language, null)
         };

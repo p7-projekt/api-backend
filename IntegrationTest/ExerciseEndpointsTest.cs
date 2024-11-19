@@ -4,7 +4,6 @@ using Core.Exercises.Models;
 using Core.Shared;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
-using Core.Solutions.Services;
 using FluentResults;
 using IntegrationTest.Setup;
 using Microsoft.AspNetCore.Http;

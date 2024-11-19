@@ -1,6 +1,7 @@
 using System.Reflection;
 using Core;
 using Core.Exercises.Contracts;
+using Core.Languages.Contracts;
 using Core.Sessions.Contracts;
 using Core.Shared.Contracts;
 using Core.Solutions.Contracts;
@@ -40,6 +41,7 @@ public static class RegisterInfrastructureServices
         services.AddScoped<ITokenRepository, TokenRepository>();
         services.AddScoped<ISessionRepository, SessionRepository>();
         services.AddScoped<ISolutionRepository, SolutionRepository>();
+        services.AddScoped<ILanguageRepository, LanguageRepository>();
         return services;
     }
 

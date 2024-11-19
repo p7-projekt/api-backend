@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Core.Exercises.Models;
+using Core.Languages.Models;
 
 namespace Core.Solutions.Models;
 public record SubmissionDto
