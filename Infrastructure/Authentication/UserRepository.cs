@@ -20,7 +20,17 @@ public class UserRepository : IUserRepository
 		_logger = logger;
 	}
 
-	public async Task<User?> GetAppUserByIdAsync(int userId)
+	public async Task<User?> GetUserByIdAsync(int userId)
+	{
+		using var con = await _connection.CreateConnectionAsync();
+		var query = """
+		            SELECT * FROM users
+		            WHERE users.id = @Id;
+		            """;
+		return await con.QuerySingleOrDefaultAsync<User>(query, new { userId });
+	}
+
+	/*public async Task<User?> GetAppUserByIdAsync(int userId)
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
@@ -30,13 +40,13 @@ public class UserRepository : IUserRepository
 		            """;
 		var user = await con.QuerySingleAsync<User>(query, new { id = userId });
 		return user;
-	}
+	}*/
 
 	public async Task<int> GetAnonUserSessionByIdAsync(int userId)
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
-		            SELECT session_id FROM anon_users WHERE user_id = @UserId;
+		            SELECT session_id FROM user_in_timedsession WHERE user_id = @UserId;
 		            """;
 		var sessionId = await con.QuerySingleOrDefaultAsync<int>(query, new { userId });
 		return sessionId;
@@ -46,10 +56,8 @@ public class UserRepository : IUserRepository
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
-					SELECT u.id, au.email, au.password_hash AS passwordhash, u.created_at AS createdat
-					FROM users AS u
-					         JOIN app_users AS au
-					              ON u.id = au.user_id
+					SELECT id, email, password_hash AS passwordhash, created_at AS createdat
+					FROM users
 					WHERE email = @Email;
 					""";
 		var user = await con.QuerySingleOrDefaultAsync<User>(query, new { email });
@@ -73,7 +81,7 @@ public class UserRepository : IUserRepository
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
 					SELECT COUNT(email) 
-					FROM app_users
+					FROM users
 					WHERE email = @email;
 					""";
 		_logger.LogInformation("Checking if email {email} is available", email);
@@ -89,9 +97,6 @@ public class UserRepository : IUserRepository
 		{
 			//Create base user and role
 			var userId = await CreateUserAndRoleAsync(user, role, con, transaction);
-			
-			// CreateApp user
-			await CreateAppUserAsync(con, transaction, user, userId);
 
 			_logger.LogInformation("Committing transaction");
 			transaction.Commit();
@@ -106,7 +111,7 @@ public class UserRepository : IUserRepository
 		return Result.Ok();
 	}
 	
-	public async Task<Result<int>> CreateAnonUserAsync(int sessionId)
+	public async Task<Result<int>> CreateAnonUserAsync(string name, int sessionId)
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		using var transaction = con.BeginTransaction();
@@ -114,14 +119,11 @@ public class UserRepository : IUserRepository
 		try
 		{
 			//Create base user and role
-			userId = await CreateUserAndRoleAsync(new User {CreatedAt = DateTime.UtcNow}, Roles.AnonymousUser, con, transaction);
-			
-			// Create Anon user
-			await CreateAnonUserAsync(con, transaction, userId, sessionId);
+			userId = await CreateUserAndRoleAsync(new User {Name = name, CreatedAt = DateTime.UtcNow}, Roles.AnonymousUser, con, transaction);
 			
 			// insert into user_in_session
 			var query = """
-			            INSERT INTO user_in_session (user_id, session_id)
+			            INSERT INTO user_in_timedsession (user_id, session_id)
 			            VALUES 
 			            (@UserId, @SessionId);
 			            """;
@@ -142,43 +144,48 @@ public class UserRepository : IUserRepository
 
 	private async Task<int> CreateUserAndRoleAsync(User user, Roles role, IDbConnection con, IDbTransaction transaction)
 	{
-			var userInsertQuery = """
-			                      INSERT INTO users (created_at) VALUES (@CreatedAt) 
-			                      RETURNING id;
-			                      """;
-			_logger.LogInformation("Inserting user into transaction: {query}", userInsertQuery);
-			var userId = await con.ExecuteScalarAsync<int>(userInsertQuery, new {CreatedAt = user.CreatedAt}, transaction);
-			_logger.LogDebug("UserID created in transaction: {userid}", userId);
-			
-			var createRoleQuery = """
-			                      INSERT INTO user_role (user_id, role_id)
-			                      SELECT @userId, id FROM role WHERE name = @roleName;
-			                      """;
-			_logger.LogInformation("Inserting role in user_roles: {query}", createRoleQuery);
-			await con.ExecuteAsync(createRoleQuery, new {userId = userId, roleName = role.ToString()}, transaction);
-			return userId;
+		var userId = 0;
+		if (role == Roles.AnonymousUser)
+		{
+			userId = await InsertAnonUserAsync(con, transaction, user);
+		}
+		else
+		{
+			userId = await InsertUserAsync(con, transaction, user);
+		}
+		
+		
+		var createRoleQuery = """
+		                      INSERT INTO user_role (user_id, role_id)
+		                      SELECT @userId, id FROM role WHERE name = @roleName;
+		                      """;
+		_logger.LogInformation("Inserting role in user_roles: {query}", createRoleQuery);
+		await con.ExecuteAsync(createRoleQuery, new {userId = userId, roleName = role.ToString()}, transaction);
+		return userId;
 	}
 
-	private async Task CreateAppUserAsync(IDbConnection con, IDbTransaction transaction, User user, int userId)
+	private async Task<int> InsertUserAsync(IDbConnection con, IDbTransaction transaction, User user)
 	{
 		var createAppUser = """
-		                    INSERT INTO app_users 
-		                        (user_id, email, name, password_hash) 
+		                    INSERT INTO users 
+		                        (email, name, password_hash, created_at, anonymous) 
 		                    VALUES 
-		                        (@UserId, @email, @Name, @password_hash);
+		                        (@email, @Name, @password_hash, @Anon, @CreatedAt)
+		                    RETURNING id;
 		                    """;
 		_logger.LogInformation("Inserting app user into transaction: {query}", createAppUser);
-		await con.ExecuteAsync(createAppUser, new {UserId = userId, email = user.Email, Name = user.Name, password_hash = user.PasswordHash}, transaction);
+		return await con.ExecuteAsync(createAppUser, new {email = user.Email, Name = user.Name, password_hash = user.PasswordHash, Anon = false, CreatedAt = user.CreatedAt}, transaction);
 	}
 
-	private async Task CreateAnonUserAsync(IDbConnection con, IDbTransaction transaction, int userId, int sessionId)
+	private async Task<int> InsertAnonUserAsync(IDbConnection con, IDbTransaction transaction, User user)
 	{
 		var createAnonUserQuery= """
-		                        INSERT INTO anon_users 
-		                        (user_id, session_id) 
-		                        VALUES (@UserId, @SessionId); 
+		                        INSERT INTO users 
+		                        (name, anonymous, created_at) 
+		                        VALUES (@Name, @Anon, @CreatedAt)
+		                        RETURNING id;
 		                        """;
-				_logger.LogInformation("Inserting anon user into transaction: {query}", createAnonUserQuery);
-				await con.ExecuteAsync(createAnonUserQuery, new {UserId = userId, SessionId = sessionId }, transaction);
+		_logger.LogInformation("Inserting anon user into transaction: {query}", createAnonUserQuery);
+		return await con.ExecuteAsync(createAnonUserQuery, new {Name = user.Name, Anon = true, CreatedAt = user.CreatedAt}, transaction);
 	}
 }
