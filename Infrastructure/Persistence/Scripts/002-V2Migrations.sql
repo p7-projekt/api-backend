@@ -11,7 +11,7 @@ INSERT INTO language_support(language, version) VALUES ('python', 'someVersion')
 
 ALTER TABLE solved RENAME TO submission;
 ALTER TABLE submission 
-    ADD COLUMN solution TEXT NOT NULL DEFAULT '',
+    ADD COLUMN solution TEXT,
     ADD COLUMN language_id INTEGER REFERENCES language_support(language_id) NOT NULL DEFAULT 9999999,
     ADD COLUMN solved BOOLEAN NOT NULL DEFAULT false;
 

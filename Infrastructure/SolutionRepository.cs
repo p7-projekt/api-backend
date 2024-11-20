@@ -134,36 +134,24 @@ public class SolutionRepository : ISolutionRepository
 				                              AND session_id = @SessionId;	
 				                              """;
 				
-				await con.ExecuteAsync(existingSubmissionQuery, new {submission.ExerciseId, submission.UserId, submission.SessionId}, transaction);
+				await con.ExecuteAsync(existingSubmissionQuery, new {ExerciseId = submission.ExerciseId, UserId = submission.UserId, SessionId = submission.SessionId}, transaction);
 			}
 			else
 			{
 				var existingSubmissionQuery = """
-			                                  WITH check_solved AS (
-			                                  SELECT 1
-			                                  FROM submission
-			                                  WHERE exercise_id = @ExerciseId 
-			                                  AND user_id = @UserId 
-			                                  AND session_id = @SessionId
-			                                  AND solved = true
-			                                  )
-			                                  DELETE FROM submission
-			                                  WHERE exercise_id = @ExerciseId 
-			                                  AND user_id = @UserId 
-			                                  AND session_id = @SessionId
-			                                  AND NOT EXISTS (SELECT 1 FROM check_solved);
+			                                 SELECT COUNT(*) FROM submission
+			                                 WHERE exercise_id = @ExerciseId
+			                                 AND user_id = @UserId
+			                                 AND session_id = @SessionId;
 			                              """;
-				var rowsAffected = await con.ExecuteAsync(existingSubmissionQuery, new {submission.ExerciseId, submission.UserId, submission.SessionId}, transaction);
-				if (rowsAffected != 1)
+				var submissions = await con.QuerySingleOrDefaultAsync<int>(existingSubmissionQuery, new {ExerciseId = submission.ExerciseId, UserId = submission.UserId, SessionId = submission.SessionId}, transaction);
+				if (submissions > 0)
 				{
-					// roll back as we have a working solution and this attempt failed
 					transaction.Rollback();
-					// return true as we succeeded but we dont insert.
 					return true;
 				}
 			}
-			
-			
+
 			// Insert 
 			var insertSubmissionQuery = """
 			                            INSERT INTO submission (user_id, session_id, exercise_id, solution, language_id, solved)
