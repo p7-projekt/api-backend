@@ -2,7 +2,9 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using Core.Exercises.Models;
+using Core.Languages.Models;
 using Core.Solutions.Models;
+using Core.Solutions.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using UnitTest.Setup;
@@ -10,7 +12,7 @@ using UnitTest.Setup;
 namespace UnitTest.Core.Solutions;
 
 [Collection(CollectionDefinitions.Sequential)]
-public class HaskellServiceTest
+public class MozartServiceTest
 {
 
 
@@ -19,8 +21,8 @@ public class HaskellServiceTest
     {
         Environment.SetEnvironmentVariable("MOZART_HASKELL", null);
         var httpClientSub = Substitute.For<HttpClient>();
-        var loggerSub = Substitute.For<ILogger<HaskellService>>();
-        Assert.Throws<NullReferenceException>(() => new HaskellService(httpClientSub, loggerSub));
+        var loggerSub = Substitute.For<ILogger<MozartService>>();
+        Assert.ThrowsAsync<NullReferenceException>(() => new MozartService(httpClientSub, loggerSub).SubmitSubmission( new SubmissionDto("solution", new List<SubmissionTestCase>()), Language.Haskell));
     }
 
     [Fact]
@@ -32,15 +34,15 @@ public class HaskellServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var loggerSub = Substitute.For<ILogger<HaskellService>>();
+        var loggerSub = Substitute.For<ILogger<MozartService>>();
         Environment.SetEnvironmentVariable("MOZART_HASKELL", "url");
-        var haskellService = new HaskellService(client, loggerSub);
+        var haskellService = new MozartService(client, loggerSub);
         var dto = SubmissionMapper.ToSubmission(
             new List<Testcase>
             {
                 new Testcase()
             }, "hello");
-        var result = await haskellService.SubmitSubmission(dto);
+        var result = await haskellService.SubmitSubmission(dto, Language.Haskell);
 
         Assert.True(result.IsFailed);
     }
@@ -53,15 +55,15 @@ public class HaskellServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var loggerSub = Substitute.For<ILogger<HaskellService>>();
+        var loggerSub = Substitute.For<ILogger<MozartService>>();
         Environment.SetEnvironmentVariable("MOZART_HASKELL", "url");
-        var haskellService = new HaskellService(client, loggerSub);
+        var haskellService = new MozartService(client, loggerSub);
         var dto = SubmissionMapper.ToSubmission(
             new List<Testcase>
             {
                 new Testcase()
             }, "hello");
-        var result = await haskellService.SubmitSubmission(dto);
+        var result = await haskellService.SubmitSubmission(dto, Language.Haskell);
 
         Assert.True(result.IsFailed);
     }
@@ -76,15 +78,15 @@ public class HaskellServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var loggerSub = Substitute.For<ILogger<HaskellService>>();
+        var loggerSub = Substitute.For<ILogger<MozartService>>();
         Environment.SetEnvironmentVariable("MOZART_HASKELL", "url");
-        var haskellService = new HaskellService(client, loggerSub);
+        var haskellService = new MozartService(client, loggerSub);
         var dto = SubmissionMapper.ToSubmission(
             new List<Testcase>
             {
                 new Testcase()
             }, "hello");
-        await Assert.ThrowsAsync<Exception>(async () => await haskellService.SubmitSubmission(dto));
+        await Assert.ThrowsAsync<Exception>(async () => await haskellService.SubmitSubmission(dto, Language.Haskell));
 
     }
 
@@ -98,15 +100,15 @@ public class HaskellServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var loggerSub = Substitute.For<ILogger<HaskellService>>();
+        var loggerSub = Substitute.For<ILogger<MozartService>>();
         Environment.SetEnvironmentVariable("MOZART_HASKELL", "url");
-        var haskellService = new HaskellService(client, loggerSub);
+        var haskellService = new MozartService(client, loggerSub);
         var dto = SubmissionMapper.ToSubmission(
             new List<Testcase>
             {
                 new Testcase()
             }, "hello");
-        var result = await haskellService.SubmitSubmission(dto);
+        var result = await haskellService.SubmitSubmission(dto, Language.Haskell);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(ResponseCode.Pass, result.Value.Action);
@@ -122,15 +124,15 @@ public class HaskellServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var loggerSub = Substitute.For<ILogger<HaskellService>>();
+        var loggerSub = Substitute.For<ILogger<MozartService>>();
         Environment.SetEnvironmentVariable("MOZART_HASKELL", "url");
-        var haskellService = new HaskellService(client, loggerSub);
+        var haskellService = new MozartService(client, loggerSub);
         var dto = SubmissionMapper.ToSubmission(
             new List<Testcase>
             {
                 new Testcase()
             }, "hello");
-        var result = await haskellService.SubmitSubmission(dto);
+        var result = await haskellService.SubmitSubmission(dto, Language.Haskell);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(ResponseCode.Failure, result.Value.Action);
@@ -146,15 +148,15 @@ public class HaskellServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var loggerSub = Substitute.For<ILogger<HaskellService>>();
+        var loggerSub = Substitute.For<ILogger<MozartService>>();
         Environment.SetEnvironmentVariable("MOZART_HASKELL", "url");
-        var haskellService = new HaskellService(client, loggerSub);
+        var haskellService = new MozartService(client, loggerSub);
         var dto = SubmissionMapper.ToSubmission(
             new List<Testcase>
             {
                 new Testcase()
             }, "hello");
-        var result = await haskellService.SubmitSubmission(dto);
+        var result = await haskellService.SubmitSubmission(dto, Language.Haskell);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(ResponseCode.Error, result.Value.Action);

@@ -305,7 +305,8 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
             Title: "Number sum",
             Description: "Basic exercise",
             ExpiresInHours: 5,
-            ExerciseIds: new List<int> { 101 }
+            ExerciseIds: new List<int> { 101 },
+            LanguageIds: new List<int> { 1 }
         );
     }
 }

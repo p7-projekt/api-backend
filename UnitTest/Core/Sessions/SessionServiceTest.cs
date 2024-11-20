@@ -110,7 +110,7 @@ public class SessionServiceTest
 
         sessionRepoSub.InsertSessionAsync(Arg.Any<Session>(), Arg.Any<int>()).Returns(1);
 
-        var sessionDto = new CreateSessionDto("Title", null, 4, new List<int>{1,2,3});
+        var sessionDto = new CreateSessionDto("Title", null, 4, new List<int>{1,2,3}, new List<int> { 1 });
         var result = await sessionService.CreateSessionAsync(sessionDto, 2);
         
         Assert.True(result.IsSuccess);
@@ -128,7 +128,7 @@ public class SessionServiceTest
 
         sessionRepoSub.InsertSessionAsync(Arg.Any<Session>(), Arg.Any<int>()).Returns((int)SessionService.ErrorCodes.ExerciseDoesNotExist);
 
-        var sessionDto = new CreateSessionDto("Title", null, 4, new List<int>{1,2,3});
+        var sessionDto = new CreateSessionDto("Title", null, 4, new List<int>{1,2,3}, new List<int> { 1 });
         var result = await sessionService.CreateSessionAsync(sessionDto, 2);
         
         Assert.True(result.IsFailed);
@@ -145,7 +145,7 @@ public class SessionServiceTest
 
         sessionRepoSub.InsertSessionAsync(Arg.Any<Session>(), Arg.Any<int>()).Returns((int)SessionService.ErrorCodes.UniqueConstraintViolation);
 
-        var sessionDto = new CreateSessionDto("Title", null, 4, new List<int>{1,2,3});
+        var sessionDto = new CreateSessionDto("Title", null, 4, new List<int>{1,2,3}, new List<int> { 1 });
         var result = await sessionService.CreateSessionAsync(sessionDto, 2);
         
         Assert.True(result.IsFailed);
@@ -162,7 +162,7 @@ public class SessionServiceTest
 
         sessionRepoSub.InsertSessionAsync(Arg.Any<Session>(), Arg.Any<int>()).Returns((int)SessionService.ErrorCodes.UniqueConstraintViolation, 1);
 
-        var sessionDto = new CreateSessionDto("Title", null, 4, new List<int>{1,2,3});
+        var sessionDto = new CreateSessionDto("Title", null, 4, new List<int>{1,2,3}, new List<int> { 1 });
         var result = await sessionService.CreateSessionAsync(sessionDto, 2);
         
         Assert.True(result.IsSuccess);
