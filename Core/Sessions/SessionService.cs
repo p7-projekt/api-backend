@@ -75,6 +75,11 @@ public class SessionService : ISessionService
             return Result.Fail("Exercises for Author could not be found");
         }
 
+        if (sessionId == (int)ErrorCodes.LanguagesDoesNotExist)
+        {
+            return Result.Fail("Languages could not be found");
+        }
+
         return new CreateSessionResponseDto(sessionId, sessionCode);
     }
 
@@ -86,7 +91,7 @@ public class SessionService : ISessionService
         {
             return Result.Fail("Invalid session");
         }
-        var student = await _sessionRepository.CreateAnonUser(session.Value.Id);
+        var student = await _sessionRepository.CreateAnonUser(dto.Name, session.Value.Id);
         
         var timeOffset = session.Value.ExpirationTimeUtc - DateTime.UtcNow;
         
@@ -138,6 +143,7 @@ public class SessionService : ISessionService
     public enum ErrorCodes
     {
         UniqueConstraintViolation = 0,
-        ExerciseDoesNotExist = -1
+        ExerciseDoesNotExist = -1,
+        LanguagesDoesNotExist = -2
     }
 }

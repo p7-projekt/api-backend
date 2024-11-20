@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using Core.Exercises.Models;
+using Core.Languages.Models;
 using Core.Solutions;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
@@ -12,8 +13,8 @@ namespace UnitTest.Core.Solutions;
 
 public class SolutionRunnerServiceTest
 {
-    private readonly ILogger<SolutionRunnnerService> loggerSub = Substitute.For<ILogger<SolutionRunnnerService>>();
-    private readonly ILogger<HaskellService> haskellLoggerSub = Substitute.For<ILogger<HaskellService>>();
+    private readonly ILogger<SolutionRunnerService> loggerSub = Substitute.For<ILogger<SolutionRunnerService>>();
+    private readonly ILogger<MozartService> mozartLoggerSub = Substitute.For<ILogger<MozartService>>();
 
     [Fact]
     public async Task SubmitSolutionAsync_ShouldReturn_FailUserNotInSession()
@@ -27,9 +28,9 @@ public class SolutionRunnerServiceTest
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
         var solutionRepo = Substitute.For<ISolutionRepository>();
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
-        var dto = new SubmitSolutionDto(1, "test");
+        var mozartService = new MozartService(client, mozartLoggerSub);
+        var runner = new SolutionRunnerService(loggerSub, solutionRepo, mozartService);
+        var dto = new SubmitSolutionDto(1, "test", 1);
 
         solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
 
@@ -49,9 +50,9 @@ public class SolutionRunnerServiceTest
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
         var solutionRepo = Substitute.For<ISolutionRepository>();
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
-        var dto = new SubmitSolutionDto(1, "test");
+        var mozartService = new MozartService(client, mozartLoggerSub);
+        var runner = new SolutionRunnerService(loggerSub, solutionRepo, mozartService);
+        var dto = new SubmitSolutionDto(1, "test", 1);
 
         solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(null));
@@ -72,12 +73,15 @@ public class SolutionRunnerServiceTest
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
         var solutionRepo = Substitute.For<ISolutionRepository>();
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
-        var dto = new SubmitSolutionDto(1, "test");
+        var mozartService = new MozartService(client, mozartLoggerSub);
+        var runner = new SolutionRunnerService(loggerSub, solutionRepo, mozartService);
+        var dto = new SubmitSolutionDto(1, "test", 1);
 
         solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        var language = new LanguageSupport { Id = 1 };
+        solutionRepo.GetSolutionLanguageBySession(Arg.Any<int>(), Arg.Any<int>()).Returns(language);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(new List<Testcase>()));
+        solutionRepo.InsertSubmissionRelation(Arg.Any<Submission>()).Returns(true);
 
         var result = await runner.SubmitSolutionAsync(dto, exerciseId: 1, userId: 2);
 
@@ -96,12 +100,15 @@ public class SolutionRunnerServiceTest
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
         var solutionRepo = Substitute.For<ISolutionRepository>();
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
-        var dto = new SubmitSolutionDto(1, "test");
+        var mozartService = new MozartService(client, mozartLoggerSub);
+        var runner = new SolutionRunnerService(loggerSub, solutionRepo, mozartService);
+        var dto = new SubmitSolutionDto(1, "test", 1);
 
         solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        var language = new LanguageSupport { Id = 1 };
+        solutionRepo.GetSolutionLanguageBySession(Arg.Any<int>(), Arg.Any<int>()).Returns(language);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(new List<Testcase>()));
+        solutionRepo.InsertSubmissionRelation(Arg.Any<Submission>()).Returns(true);
 
         var result = await runner.SubmitSolutionAsync(dto, exerciseId: 1, userId: 2);
 
@@ -121,12 +128,15 @@ public class SolutionRunnerServiceTest
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
         var solutionRepo = Substitute.For<ISolutionRepository>();
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
-        var dto = new SubmitSolutionDto(1, "test");
-
+        var mozartService = new MozartService(client, mozartLoggerSub);
+        var runner = new SolutionRunnerService(loggerSub, solutionRepo, mozartService);
+        var dto = new SubmitSolutionDto(1, "test", 1);
+        
         solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        var language = new LanguageSupport { Id = 1 };
+        solutionRepo.GetSolutionLanguageBySession(Arg.Any<int>(), Arg.Any<int>()).Returns(language);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(new List<Testcase>()));
+        solutionRepo.InsertSubmissionRelation(Arg.Any<Submission>()).Returns(true);
 
         var result = await runner.SubmitSolutionAsync(dto, exerciseId: 1, userId: 2);
 
@@ -146,17 +156,19 @@ public class SolutionRunnerServiceTest
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
         var solutionRepo = Substitute.For<ISolutionRepository>();
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
-        var dto = new SubmitSolutionDto(1, "test");
+        var mozartService = new MozartService(client, mozartLoggerSub);
+        var runner = new SolutionRunnerService(loggerSub, solutionRepo, mozartService);
+        var dto = new SubmitSolutionDto(1, "test", 1);
 
         solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        var language = new LanguageSupport { Id = 1 };
+        solutionRepo.GetSolutionLanguageBySession(Arg.Any<int>(), Arg.Any<int>()).Returns(language);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(new List<Testcase>()));
-        solutionRepo.InsertSolvedRelation(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
+        solutionRepo.InsertSubmissionRelation(Arg.Any<Submission>()).Returns(false);
 
         var result = await runner.SubmitSolutionAsync(dto, exerciseId: 1, userId: 2);
 
-        Assert.True(result.IsSuccess);
+        Assert.True(result.IsFailed);
     }
 
     [Fact]
@@ -171,13 +183,15 @@ public class SolutionRunnerServiceTest
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
         var solutionRepo = Substitute.For<ISolutionRepository>();
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var runner = new SolutionRunnnerService(loggerSub, haskellService, solutionRepo);
-        var dto = new SubmitSolutionDto(1, "test");
+        var mozartService = new MozartService(client, mozartLoggerSub);
+        var runner = new SolutionRunnerService(loggerSub, solutionRepo, mozartService);
+        var dto = new SubmitSolutionDto(1, "test", 1);
 
         solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        var language = new LanguageSupport { Id = 1 };
+        solutionRepo.GetSolutionLanguageBySession(Arg.Any<int>(), Arg.Any<int>()).Returns(language);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(new List<Testcase>()));
-        solutionRepo.InsertSolvedRelation(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        solutionRepo.InsertSubmissionRelation(Arg.Any<Submission>()).Returns(true);
 
         var result = await runner.SubmitSolutionAsync(dto, exerciseId: 1, userId: 2);
 

@@ -7,7 +7,7 @@ public interface ISessionRepository
 {
     Task<int> InsertSessionAsync(Session session, int authorId);
     Task<bool> VerifyAuthor(int userId, int sessionId);
-    Task<int> CreateAnonUser(int sessionId);
+    Task<int> CreateAnonUser(string name, int sessionId);
     Task<Session?> GetSessionByIdAsync(int sessionId);
     Task<bool> VerifyParticipantAccess(int userId, int sessionId);
     Task DeleteExpiredSessions();

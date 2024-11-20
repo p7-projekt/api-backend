@@ -87,6 +87,7 @@ public static class RegisterApiConfiguration
             
             opt.AddPolicy(nameof(Roles.AnonymousUser), policy => policy.RequireRole(nameof(Roles.AnonymousUser)));
             opt.AddPolicy(Policies.AllowAllRoles, policy => policy.RequireRole(nameof(Roles.Instructor), nameof(Roles.Student), nameof(Roles.AnonymousUser)));
+            opt.AddPolicy(Policies.AllowSubmissions, policy => policy.RequireRole(nameof(Roles.Student), nameof(Roles.AnonymousUser)));
         });
 
         return services;
@@ -96,4 +97,5 @@ public static class RegisterApiConfiguration
 public static class Policies
 {
     public const string AllowAllRoles = "AllowAllRoles";
+    public const string AllowSubmissions = "AllowSubmissions";
 }

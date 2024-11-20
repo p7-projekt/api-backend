@@ -48,6 +48,8 @@ public class UserEndpoints : IClassFixture<TestWebApplicationFactory<Program>>
 		using var scope = _factory.Services.CreateScope();
 		var userRepo = scope.ServiceProvider.GetService<IUserRepository>();
 		userRepo!.GetAnonUserSessionByIdAsync(Arg.Any<int>()).Returns(1);
+		var user = new User { Anonymous = true };
+		userRepo!.GetUserByIdAsync(Arg.Any<int>()).Returns(user);
 		_client.AddAnonAuth(1,1);
 		var response = await _client.GetAsync("v1/users/1");
 
@@ -59,7 +61,7 @@ public class UserEndpoints : IClassFixture<TestWebApplicationFactory<Program>>
 	{
 		using var scope = _factory.Services.CreateScope();
 		var userRepo = scope.ServiceProvider.GetService<IUserRepository>();
-		userRepo!.GetAppUserByIdAsync(Arg.Any<int>()).Returns(Task.FromResult((User?)null));
+		userRepo!.GetUserByIdAsync(Arg.Any<int>()).Returns(Task.FromResult((User?)null));
 		_client.AddRoleAuth(1, new List<Roles> {Roles.Instructor});
 		var response = await _client.GetAsync("v1/users/1");
 		
@@ -72,7 +74,7 @@ public class UserEndpoints : IClassFixture<TestWebApplicationFactory<Program>>
 		using var scope = _factory.Services.CreateScope();
 		var userRepo = scope.ServiceProvider.GetService<IUserRepository>();
 		var user = new User();
-		userRepo!.GetAppUserByIdAsync(Arg.Any<int>()).Returns(user);
+		userRepo!.GetUserByIdAsync(Arg.Any<int>()).Returns(user);
 		_client.AddRoleAuth(1, new List<Roles> {Roles.Instructor});
 		var response = await _client.GetAsync("v1/users/1");
 		

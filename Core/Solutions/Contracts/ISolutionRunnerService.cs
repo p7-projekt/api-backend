@@ -6,6 +6,6 @@ namespace Core.Solutions.Contracts;
 
 public interface ISolutionRunnerService
 {
-    Task<Result<HaskellResponseDto>> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId);
+    Task<Result<MozartResponseDto>> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId);
     
 }

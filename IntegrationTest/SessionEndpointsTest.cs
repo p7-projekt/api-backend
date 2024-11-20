@@ -247,9 +247,9 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
         var sessionResponse = CreateSessionResponse();
 
         sessionRepoSub.GetSessionBySessionCodeAsync(Arg.Any<string>()).Returns(sessionResponse);
-        sessionRepoSub.CreateAnonUser(Arg.Any<int>()).Returns(1);
+        sessionRepoSub.CreateAnonUser(Arg.Any<string>(), Arg.Any<int>()).Returns(1);
 
-        var requestBody = new JoinSessionDto("AA1234");
+        var requestBody = new JoinSessionDto("AA1234", "lars");
 
         var response = await _client.PostAsJsonAsync("/join", requestBody);
 
@@ -266,9 +266,9 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
         var sessionResponse = CreateSessionResponse();
 
         sessionRepoSub.GetSessionBySessionCodeAsync(Arg.Any<string>()).Returns(Result.Fail("Found no session on session code"));
-        sessionRepoSub.CreateAnonUser(Arg.Any<int>()).Returns(1);
+        sessionRepoSub.CreateAnonUser(Arg.Any<string>(), Arg.Any<int>()).Returns(1);
 
-        var requestBody = new JoinSessionDto("AA1234");
+        var requestBody = new JoinSessionDto("AA1234", "lars");
 
         var response = await _client.PostAsJsonAsync("/join", requestBody);
 
@@ -305,7 +305,8 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
             Title: "Number sum",
             Description: "Basic exercise",
             ExpiresInHours: 5,
-            ExerciseIds: new List<int> { 101 }
+            ExerciseIds: new List<int> { 101 },
+            LanguageIds: new List<int> { 1 }
         );
     }
 }

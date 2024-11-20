@@ -1,32 +1,38 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Core.Exercises.Models;
+using Core.Languages.Models;
+using Core.Solutions.Contracts;
 using Core.Solutions.Models;
+using Core.Solutions.Strategies;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Solutions.Services;
 
-public class HaskellService : IHaskellService
+public class MozartService : IMozartService
 {
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<HaskellService> _logger;
-
-    public HaskellService(HttpClient httpClient, ILogger<HaskellService> logger)
+	private readonly HttpClient _httpClient;
+	private readonly ILogger<MozartService> _logger;
+	
+	public MozartService(HttpClient httpClient, ILogger<MozartService> logger)
+	{
+		_httpClient = httpClient;
+		_logger = logger;
+	}
+	
+	private IMozartStrategy DetermineStrategy(Language language)
     {
-        _httpClient = httpClient;
-        _logger = logger;
-        var haskellURL = Environment.GetEnvironmentVariable("MOZART_HASKELL");
-        if (string.IsNullOrEmpty(haskellURL))
+        return language switch
         {
-            throw new NullReferenceException("Haskell environment variable not set");
-        }
-        _httpClient.BaseAddress = new Uri($"http://{haskellURL}");
+            Language.Haskell => new HaskellStrategy(),
+            Language.Python => throw new NotImplementedException(),
+            _ => throw new ArgumentOutOfRangeException(nameof(language), language, null)
+        };
     }
-    public async Task<Result<SolutionRunnerResponse>> SubmitSubmission(SubmissionDto submission)
-    {
+	public async Task<Result<SolutionRunnerResponse>> SubmitSubmission(SubmissionDto submission, Language language)
+	{
+		var url = DetermineStrategy(language).Url;
+	    _httpClient.BaseAddress = new Uri(url);
         using var response = await _httpClient.PostAsJsonAsync("/submit", submission);
         _logger.LogInformation("HTTP response: {response}, {body}", response.StatusCode, response.Content.ReadAsStringAsync().Result);
 
@@ -54,15 +60,12 @@ public class HaskellService : IHaskellService
             haskellResponse.ResponseDto = responseBody;
             return haskellResponse;
         }
-        else if (response.StatusCode == HttpStatusCode.UnprocessableContent)
+        if (response.StatusCode == HttpStatusCode.UnprocessableContent)
         {
             _logger.LogError("Wrong format of json provided to solution runner:, {message}", submission.Solution);
             return Result.Fail("Error occured");
         }
-        else
-        {
-            _logger.LogError("Unknown response from solution runner: {response}", response.Content.ReadAsStringAsync().Result);
-            return Result.Fail("Unknown error occured");
-        }
+	    _logger.LogError("Unknown response from solution runner: {response}", response.Content.ReadAsStringAsync().Result);
+	    return Result.Fail("Unknown error occured");
     }
 }

@@ -3,6 +3,8 @@ using Core.Classrooms;
 using Core.Classrooms.Contracts;
 using Core.Exercises;
 using Core.Exercises.Contracts;
+using Core.Languages.Contracts;
+using Core.Languages.Services;
 using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Solutions;
@@ -18,10 +20,11 @@ public static class RegisterCoreServices
     public static IServiceCollection AddCoreServices(this IServiceCollection services)
     {
         services.AddValidatorsFromAssemblies(new [] {Assembly.GetExecutingAssembly() });
-        services.AddScoped<ISolutionRunnerService, SolutionRunnnerService>();
+        services.AddScoped<ISolutionRunnerService, SolutionRunnerService>();
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<IExerciseService, ExerciseService>();
         services.AddScoped<IClassroomService, ClassroomService>();
+        services.AddScoped<ILanguageService, LanguageService>();
 
         services.AddQuartzHostedService(options =>
         {
