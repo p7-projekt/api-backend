@@ -138,9 +138,9 @@ public class SessionRepository : ISessionRepository
         return languages.Count == result;
     }
     
-    public async Task<int> CreateAnonUser(int sessionId)
+    public async Task<int> CreateAnonUser(string name, int sessionId)
     {
-        var result = await _userRepository.CreateAnonUserAsync(sessionId);
+        var result = await _userRepository.CreateAnonUserAsync(name, sessionId);
         if (result.IsFailed)
         {
             return 0;
@@ -172,6 +172,11 @@ public class SessionRepository : ISessionRepository
                     """;
         var result = await con.QuerySingleAsync<int>(query, new { UserId = userId, SessionId = sessionId });
         return result == 1;
+    }
+
+    public Task<int> CreateAnonUser(int sessionId)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task<Session?> GetSessionOverviewAsync(int sessionId, int userId)

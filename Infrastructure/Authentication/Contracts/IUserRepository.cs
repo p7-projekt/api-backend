@@ -14,7 +14,7 @@ public interface IUserRepository
 	Task<IEnumerable<Role>> GetRolesByUserIdAsync(int userId);
 	Task<bool> IsEmailAvailableAsync(string email);
 	Task<Result> CreateUserAsync(User user, Roles role);
-	Task<Result<int>> CreateAnonUserAsync(string name);
+	Task<Result<int>> CreateAnonUserAsync(string name, int sessionId);
 	Task<User?> GetUserByIdAsync(int userId);
 
 }

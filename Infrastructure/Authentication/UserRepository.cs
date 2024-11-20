@@ -97,9 +97,6 @@ public class UserRepository : IUserRepository
 		{
 			//Create base user and role
 			var userId = await CreateUserAndRoleAsync(user, role, con, transaction);
-			
-			// CreateApp user
-			await CreateAppUserAsync(con, transaction, user, userId);
 
 			_logger.LogInformation("Committing transaction");
 			transaction.Commit();
@@ -114,7 +111,7 @@ public class UserRepository : IUserRepository
 		return Result.Ok();
 	}
 	
-	public async Task<Result<int>> CreateAnonUserAsync(string name)
+	public async Task<Result<int>> CreateAnonUserAsync(string name, int sessionId)
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		using var transaction = con.BeginTransaction();
@@ -122,10 +119,7 @@ public class UserRepository : IUserRepository
 		try
 		{
 			//Create base user and role
-			userId = await CreateUserAndRoleAsync(new User {CreatedAt = DateTime.UtcNow}, Roles.AnonymousUser, con, transaction);
-			
-			// Create Anon user
-			await CreateAnonUserAsync(con, transaction, userId, name);
+			userId = await CreateUserAndRoleAsync(new User {Name = name, CreatedAt = DateTime.UtcNow}, Roles.AnonymousUser, con, transaction);
 			
 			// insert into user_in_session
 			var query = """
@@ -150,43 +144,48 @@ public class UserRepository : IUserRepository
 
 	private async Task<int> CreateUserAndRoleAsync(User user, Roles role, IDbConnection con, IDbTransaction transaction)
 	{
-			var userInsertQuery = """
-			                      INSERT INTO users (created_at) VALUES (@CreatedAt) 
-			                      RETURNING id;
-			                      """;
-			_logger.LogInformation("Inserting user into transaction: {query}", userInsertQuery);
-			var userId = await con.ExecuteScalarAsync<int>(userInsertQuery, new {CreatedAt = user.CreatedAt}, transaction);
-			_logger.LogDebug("UserID created in transaction: {userid}", userId);
-			
-			var createRoleQuery = """
-			                      INSERT INTO user_role (user_id, role_id)
-			                      SELECT @userId, id FROM role WHERE name = @roleName;
-			                      """;
-			_logger.LogInformation("Inserting role in user_roles: {query}", createRoleQuery);
-			await con.ExecuteAsync(createRoleQuery, new {userId = userId, roleName = role.ToString()}, transaction);
-			return userId;
+		var userId = 0;
+		if (role == Roles.AnonymousUser)
+		{
+			userId = await InsertAnonUserAsync(con, transaction, user);
+		}
+		else
+		{
+			userId = await InsertUserAsync(con, transaction, user);
+		}
+		
+		
+		var createRoleQuery = """
+		                      INSERT INTO user_role (user_id, role_id)
+		                      SELECT @userId, id FROM role WHERE name = @roleName;
+		                      """;
+		_logger.LogInformation("Inserting role in user_roles: {query}", createRoleQuery);
+		await con.ExecuteAsync(createRoleQuery, new {userId = userId, roleName = role.ToString()}, transaction);
+		return userId;
 	}
 
-	private async Task CreateUserAsync(IDbConnection con, IDbTransaction transaction, User user, int userId)
+	private async Task<int> InsertUserAsync(IDbConnection con, IDbTransaction transaction, User user)
 	{
 		var createAppUser = """
 		                    INSERT INTO users 
-		                        (user_id, email, name, password_hash) 
+		                        (email, name, password_hash, created_at, anonymous) 
 		                    VALUES 
-		                        (@UserId, @email, @Name, @password_hash);
+		                        (@email, @Name, @password_hash, @Anon, @CreatedAt)
+		                    RETURNING id;
 		                    """;
 		_logger.LogInformation("Inserting app user into transaction: {query}", createAppUser);
-		await con.ExecuteAsync(createAppUser, new {UserId = userId, email = user.Email, Name = user.Name, password_hash = user.PasswordHash}, transaction);
+		return await con.ExecuteAsync(createAppUser, new {email = user.Email, Name = user.Name, password_hash = user.PasswordHash, Anon = false, CreatedAt = user.CreatedAt}, transaction);
 	}
 
-	private async Task CreateAnonUserAsync(IDbConnection con, IDbTransaction transaction, int userId, string name)
+	private async Task<int> InsertAnonUserAsync(IDbConnection con, IDbTransaction transaction, User user)
 	{
 		var createAnonUserQuery= """
 		                        INSERT INTO users 
-		                        (id, name) 
-		                        VALUES (@UserId, @Name); 
+		                        (name, anonymous, created_at) 
+		                        VALUES (@Name, @Anon, @CreatedAt)
+		                        RETURNING id;
 		                        """;
-				_logger.LogInformation("Inserting anon user into transaction: {query}", createAnonUserQuery);
-				await con.ExecuteAsync(createAnonUserQuery, new {UserId = userId, Name = name }, transaction);
+		_logger.LogInformation("Inserting anon user into transaction: {query}", createAnonUserQuery);
+		return await con.ExecuteAsync(createAnonUserQuery, new {Name = user.Name, Anon = true, CreatedAt = user.CreatedAt}, transaction);
 	}
 }

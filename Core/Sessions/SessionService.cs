@@ -91,7 +91,7 @@ public class SessionService : ISessionService
         {
             return Result.Fail("Invalid session");
         }
-        var student = await _sessionRepository.CreateAnonUser(session.Value.Id);
+        var student = await _sessionRepository.CreateAnonUser(dto.Name, session.Value.Id);
         
         var timeOffset = session.Value.ExpirationTimeUtc - DateTime.UtcNow;
         
