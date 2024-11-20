@@ -10,5 +10,5 @@ namespace Core.Classrooms.Contracts;
 
 public interface IClassroomRepository
 {
-    Task<Result> InsertClassroomAsync(ClassroomDto dto, int authorId);
+    Task<Result> InsertClassroomAsync(ClassroomDto dto, int authorId, string roomCode);
 }

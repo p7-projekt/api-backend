@@ -20,8 +20,26 @@ public class ClassroomService : IClassroomService
         _logger = logger;
         _classroomRepository = classroomRepository;
     }
-    public async Task<Result> CreateClassroom(ClassroomDto dto, int authorId)
+    public async Task<Result<string>> CreateClassroom(ClassroomDto dto, int authorId)
     {
-        return await _classroomRepository.InsertClassroomAsync(dto, authorId);
+        var roomCode = GenerateClassroomCode();
+
+        var result = await _classroomRepository.InsertClassroomAsync(dto, authorId, roomCode);
+        if(result.IsFailed)
+        {
+            return result;
+        }
+
+        return Result.Ok(roomCode);
+    }
+
+    public string GenerateClassroomCode()
+    {
+        Random rnd = new Random();
+        var pinCode = rnd.Next(1000, 10000);
+        var secondToLastChar = (char)rnd.Next(65, 91);
+        var lastChar = (char)rnd.Next(65, 91);
+        var chars = string.Concat(secondToLastChar, lastChar);
+        return string.Concat(pinCode.ToString(), chars);
     }
 }

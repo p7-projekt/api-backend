@@ -3,7 +3,9 @@ INSERT INTO role(name) VALUES ('Student')
 CREATE TABLE classroom (
 	id SERIAL PRIMARY KEY,
 	title VARCHAR(100),
-	owner INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL
+	owner INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+	roomcode VARCHAR(6) NOT NULL,
+	registration_open BOOLEAN NOT NULL
 );
 
 CREATE TABLE session_in_classroom(

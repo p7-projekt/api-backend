@@ -35,6 +35,17 @@ public static class ClassroomEndpoints
 
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ClassroomDto>();
 
+        // POST add session to classroom
+
+        // GET classroom
+
+        // DELETE classroom
+
+        // PUT? open classroom
+
+        // PUT? open Close Classroom
+
+
         return app;
     }
 }

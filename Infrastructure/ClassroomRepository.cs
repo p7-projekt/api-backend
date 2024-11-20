@@ -23,13 +23,13 @@ public class ClassroomRepository : IClassroomRepository
         _connection = connection;
     }
 
-    public async Task<Result> InsertClassroomAsync(ClassroomDto dto, int authorId)
+    public async Task<Result> InsertClassroomAsync(ClassroomDto dto, int authorId, string roomcode)
     {
         using var con = await _connection.CreateConnectionAsync();
 
-        var query = "INSERT INTO classroom (title, author_id) VALUES (@Title, @AuthorId) RETURNING classroom_id;";
+        var query = "INSERT INTO classroom (title, author_id, registration_open) VALUES (@Title, @AuthorId, FALSE, @RoomCode) RETURNING classroom_id;";
 
-        var result = await con.ExecuteAsync(query, new { Titel = dto.Title, AuthorId = authorId } );
+        var result = await con.ExecuteAsync(query, new { Titel = dto.Title, AuthorId = authorId, RoomCode = roomcode } );
 
         if (result == 0)
         {
