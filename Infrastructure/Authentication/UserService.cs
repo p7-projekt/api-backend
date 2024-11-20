@@ -41,31 +41,51 @@ public class UserService : IUserService
 		return Result.Ok();
 	}
 
+
+	private async Task<Result<User>> GetUserByIdAsync(int userId, int userIdParameter)
+	{
+		if (userId != userIdParameter)
+        {
+            return Result.Fail("User id not consistent");
+        }
+
+		var result = await _userRepository.GetUserByIdAsync(userId);
+		if (result == null) // It seems null cannot be returned from the repository function - this may need rethinking
+        {
+        	return Result.Fail("User not found");
+        }
+
+		return result;
+	}
+	
 	public async Task<Result<GetUserResponseDto>> GetAppUserByIdAsync(int id, int userIdParameter)
 	{
-		if (id != userIdParameter)
-		{
-			return Result.Fail("User id not consistent");
-		}
-		var result = await _userRepository.GetAppUserByIdAsync(id);
-		_logger.LogInformation("Selecting user with userid: {userid}", id);
-		if (result == null) // It seems null cannot be returned from the repository function - this may need rethinking
-		{
-			return Result.Fail("User not found");
-		}
 
-		return Result.Ok(new GetUserResponseDto(result.Email, result.Name, null));
+		var result = await GetUserByIdAsync(id, userIdParameter);
+		if (result.IsFailed)
+		{
+			_logger.LogWarning("Could not retrieve user {userid}", id);
+			return Result.Fail("Error getting user");
+		}
+		return Result.Ok(new GetUserResponseDto(result.Value.Email, result.Value.Name));
 	}
 
 	public async Task<Result<GetUserResponseDto>> GetAnonUserByIdAsync(int userId)
 	{
-		var sessionId = await _userRepository.GetAnonUserSessionByIdAsync(userId);
-		if (sessionId == 0)
-		{
-			return Result.Fail("Error receiving user");
-		}
+		// TODO FIX!!!!!
+		var result = await GetUserByIdAsync(userId, userId);
+        if (result.IsFailed)
+        {
+			_logger.LogWarning("Could not retrieve user {userid}", userId);
+        	return Result.Fail("Error getting user");
+        }
 
-		return new GetUserResponseDto(null, null, sessionId.ToString());
+        if (result.Value.Anonymous == false)
+        {
+	        return Result.Fail("Error getting user");
+        }	
+		
+		return new GetUserResponseDto(null, result.Value.Name);
 	}
 
 	public async Task<Result<LoginResponse>> LoginAsync(LoginDto loginDto)

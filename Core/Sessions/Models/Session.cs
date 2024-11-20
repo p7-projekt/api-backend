@@ -1,5 +1,7 @@
 using Core.Exercises.Models;
 using System.Globalization;
+using Core.Languages.Models;
+using Core.Solutions.Models;
 
 namespace Core.Sessions.Models;
 
@@ -14,6 +16,8 @@ public class Session
     public string SessionCode { get; set; } = string.Empty;
     public List<int> Exercises { get; set; } = new (); // this needs to be changed when exercises are available
     public List<SolvedExercise> ExerciseDetails { get; set; } = new();
+
+    public List<Language> Languages { get; set; } = new();
 }
 
 public static class SessionMapper
@@ -25,7 +29,8 @@ public static class SessionMapper
             Title = dto.Title,
             Description = dto.Description,
             ExpirationTimeUtc = DateTime.UtcNow.AddHours(dto.ExpiresInHours),
-            Exercises = dto.ExerciseIds
+            Exercises = dto.ExerciseIds,
+            Languages = dto.LanguageIds.Select(l => (Language)l).ToList()
         };
     }
     
