@@ -29,7 +29,7 @@ public class UserRepository : IUserRepository
 		            """;
 		return await con.QuerySingleOrDefaultAsync<User>(query, new { userId });
 	}
-	
+
 	/*public async Task<User?> GetAppUserByIdAsync(int userId)
 	{
 		using var con = await _connection.CreateConnectionAsync();
@@ -42,15 +42,15 @@ public class UserRepository : IUserRepository
 		return user;
 	}*/
 
-	/*public async Task<int> GetAnonUserSessionByIdAsync(int userId)
+	public async Task<int> GetAnonUserSessionByIdAsync(int userId)
 	{
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
-		            SELECT session_id FROM anon_users WHERE user_id = @UserId;
+		            SELECT session_id FROM user_in_timedsession WHERE user_id = @UserId;
 		            """;
 		var sessionId = await con.QuerySingleOrDefaultAsync<int>(query, new { userId });
 		return sessionId;
-	}*/
+	}
 
 	public async Task<User?> GetUserByEmailAsync(string email)
 	{
