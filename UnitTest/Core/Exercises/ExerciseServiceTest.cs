@@ -21,7 +21,7 @@ namespace UnitTest.Core.Exercises;
 
 public class ExerciseServiceTest
 {
-    private readonly ILogger<HaskellService> haskellLoggerSub = Substitute.For<ILogger<HaskellService>>();
+    private readonly ILogger<MozartService> mozartlLoggerSub = Substitute.For<ILogger<MozartService>>();
 
 
     [Fact]
@@ -38,8 +38,8 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartlService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartlService);
 
         exerciseRepo.VerifyExerciseAuthorAsync(Arg.Is<int>(x => x > 0), Arg.Is<int>(x => x > 0)).Returns(true);
         exerciseRepo.DeleteExerciseAsync(Arg.Is<int>(x => x > 0)).Returns(true);
@@ -66,8 +66,8 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         exerciseRepo.VerifyExerciseAuthorAsync(Arg.Is<int>(x => x > 0), Arg.Is<int>(x => x > 0)).Returns(true);
         exerciseRepo.DeleteExerciseAsync(Arg.Is<int>(x => x > 0)).Returns(true);
@@ -91,8 +91,8 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         var exercise = new GetExerciseResponseDto();
         exerciseRepo.GetExerciseByIdAsync(Arg.Is<int>(x => x > 0)).Returns(exercise);
@@ -119,8 +119,8 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         var exercise = new GetExerciseResponseDto();
         exerciseRepo.GetExerciseByIdAsync(Arg.Is<int>(x => x > 0)).Returns(exercise);
@@ -147,8 +147,8 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         var exercise = new GetExerciseResponseDto();
         exerciseRepo.GetExerciseByIdAsync(Arg.Is<int>(x => x > 0)).Returns(exercise);
@@ -174,8 +174,8 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         var exercise = new GetExercisesResponseDto(1, "title");
         exerciseRepo.GetExercisesAsync(Arg.Is<int>(x => x > 0)).Returns(new List<GetExercisesResponseDto> { exercise });
@@ -200,8 +200,8 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         var exercise = new GetExercisesResponseDto(1, "title");
         exerciseRepo.GetExercisesAsync(Arg.Is<int>(x => x > 0)).Returns(new List<GetExercisesResponseDto> { exercise });
@@ -226,13 +226,13 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         exerciseRepo.VerifyExerciseAuthorAsync(Arg.Is<int>(x => x > 0), Arg.Is<int>(x => x > 0)).Returns(true);
         exerciseRepo.UpdateExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Ok());
 
-        var dto = new ExerciseDto("title", "description", "2+2", [ "int" ], [ "int" ], [ new TestcaseDto(["2"], ["4"], true) ]);
+        var dto = new ExerciseDto("title", "description", "2+2", 1, [ "int" ], [ "int" ], [ new TestcaseDto(["2"], ["4"], true) ]);
         var result = await exerciseService.UpdateExercise(1, 1, dto);
 
         Assert.True(result.IsSuccess);
@@ -257,13 +257,13 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         exerciseRepo.VerifyExerciseAuthorAsync(Arg.Is<int>(x => x > 0), Arg.Is<int>(x => x > 0)).Returns(true);
         exerciseRepo.UpdateExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Ok());
 
-        var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
+        var dto = new ExerciseDto("title", "description", "2+2", 1, ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
         var result = await exerciseService.UpdateExercise(exerciseId, authorId, dto);
 
         Assert.True(result.IsFailed);
@@ -283,13 +283,13 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         exerciseRepo.VerifyExerciseAuthorAsync(Arg.Is<int>(x => x > 0), Arg.Is<int>(x => x > 0)).Returns(true);
         exerciseRepo.UpdateExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Ok());
 
-        var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto([ "2" ], [ "4" ], true)]);
+        var dto = new ExerciseDto("title", "description", "2+2", 1, ["int"], ["int"], [new TestcaseDto([ "2" ], [ "4" ], true)]);
         var result = await exerciseService.UpdateExercise(1, 1, dto);
 
         Assert.True(result.IsFailed);
@@ -309,13 +309,13 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         exerciseRepo.VerifyExerciseAuthorAsync(Arg.Is<int>(x => x > 0), Arg.Is<int>(x => x > 0)).Returns(true);
         exerciseRepo.UpdateExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Ok());
 
-        var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
+        var dto = new ExerciseDto("title", "description", "2+2", 1, ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
         var result = await exerciseService.UpdateExercise(1, 1, dto);
 
         Assert.True(result.IsSuccess);
@@ -336,13 +336,13 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         exerciseRepo.VerifyExerciseAuthorAsync(Arg.Is<int>(x => x > 0), Arg.Is<int>(x => x > 0)).Returns(true);
         exerciseRepo.UpdateExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Ok());
 
-        var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
+        var dto = new ExerciseDto("title", "description", "2+2", 1, ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
         var result = await exerciseService.UpdateExercise(1, 1, dto);
 
         Assert.True(result.IsSuccess);
@@ -363,13 +363,13 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         exerciseRepo.VerifyExerciseAuthorAsync(Arg.Is<int>(x => x > 0), Arg.Is<int>(x => x > 0)).Returns(true);
         exerciseRepo.UpdateExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Fail("error occured"));
 
-        var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
+        var dto = new ExerciseDto("title", "description", "2+2", 1, ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
         var result = await exerciseService.UpdateExercise(1, 1, dto);
 
         Assert.True(result.IsFailed);
@@ -389,12 +389,12 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         exerciseRepo.InsertExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Ok());
 
-        var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
+        var dto = new ExerciseDto("title", "description", "2+2", 1, ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
         var result = await exerciseService.CreateExercise(dto, 1);
 
         Assert.True(result.IsSuccess);
@@ -415,12 +415,12 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         exerciseRepo.InsertExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Ok());
 
-        var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
+        var dto = new ExerciseDto("title", "description", "2+2", 1, ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
         var result = await exerciseService.CreateExercise(dto, 1);
 
         Assert.True(result.IsFailed);
@@ -440,16 +440,16 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         exerciseRepo.InsertExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Ok());
 
-        var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
+        var dto = new ExerciseDto("title", "description", "2+2", 1, ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
         var result = await exerciseService.CreateExercise(dto, 1);
 
         Assert.True(result.IsSuccess);
-        Assert.IsType<HaskellResponseDto>(result.Value);
+        Assert.IsType<MozartResponseDto>(result.Value);
         Assert.Null(result.Value.Message);
     }
 
@@ -467,16 +467,16 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         exerciseRepo.InsertExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Ok());
 
-        var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
+        var dto = new ExerciseDto("title", "description", "2+2", 1, ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
         var result = await exerciseService.CreateExercise(dto, 1);
 
         Assert.True(result.IsSuccess);
-        Assert.IsType<HaskellResponseDto>(result.Value);
+        Assert.IsType<MozartResponseDto>(result.Value);
         Assert.Null(result.Value.TestCaseResults);
     }
 
@@ -494,12 +494,12 @@ public class ExerciseServiceTest
         };
         var httpClientSub = new MockHttpMessageHandler(response);
         var client = new HttpClient(httpClientSub);
-        var haskellService = new HaskellService(client, haskellLoggerSub);
-        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, haskellService);
+        var mozartService = new MozartService(client, mozartlLoggerSub);
+        var exerciseService = new ExerciseService(exerciseRepo, logger, solutionRepo, mozartService);
 
         exerciseRepo.InsertExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Is<int>(x => x > 0)).Returns(Result.Fail("Failed insert, transacation rolled back"));
 
-        var dto = new ExerciseDto("title", "description", "2+2", ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
+        var dto = new ExerciseDto("title", "description", "2+2", 1, ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
         var result = await exerciseService.CreateExercise(dto, 1);
 
         Assert.True(result.IsFailed);

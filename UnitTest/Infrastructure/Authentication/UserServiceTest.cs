@@ -144,7 +144,7 @@ public class UserServiceTest
         var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
 
 		var user = new User { Email = "validmail@mail.com", Name = "James" };
-		userRepoMock.GetAppUserByIdAsync(Arg.Any<int>()).Returns(user);
+		userRepoMock.GetUserByIdAsync(Arg.Any<int>()).Returns(user);
 
 		var result = await userService.GetAppUserByIdAsync(1, 1);
 
@@ -162,7 +162,7 @@ public class UserServiceTest
         var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
 
         var user = new User { Email = "validmail@mail.com", Name = "James" };
-        userRepoMock.GetAppUserByIdAsync(Arg.Any<int>()).Returns(user);
+        userRepoMock.GetUserByIdAsync(Arg.Any<int>()).Returns(user);
 
 		var id1 = 1;
 		var id2 = 2;
@@ -181,7 +181,8 @@ public class UserServiceTest
         var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
 
 		userRepoMock.GetAnonUserSessionByIdAsync(Arg.Any<int>()).Returns(1);
-
+		var user = new User { Anonymous = true };
+		userRepoMock.GetUserByIdAsync(Arg.Any<int>()).Returns(user);
 		var result = await userService.GetAnonUserByIdAsync(1);
 
 		Assert.True(result.IsSuccess);

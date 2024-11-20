@@ -38,13 +38,13 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
 			var ItokenRepoSub = Substitute.For<ITokenRepository>();
 			var IUserRepo = Substitute.For<IUserRepository>();
       var iExeciseSub = Substitute.For<IExerciseRepository>();
-			var iHaskellSub = Substitute.For<IHaskellService>();
+			var iMozartSub = Substitute.For<IMozartService>();
 			var iSolutionSub = Substitute.For<ISolutionRepository>();
       services.AddScoped<ITokenRepository>(_ => ItokenRepoSub);
 			services.AddScoped<IUserRepository>(_ => IUserRepo);
       services.AddScoped<ISessionRepository>(_ => iSesSub);
 			services.AddScoped<IExerciseRepository>(_ => iExeciseSub);
-			services.AddScoped<IHaskellService>(_ => iHaskellSub);
+			services.AddScoped<IMozartService>(_ => iMozartSub);
 			services.AddScoped<ISolutionRepository>(_ => iSolutionSub);
 		});
 		

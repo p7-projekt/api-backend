@@ -2,9 +2,10 @@
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using Core.Exercises.Contracts;
+using Core.Languages.Models;
+using Core.Solutions;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
-using Core.Solutions.Services;
 
 namespace Core.Exercises;
 
@@ -13,15 +14,15 @@ public class ExerciseService : IExerciseService
     private readonly IExerciseRepository _exerciseRepository;
     private readonly ILogger<ExerciseService> _logger;
     private readonly ISolutionRepository _solutionRepository;
-    private readonly IHaskellService _haskellService;
+    private readonly IMozartService _iMozartService;
 
 
-    public ExerciseService(IExerciseRepository exerciseRepository, ILogger<ExerciseService> logger, ISolutionRepository solutionRepository, IHaskellService haskellService)
+    public ExerciseService(IExerciseRepository exerciseRepository, ILogger<ExerciseService> logger, ISolutionRepository solutionRepository, IMozartService iMozartService)
     {
         _exerciseRepository = exerciseRepository;
         _logger = logger;
         _solutionRepository = solutionRepository;
-        _haskellService = haskellService;
+        _iMozartService = iMozartService;
     }
 
     public async Task<Result> DeleteExercise(int exerciseId, int userId)
@@ -80,8 +81,8 @@ public class ExerciseService : IExerciseService
             _logger.LogInformation("Exercise: {exercise_id} not created by provided author: {author_Id}", exerciseId, authorId);
             return Result.Fail("Exercise not updated");
         }
-        
-        var submissionResult = await _haskellService.SubmitSubmission(new SubmissionDto(dto));
+
+        var submissionResult = await _iMozartService.SubmitSubmission(new SubmissionDto(dto), (Language)dto.SolutionLanguage);
 
         if (submissionResult.IsFailed) 
         {
@@ -103,9 +104,9 @@ public class ExerciseService : IExerciseService
         return submissionResult;
     }
 
-    public async Task<Result<HaskellResponseDto>> CreateExercise(ExerciseDto dto, int authorId)
+    public async Task<Result<MozartResponseDto>> CreateExercise(ExerciseDto dto, int authorId)
     {
-        var result = await _haskellService.SubmitSubmission(new SubmissionDto(dto));
+        var result = await _iMozartService.SubmitSubmission(new SubmissionDto(dto), (Language)dto.SolutionLanguage);
         if (result.IsFailed)
         {
             return Result.Fail("Internal error");
@@ -114,9 +115,9 @@ public class ExerciseService : IExerciseService
         switch (result.Value.Action)
         {
             case ResponseCode.Failure:
-                return Result.Ok(new HaskellResponseDto(result.Value.ResponseDto!.TestCaseResults, null));
+                return Result.Ok(new MozartResponseDto(result.Value.ResponseDto!.TestCaseResults, null));
             case ResponseCode.Error:
-                return Result.Ok(new HaskellResponseDto(null, result.Value.ResponseDto!.Message));
+                return Result.Ok(new MozartResponseDto(null, result.Value.ResponseDto!.Message));
         }
 
         var insertResult = await _exerciseRepository.InsertExerciseAsync(dto, authorId);

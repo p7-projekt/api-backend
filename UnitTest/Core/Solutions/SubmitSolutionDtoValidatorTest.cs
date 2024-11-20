@@ -9,7 +9,7 @@ public class SubmitSolutionDtoValidatorTest
     public void SubmitSolutionDtoValidatorTest_ShouldReturn_Ok()
     {
         var validator = new SubmitSolutionDtoValidator();
-        var dto = new SubmitSolutionDto(1, "test");
+        var dto = new SubmitSolutionDto(1, "test", 1);
 
         var result = validator.Validate(dto);
 
@@ -20,7 +20,7 @@ public class SubmitSolutionDtoValidatorTest
     public void SubmitSolutionDtoValidatorTest_ShouldReturn_FailEmptySolution()
     {
         var validator = new SubmitSolutionDtoValidator();
-        var dto = new SubmitSolutionDto(1, "");
+        var dto = new SubmitSolutionDto(1, "", 1);
 
         var result = validator.Validate(dto);
 
@@ -31,7 +31,7 @@ public class SubmitSolutionDtoValidatorTest
     public void SubmitSolutionDtoValidatorTest_ShouldReturn_FailId()
     {
         var validator = new SubmitSolutionDtoValidator();
-        var dto = new SubmitSolutionDto(0, "test");
+        var dto = new SubmitSolutionDto(0, "test", 1);
 
         var result = validator.Validate(dto);
 

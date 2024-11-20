@@ -1,6 +1,9 @@
 using API.Configuration;
 using API.Endpoints;
+using Asp.Versioning;
+using Asp.Versioning.Builder;
 using Core;
+using Core.Solutions.Contracts;
 using Core.Solutions.Models;
 using Core.Solutions.Services;
 using Infrastructure;
@@ -20,8 +23,10 @@ public class Program
         });
         
         // Supported languages
-        builder.Services.AddHttpClient<IHaskellService, HaskellService>()
-            .SetHandlerLifetime(TimeSpan.FromSeconds(30));
+        builder.Services.AddHttpClient<IMozartService, MozartService>()
+            .SetHandlerLifetime(TimeSpan.FromSeconds(30)); 
+        // builder.Services.AddHttpClient<IHaskellService, HaskellService>()
+            // .SetHandlerLifetime(TimeSpan.FromSeconds(30));
         
         // Add services to the container.
         builder.Services.AddCoreServices();
@@ -36,8 +41,15 @@ public class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-
+        
+        
         var app = builder.Build();
+
+        ApiVersionSet apiVersionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1))
+            .HasApiVersion(new ApiVersion(2))
+            .ReportApiVersions()
+            .Build();
         
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -57,11 +69,12 @@ public class Program
         app.UseSerilogRequestLogging();
 
         // Endpoints
-        app.UseExerciseEndpoints();
+        app.UseExerciseEndpoints(apiVersionSet);
         app.UseAuthenticationEndpoints();
         app.UseSessionEndpoints();
         app.UseUserEndpoints();
         app.UseClassroomEndpoints();
+        app.UseLanguageEndpoints();
 
         app.Run();
     }

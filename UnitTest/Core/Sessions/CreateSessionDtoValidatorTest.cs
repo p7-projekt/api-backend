@@ -14,7 +14,7 @@ public class CreateSessionDtoValidatorTest
 	public void ValidateTitle_ShouldReturn_Fail(string title)
 	{
 		var validator = new CreateSessionDtoValidator();
-		var dto = new CreateSessionDto(title, null, 1, new List<int>{1,2});
+		var dto = new CreateSessionDto(title, null, 1, new List<int>{1,2}, new List<int> { 1 });
 		
 		var result = validator.Validate(dto);
 		
@@ -30,7 +30,7 @@ public class CreateSessionDtoValidatorTest
 	public void ValidateTitle_ShouldReturn_Ok(string title)
 	{
 		var validator = new CreateSessionDtoValidator();
-		var dto = new CreateSessionDto(title, null, 1, new List<int>{1,2});
+		var dto = new CreateSessionDto(title, null, 1, new List<int>{1,2}, new List<int> { 1 });
 		
 		var result = validator.Validate(dto);
 		
@@ -46,7 +46,7 @@ public class CreateSessionDtoValidatorTest
 		{
 			desc += "a";
 		}
-		var dto = new CreateSessionDto("MyTitle", desc, 1, new List<int>{1,2});
+		var dto = new CreateSessionDto("MyTitle", desc, 1, new List<int>{1,2}, new List<int> { 1 });
 		
 		var result = validator.Validate(dto);
 		
@@ -61,7 +61,7 @@ public class CreateSessionDtoValidatorTest
 		{
 			desc += "a";
 		}
-		var dto = new CreateSessionDto("MyTitle", desc, 1, new List<int>{1,2});
+		var dto = new CreateSessionDto("MyTitle", desc, 1, new List<int>{1,2}, new List<int> { 1 });
 		
 		var result = validator.Validate(dto);
 		
@@ -71,7 +71,7 @@ public class CreateSessionDtoValidatorTest
 	public void ValidateDescription_ShouldReturn_OkNull()
 	{
 		var validator = new CreateSessionDtoValidator();
-		var dto = new CreateSessionDto("MyTitle", null, 1, new List<int>{1,2});
+		var dto = new CreateSessionDto("MyTitle", null, 1, new List<int>{1,2}, new List<int> { 1 });
 		
 		var result = validator.Validate(dto);
 		
@@ -87,7 +87,7 @@ public class CreateSessionDtoValidatorTest
 	public void ValidateExpiresInHours_ShouldReturn_Fail(int expiresInHours)
 	{
 		var validator = new CreateSessionDtoValidator();
-		var dto = new CreateSessionDto("MyTitle", null, expiresInHours, new List<int>{1,2});
+		var dto = new CreateSessionDto("MyTitle", null, expiresInHours, new List<int>{1,2}, new List<int> { 1 });
 		
 		var result = validator.Validate(dto);
 		
@@ -102,7 +102,7 @@ public class CreateSessionDtoValidatorTest
 	public void ValidateExpiresInHours_ShouldReturn_OK(int expiresInHours)
 	{
 		var validator = new CreateSessionDtoValidator();
-		var dto = new CreateSessionDto("MyTitle", null, expiresInHours, new List<int>{1,2});
+		var dto = new CreateSessionDto("MyTitle", null, expiresInHours, new List<int>{1,2}, new List<int> { 1 });
 		
 		var result = validator.Validate(dto);
 		
@@ -113,7 +113,7 @@ public class CreateSessionDtoValidatorTest
 	public void ValidateExerciseIds_ShouldReturn_Fail()
 	{
 		var validator = new CreateSessionDtoValidator();
-		var dto = new CreateSessionDto("MyTitle", null, 1, new List<int>{});
+		var dto = new CreateSessionDto("MyTitle", null, 1, new List<int>{}, new List<int> { 1 });
 		
 		var result = validator.Validate(dto);
 		
@@ -124,7 +124,7 @@ public class CreateSessionDtoValidatorTest
 	public void ValidateExerciseIds_ShouldReturn_Ok()
 	{
 		var validator = new CreateSessionDtoValidator();
-		var dto = new CreateSessionDto("MyTitle", null, 1, new List<int>{1});
+		var dto = new CreateSessionDto("MyTitle", null, 1, new List<int>{1}, new List<int> { 1 });
 		
 		var result = validator.Validate(dto);
 		
