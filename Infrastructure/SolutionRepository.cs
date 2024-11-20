@@ -95,31 +95,35 @@ public class SolutionRepository : ISolutionRepository
 		return await con.QuerySingleOrDefaultAsync<LanguageSupport>(query, new { LanguageId = languageId, SessionId = sessionId });
 	}
 
+	public async Task<bool> VerifyUserInTimedSession(int userId, int sessionId)
+	{
+		using var con = await _dbConnection.CreateConnectionAsync();
+		// verify correct session id in Submission and exercise is in that session
+        	var verifySessionExerciseQuery = """
+                                         SELECT COUNT(*)
+                                         FROM user_in_timedsession
+                                         WHERE session_id = @SessionId AND user_id = @UserId;
+                                         """;
+        var verification = await con.ExecuteScalarAsync<int>(verifySessionExerciseQuery,
+        	new
+        	{
+        		 SessionId = sessionId, UserId = userId
+        	});
+        if (verification != 1)
+        {
+        	return false;
+        }
+
+        return true;
+	}
+
+
 	public async Task<bool> InsertSubmissionRelation(Submission submission) 
 	{
 		using var con = await _dbConnection.CreateConnectionAsync();
 		using var transaction = con.BeginTransaction();
 		try
 		{
-			// verify correct session id in Submission and exercise is in that session
-			var verifySessionExerciseQuery = """
-			                                 SELECT COUNT(*)
-			                                 FROM exercise_in_session AS eis
-			                                 join user_in_session AS uis
-			                                 	on eis.session_id = uis.session_id
-			                                 WHERE eis.exercise_id = @ExerciseId AND eis.session_id = @SessionId AND uis.user_id = @UserId;
-			                                 """;
-			var verification = await con.ExecuteScalarAsync<int>(verifySessionExerciseQuery,
-				new
-				{
-					ExerciseId = submission.ExerciseId, SessionId = submission.SessionId, UserId = submission.UserId
-				}, transaction);
-			if (verification != 1)
-			{
-				transaction.Rollback();
-				return false;
-			}
-
 			// check if there already exist a solution / submission
 			if (submission.Solved)
 			{
