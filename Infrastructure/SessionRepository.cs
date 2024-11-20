@@ -152,10 +152,8 @@ public class SessionRepository : ISessionRepository
     {
         using var con = await _connection.CreateConnectionAsync();
         var query = """
-                    SELECT COUNT(*) FROM anon_users
-                    JOIN session 
-                        ON session.session_id = anon_users.session_id
-                    WHERE anon_users.user_id = @UserId AND session.session_id = @SessionId;
+                    SELECT COUNT(*) FROM user_in_timedsession
+                    where user_id = @UserId AND session_id = @SessionId
                     """;
         var result = await con.ExecuteScalarAsync<int>(query, new { UserId = userId, SessionId = sessionId });
         return result == 1;
@@ -165,26 +163,21 @@ public class SessionRepository : ISessionRepository
     {
         using var con = await _connection.CreateConnectionAsync();
         var query = """
-                    SELECT COUNT(*) FROM app_users
+                    SELECT COUNT(*) FROM users
                     JOIN session
-                    ON session.author_id = app_users.user_id
-                    WHERE app_users.user_id = @UserId AND session.session_id = @SessionId;
+                    ON session.author_id = users.id
+                    WHERE users.id = @UserId AND session.session_id = @SessionId;
                     """;
         var result = await con.QuerySingleAsync<int>(query, new { UserId = userId, SessionId = sessionId });
         return result == 1;
     }
 
-    public Task<int> CreateAnonUser(int sessionId)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<Session?> GetSessionOverviewAsync(int sessionId, int userId)
     {
         var query = """
-                    SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc, app_users.name AS authorname  
+                    SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc, users.name AS authorname  
                     FROM session
-                    JOIN app_users ON app_users.user_id = session.author_id
+                    JOIN users ON users.id = session.author_id
                     WHERE session_id = @SessionId;
                     """;
         using var con = await _connection.CreateConnectionAsync();
@@ -203,7 +196,7 @@ public class SessionRepository : ISessionRepository
                              FROM exercise AS e
                              JOIN exercise_in_session AS eis
                                 ON e.exercise_id = eis.exercise_id
-                             LEFT JOIN solved AS s 
+                             LEFT JOIN submission AS s 
                                 ON e.exercise_id = s.exercise_id AND s.user_id = @UserId
                              WHERE eis.session_id = @SessionId;
                              """;
@@ -217,9 +210,9 @@ public class SessionRepository : ISessionRepository
     public async Task<Result<Session>> GetSessionBySessionCodeAsync(string sessionCode)
     {
         var query = """
-                    SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc, app_users.name AS authorname  
+                    SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc, users.name AS authorname  
                     FROM session
-                    JOIN app_users ON app_users.user_id = session.author_id
+                    JOIN users ON users.id = session.author_id
                     WHERE session_code = @SessionCode;
                     """;
         using var con = await _connection.CreateConnectionAsync();
@@ -245,9 +238,9 @@ public class SessionRepository : ISessionRepository
     public async Task<Session?> GetSessionByIdAsync(int sessionId)
     {
         var query = """
-                    SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc, app_users.name AS authorname  
+                    SELECT session_id AS id, title, description, author_id AS authorid, expirationtime_utc AS ExpirationTimeUtc, users.name AS authorname  
                     FROM session
-                    JOIN app_users ON app_users.user_id = session.author_id
+                    JOIN users ON users.id = session.author_id
                     WHERE session_id = @SessionId;
                     """;
         using var con = await _connection.CreateConnectionAsync();
@@ -281,11 +274,28 @@ public class SessionRepository : ISessionRepository
     public async Task<bool> DeleteSessionAsync(int sessionId, int authorId)
     {
         using var con = await _connection.CreateConnectionAsync();
+        // owned session is not a data modyfing query, which means it will only be executed once it is referenced.
+        // where as the delete_anon_users is a data modifying query and will be executed exactly once 
+        // delete_anon_users is thus triggered just before the last delete of the session.
         var query = """
-                    DELETE FROM session WHERE session_id = @SessionId
-                    AND EXISTS (
-                        SELECT 1 FROM session WHERE session_id = @SessionId AND author_id = @AuthorId
-                    )
+                    WITH owned_session AS (
+                        SELECT 1
+                        FROM session
+                        WHERE session_id = @SessionId
+                          AND author_id = @AuthorId
+                    ), delete_anon_users AS (
+                        DELETE FROM users
+                        WHERE id IN (
+                            SELECT user_id
+                            FROM user_in_timedsession
+                            WHERE session_id = @SessionId
+                        )
+                        AND EXISTS (SELECT 1 FROM owned_session)
+                        RETURNING id
+                        )
+                    DELETE FROM session
+                    WHERE session_id = @SessionId
+                    AND EXISTS (SELECT 1 FROM owned_session);
                     """;
         var result = await con.ExecuteAsync(query, new { SessionId = sessionId, AuthorId = authorId });
         return result == 1;

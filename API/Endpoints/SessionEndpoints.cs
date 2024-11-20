@@ -99,16 +99,23 @@ public static class SessionEndpoints
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<CreateSessionDto>();
         
         // Join session
-        app.MapPost("/join", async Task<Results<Ok<JoinSessionResponseDto>, BadRequest<ValidationProblemDetails>>> ([FromBody]JoinSessionDto dto, ISessionService service) =>
+        app.MapPost("/join", async Task<Results<Ok<JoinSessionResponseDto>, BadRequest<ValidationProblemDetails>>> ([FromBody]JoinSessionDto dto, ISessionService service, ClaimsPrincipal principal) =>
         {
-            var result = await service.JoinSessionAnonUser(dto);
-            if (result.IsFailed)
-            {
-                var error = CreateBadRequest.CreateValidationProblemDetails(result.Errors, $"Invalid {nameof(dto.SessionCode)}", nameof(dto.SessionCode));
-                return TypedResults.BadRequest(error);
-            }
+            var hasToken = principal.Claims.Any();
             
-            return TypedResults.Ok(result.Value);
+            // Join as anonUser
+            if (!hasToken)
+            {
+                var result = await service.JoinSessionAnonUser(dto);
+                if (result.IsFailed)
+                {
+                    var error = CreateBadRequest.CreateValidationProblemDetails(result.Errors, $"Invalid {nameof(dto.SessionCode)}", nameof(dto.SessionCode));
+                    return TypedResults.BadRequest(error);
+                }
+                return TypedResults.Ok(result.Value);
+            }
+            // TODO
+            return TypedResults.Ok(new JoinSessionResponseDto("helo", DateTime.UtcNow));
         }).WithRequestValidation<JoinSessionDto>();
         return app;
     }

@@ -25,9 +25,9 @@ public class UserRepository : IUserRepository
 		using var con = await _connection.CreateConnectionAsync();
 		var query = """
 		            SELECT * FROM users
-		            WHERE users.id = @Id;
+		            WHERE id = @Id;
 		            """;
-		return await con.QuerySingleOrDefaultAsync<User>(query, new { userId });
+		return await con.QueryFirstOrDefaultAsync<User>(query, new { userId });
 	}
 
 	/*public async Task<User?> GetAppUserByIdAsync(int userId)
@@ -101,9 +101,9 @@ public class UserRepository : IUserRepository
 			_logger.LogInformation("Committing transaction");
 			transaction.Commit();
 		}
-		catch (Exception)
+		catch (Exception e)
 		{
-			_logger.LogInformation("Creating user with email: {email} failed", user.Email);
+			_logger.LogInformation("Creating user with email: {email} failed, Ex msg: {errormsg}", user.Email, e.Message);
 			transaction.Rollback();
 			return Result.Fail("Failed to create user");
 		}
@@ -170,11 +170,11 @@ public class UserRepository : IUserRepository
 		                    INSERT INTO users 
 		                        (email, name, password_hash, created_at, anonymous) 
 		                    VALUES 
-		                        (@email, @Name, @password_hash, @Anon, @CreatedAt)
+		                        (@email, @Name, @password_hash, @CreatedAt, @Anon)
 		                    RETURNING id;
 		                    """;
 		_logger.LogInformation("Inserting app user into transaction: {query}", createAppUser);
-		return await con.ExecuteAsync(createAppUser, new {email = user.Email, Name = user.Name, password_hash = user.PasswordHash, Anon = false, CreatedAt = user.CreatedAt}, transaction);
+		return await con.QueryFirstOrDefaultAsync<int>(createAppUser, new {email = user.Email, Name = user.Name, password_hash = user.PasswordHash, Anon = false, CreatedAt = user.CreatedAt}, transaction);
 	}
 
 	private async Task<int> InsertAnonUserAsync(IDbConnection con, IDbTransaction transaction, User user)
@@ -186,6 +186,6 @@ public class UserRepository : IUserRepository
 		                        RETURNING id;
 		                        """;
 		_logger.LogInformation("Inserting anon user into transaction: {query}", createAnonUserQuery);
-		return await con.ExecuteAsync(createAnonUserQuery, new {Name = user.Name, Anon = true, CreatedAt = user.CreatedAt}, transaction);
+		return await con.QueryFirstOrDefaultAsync<int>(createAnonUserQuery, new {Name = user.Name, Anon = true, CreatedAt = user.CreatedAt}, transaction);
 	}
 }
