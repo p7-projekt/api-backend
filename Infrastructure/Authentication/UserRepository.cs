@@ -27,7 +27,7 @@ public class UserRepository : IUserRepository
 		            SELECT * FROM users
 		            WHERE id = @Id;
 		            """;
-		return await con.QueryFirstOrDefaultAsync<User>(query, new { userId });
+		return await con.QueryFirstOrDefaultAsync<User>(query, new { Id = userId });
 	}
 
 	/*public async Task<User?> GetAppUserByIdAsync(int userId)

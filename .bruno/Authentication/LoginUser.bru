@@ -16,3 +16,8 @@ body:json {
     "password": "Student!1232"
   }
 }
+
+script:post-response {
+  bru.setEnvVar("studentToken",res.body.token);
+  bru.setEnvVar("studentRefreshToken",res.body.refreshToken);
+}
