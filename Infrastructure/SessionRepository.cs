@@ -289,7 +289,7 @@ public class SessionRepository : ISessionRepository
                             SELECT user_id
                             FROM user_in_timedsession
                             WHERE session_id = @SessionId
-                        )
+                        ) AND anonymous = true
                         AND EXISTS (SELECT 1 FROM owned_session)
                         RETURNING id
                         )
