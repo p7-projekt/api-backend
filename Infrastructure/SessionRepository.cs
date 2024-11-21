@@ -37,7 +37,7 @@ public class SessionRepository : ISessionRepository
         await con.ExecuteAsync(query);
     }
 
-    private async Task<bool> VerifyExerciseIdsAsync(List<int> exerciseIds, int authorId, IDbConnection con, IDbTransaction transaction)
+    public async Task<bool> VerifyExerciseIdsAsync(List<int> exerciseIds, int authorId, IDbConnection con, IDbTransaction transaction)
     {
         var query = """
                     SELECT COUNT(*) FROM EXERCISE WHERE exercise_id = ANY(@Ids) AND author_id = @AuthorId;
@@ -81,22 +81,9 @@ public class SessionRepository : ISessionRepository
                     ExpirationTime = session.ExpirationTimeUtc, SessionCode = session.SessionCode
                 }, transaction);
 
-            // exercise relations
-            var exerciseQuery = """
-                                INSERT INTO exercise_in_session (exercise_id, session_id) VALUES (@ExerciseId, @SessionId);
-                                """;
-            await con.ExecuteAsync(exerciseQuery,
-                session.Exercises.Select(x => new { ExerciseId = x, SessionId = sessionId }).ToList(),
-                transaction);
-            
-            
-            var sessionLanguage = """
-                                  INSERT INTO language_in_session(session_id, language_id) VALUES (@SessionId, @LanguageId);
-                                  """;
-            foreach (var language in session.Languages)
-            {
-                await con.ExecuteAsync(sessionLanguage, new { SessionId = sessionId, LanguageId = (int)language }, transaction);
-            }
+            await InsertExerciseRelation(session.Exercises, sessionId, con, transaction);
+
+            await InsertLanguageRelation(session.Languages.Select(x => (int)x).ToList(), sessionId, con, transaction);
             
             transaction.Commit();
             _logger.LogInformation("User: {userid} created Session: {sessionid}.", session.AuthorId, sessionId);
@@ -126,7 +113,27 @@ public class SessionRepository : ISessionRepository
         }
     }
 
-    private async Task<bool> VerifyLanguagesIdsAsync(List<Language> languages)
+    public async Task InsertLanguageRelation(List<int> languageIds, int sessionId, IDbConnection con, IDbTransaction transaction)
+    {
+        var sessionLanguage = """
+                                  INSERT INTO language_in_session(session_id, language_id) VALUES (@SessionId, @LanguageId);
+                                  """;
+        foreach (var langId in languageIds)
+        {
+            await con.ExecuteAsync(sessionLanguage, new { SessionId = sessionId, LanguageId = langId }, transaction);
+        }
+    }
+    public async Task InsertExerciseRelation(List<int> exerciseIds, int sessionId, IDbConnection con, IDbTransaction transaction)
+    {
+        var exerciseQuery = """
+                                INSERT INTO exercise_in_session (exercise_id, session_id) VALUES (@ExerciseId, @SessionId);
+                                """;
+        await con.ExecuteAsync(exerciseQuery,
+            exerciseIds.Select(x => new { ExerciseId = x, SessionId = sessionId }).ToList(),
+            transaction);
+    }
+
+    public async Task<bool> VerifyLanguagesIdsAsync(List<Language> languages)
     {
         var querry = """
                      SELECT COUNT(*) 

@@ -8,6 +8,7 @@ using System.Security.Claims;
 using Core.Classrooms.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using API.Configuration;
+using FluentValidation.Internal;
 
 namespace API.Endpoints;
 
@@ -35,12 +36,33 @@ public static class ClassroomEndpoints
 
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ClassroomDto>();
 
-        // POST add session to classroom
+        classroomV2.MapPost("{classroomId:int}/session", async Task<Results<Created, BadRequest>>(int classroomId, [FromBody]ClassroomSessionDto dto, ClaimsPrincipal principal, IClassroomService service) =>
+        {
+            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+            var result = await service.AddSessionToClassroom(dto, Convert.ToInt32(userId), classroomId);
+            
+            if (result.IsFailed)
+            {
+                return TypedResults.BadRequest();
+            }
+            return TypedResults.Created();
+
+        }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ClassroomSessionDto>();
+
 
         // GET classroom
 
-        // DELETE classroom
+        classroomV2.MapDelete("{classroomId:int}", async Task<Results<NoContent, BadRequest>> (int classroomId, ClaimsPrincipal principal, IClassroomService service) =>
+        {
+            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+            var result = await service.DeleteClassroom(classroomId, Convert.ToInt32(userId));
 
+            if (result.IsFailed)
+            {
+                return TypedResults.BadRequest();
+            }
+            return TypedResults.NoContent();
+        }).RequireAuthorization(nameof(Roles.Instructor));
         // PUT? open classroom
 
         // PUT? open Close Classroom

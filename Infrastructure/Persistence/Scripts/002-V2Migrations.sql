@@ -57,3 +57,7 @@ ALTER TABLE users
     ADD COLUMN password_hash VARCHAR(255),
     ADD COLUMN anonymous BOOLEAN DEFAULT True;
 
+ALTER TABLE session
+ALTER COLUMN expirationtime_utc DROP NOT NULL,
+ALTER COLUMN session_code DROP NOT NULL;
+

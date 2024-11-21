@@ -10,6 +10,9 @@ namespace Core.Classrooms.Contracts;
 
 public interface IClassroomService
 {
-    Task<Result<string>> CreateClassroom(ClassroomDto dto, int authorId);
+    Task<Result> CreateClassroom(ClassroomDto dto, int authorId);
+    Task<Result> AddSessionToClassroom(ClassroomSessionDto dto, int authorId, int classroomId);
+    Task<Result> DeleteClassroom(int classroomId, int authorId);
+
 
 }

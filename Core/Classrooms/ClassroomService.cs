@@ -20,20 +20,31 @@ public class ClassroomService : IClassroomService
         _logger = logger;
         _classroomRepository = classroomRepository;
     }
-    public async Task<Result<string>> CreateClassroom(ClassroomDto dto, int authorId)
+    public async Task<Result> CreateClassroom(ClassroomDto dto, int authorId)
     {
         var roomCode = GenerateClassroomCode();
 
-        var result = await _classroomRepository.InsertClassroomAsync(dto, authorId, roomCode);
-        if(result.IsFailed)
-        {
-            return result;
-        }
-
-        return Result.Ok(roomCode);
+        return await _classroomRepository.InsertClassroomAsync(dto, authorId, roomCode);
     }
 
-    public string GenerateClassroomCode()
+    public async Task<Result> AddSessionToClassroom(ClassroomSessionDto dto, int authorId, int classroomId)
+    {
+        return await _classroomRepository.AddSessionToClassroomAsync(dto, authorId, classroomId);
+
+    }
+
+    public async Task<Result> DeleteClassroom(int classroomId, int authorId)
+    {
+        var correctAuthor = await _classroomRepository.VerifyClassroomAuthor(classroomId, authorId);
+        if (!correctAuthor)
+        {
+            _logger.LogWarning("Invalid user with id {userId} tried to delete classroom with id {classroomId}", authorId, classroomId);
+            return Result.Fail("Invalid author");
+        }
+        return await _classroomRepository.DeleteClassroomAsync(classroomId);
+    }
+
+    private string GenerateClassroomCode()
     {
         Random rnd = new Random();
         var pinCode = rnd.Next(1000, 10000);
