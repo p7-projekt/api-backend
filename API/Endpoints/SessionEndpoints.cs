@@ -117,6 +117,14 @@ public static class SessionEndpoints
             // TODO
             return TypedResults.Ok(new JoinSessionResponseDto("helo", DateTime.UtcNow));
         }).WithRequestValidation<JoinSessionDto>();
+
+        //Get exercises in timed_session
+        app.MapGet("/{session_id:int}/timed_session", async Task<Results<Ok<List<GetSessionsResponseDto>>, NotFound, BadRequest>> (ClaimsPrincipal principal,
+                ISessionService sessionService) =>
+        {
+            var result = await sessionService.GetExercisesInSession
+        }).RequireAuthorization(nameof(Roles.Instructor));
+
         return app;
     }
 }

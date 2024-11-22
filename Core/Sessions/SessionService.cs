@@ -1,4 +1,5 @@
 using Core.Exercises.Contracts;
+using Core.Exercises.Models;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
 using Core.Shared;
@@ -127,7 +128,19 @@ public class SessionService : ISessionService
         
         return session.ConvertToGetResponse();
     }
-    
+    public async Task<Result<List<GetExercisesInSessionResponseDto>>> GetExercisesInSessionAsync(int sessionId)
+    {
+        //Verify Owner of session?
+        var exercises = await _sessionRepository.GetExercisesInSessionAsync(sessionId);
+        if (exercises == null || exercises.Count() == 0)
+        {
+            _logger.LogInformation("No Exercises in session: {sessionID}", sessionId);
+            return Result.Fail("Exercises not found");
+        }
+
+        return Result.Ok(exercises.ToList());
+    }
+
     public string GenerateSessionCode()
     {
         Random rnd = new Random();

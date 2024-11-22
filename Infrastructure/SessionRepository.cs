@@ -300,4 +300,25 @@ public class SessionRepository : ISessionRepository
         var result = await con.ExecuteAsync(query, new { SessionId = sessionId, AuthorId = authorId });
         return result == 1;
     }
+    public async Task<IEnumerable<GetExercisesInSessionResponseDto>?> GetExercisesInSessionAsync(int sessionId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var query = """
+                    SELECT 
+                    sub.exercise_id AS Id,
+                    COUNT(CASE WHEN solved THEN 1 END) AS Solved,
+                    COUNT(exercise_id) AS Attempted,
+                    ARRAY_AGG(CASE WHEN solved THEN u.user_id END) AS UserIds
+                FROM 
+                    session AS s
+                    JOIN user_in_timedsession AS u ON s.session_id = u.session_id
+                    JOIN submission AS sub ON u.user_id = sub.user_id AND s.session_id = sub.session_id
+                WHERE 
+                    s.session_id = @Id
+                GROUP BY 
+                    sub.exercise_id;
+                """;
+        var results = await con.QueryAsync<GetExercisesInSessionResponseDto>(query, new { Id = sessionId });
+        return results;
+    }
 }
