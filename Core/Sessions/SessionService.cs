@@ -129,8 +129,8 @@ public class SessionService : ISessionService
     }
     public async Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInSessionAsync(int sessionId, int userId)
     {
-        var access = true;
-        //access = await _sessionRepository.VerifyAuthor(userId, sessionId);
+        var access = false;
+        access = await _sessionRepository.VerifyAuthor(userId, sessionId);
         if (!access)
         {
             _logger.LogInformation("User {userid} does not have access to {sessionid}", userId, sessionId);

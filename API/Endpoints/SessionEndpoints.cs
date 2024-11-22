@@ -121,12 +121,11 @@ public static class SessionEndpoints
         }).WithRequestValidation<JoinSessionDto>();
 
         //Get exercises in timed_session
-        sessionV1Group.MapGet("/{sessionId:int}/timed_session", async Task<Results<Ok<GetExercisesInSessionCombinedInfo>, NotFound, BadRequest>> (int session_id, ClaimsPrincipal principal,
+        sessionV1Group.MapGet("/{sessionId:int}/timed_session", async Task<Results<Ok<GetExercisesInSessionCombinedInfo>, NotFound, BadRequest>> (int sessionId, ClaimsPrincipal principal,
                 ISessionService sessionService) =>
         {
-            //var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
-            //var result = await sessionService.GetExercisesInSessionAsync(session_id, int.Parse(userId));
-            var result = await sessionService.GetExercisesInSessionAsync(session_id, 1);
+            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+            var result = await sessionService.GetExercisesInSessionAsync(sessionId, int.Parse(userId));
 
             if (result.IsFailed)
             {
@@ -134,7 +133,7 @@ public static class SessionEndpoints
             }
             return TypedResults.Ok(result.Value);
 
-        });//.RequireAuthorization(nameof(Roles.Instructor));
+        }).RequireAuthorization(nameof(Roles.Instructor));
 
         return app;
     }
