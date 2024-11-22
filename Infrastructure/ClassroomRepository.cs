@@ -122,6 +122,54 @@ public class ClassroomRepository : IClassroomRepository
         return Result.Ok();
     }
 
+    public async Task<GetClassroomResponseDto> GetClassroomByIdAsync(int classroomId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        
+        var classroomQuery = "SELECT classroom_id AS id, title, roomcode, registration_open AS isOpen FROM classroom WHERE classroom_id = @ClassroomId;";
+        var classroom = await con.QuerySingleAsync<GetClassroomResponseDto>(classroomQuery, new { ClassroomId = classroomId });
+
+        var sessionIdsQuery = """
+                              SELECT session_id, title, active 
+                              FROM session_in_classroom AS sic
+                              JOIN session AS s 
+                              ON s.session_id = sic.session_id
+                              WHERE classroom_id = @ClassroomId
+                              """;
+
+        var sessions = await con.QueryAsync<GetClassroomSessionDto>(sessionIdsQuery, new { ClassroomID = classroomId });
+        classroom.Sessions = sessions.ToList();
+
+        return classroom;
+    }
+    
+    public async Task<List<GetClassroomsResponseDto>> GetStudentClassroomsById(int studentId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+
+        var query = """
+                    SELECT classroom_id AS id, title 
+                    FROM classroom AS c
+                    JOIN student_in_classroom AS sic
+                    ON c.classroom_id = sic.classroom_id
+                    WHERE student_id = @StudentId;
+                    """;
+        var classrooms = await con.QueryAsync<GetClassroomsResponseDto>(query, new { StudentId = studentId });
+
+        return classrooms.ToList();
+    }
+
+    public async Task<List<GetClassroomsResponseDto>> GetInstructorClassroomsById(int instructorId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+
+        var query = "SELECT classroom_id AS id, title FROM classroom WHERE owner = @InstructorId;";
+
+        var classrooms = await con.QueryAsync<GetClassroomsResponseDto>(query, new { InstructorId = instructorId });
+
+        return classrooms.ToList();
+    }
+
     public async Task<bool> VerifyClassroomAuthor(int classroomId, int authorId)
     {
         using var con = await _connection.CreateConnectionAsync();

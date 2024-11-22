@@ -1,5 +1,6 @@
 ﻿using Core.Classrooms.Contracts;
 using Core.Classrooms.Models;
+using Core.Shared;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using System;
@@ -30,7 +31,6 @@ public class ClassroomService : IClassroomService
     public async Task<Result> AddSessionToClassroom(ClassroomSessionDto dto, int authorId, int classroomId)
     {
         return await _classroomRepository.AddSessionToClassroomAsync(dto, authorId, classroomId);
-
     }
 
     public async Task<Result> DeleteClassroom(int classroomId, int authorId)
@@ -44,6 +44,22 @@ public class ClassroomService : IClassroomService
         return await _classroomRepository.DeleteClassroomAsync(classroomId);
     }
 
+    public async Task<Result<GetClassroomResponseDto>> GetClassroomById(int classroomId)
+    {
+        return await _classroomRepository.GetClassroomByIdAsync(classroomId);
+    }
+
+    public async Task<Result<List<GetClassroomsResponseDto>>> GetClassroomsByUserRole(int userId, Roles userRole)
+    {
+        var result = userRole switch
+        {
+            Roles.Student => Result.Ok(await _classroomRepository.GetStudentClassroomsById(userId)),
+            Roles.Instructor => Result.Ok(await _classroomRepository.GetInstructorClassroomsById(userId)),
+            _ => Result.Fail("Invalid role")
+        };
+
+        return result;
+    }
     private string GenerateClassroomCode()
     {
         Random rnd = new Random();

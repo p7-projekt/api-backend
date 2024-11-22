@@ -9,6 +9,7 @@ using Core.Classrooms.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using API.Configuration;
 using FluentValidation.Internal;
+using Infrastructure.Authentication.Models;
 
 namespace API.Endpoints;
 
@@ -36,7 +37,7 @@ public static class ClassroomEndpoints
 
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ClassroomDto>();
 
-        classroomV2.MapPost("{classroomId:int}/session", async Task<Results<Created, BadRequest>>(int classroomId, [FromBody]ClassroomSessionDto dto, ClaimsPrincipal principal, IClassroomService service) =>
+        classroomV2.MapPost("/{classroomId:int}/session", async Task<Results<Created, BadRequest>>(int classroomId, [FromBody]ClassroomSessionDto dto, ClaimsPrincipal principal, IClassroomService service) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
             var result = await service.AddSessionToClassroom(dto, Convert.ToInt32(userId), classroomId);
@@ -49,8 +50,28 @@ public static class ClassroomEndpoints
 
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ClassroomSessionDto>();
 
+        classroomV2.MapGet("/{classroomId:int}", async Task<Ok<GetClassroomResponseDto>> (int classroomId, ClaimsPrincipal principal, IClassroomService service) =>
+        {
+            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+            var result = await service.GetClassroomById(classroomId);
 
-        // GET classroom
+            return TypedResults.Ok(result.Value);
+
+        }).RequireAuthorization(Policies.AllowClassroomRoles);
+
+        classroomV2.MapGet("", async Task<Results<Ok<List<GetClassroomsResponseDto>>, BadRequest>> (ClaimsPrincipal principal, IClassroomService service) =>
+        {
+            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+            var userRole = principal.Claims.First(c => c.Type == ClaimTypes.Role).Value;
+
+            var result = await service.GetClassroomsByUserRole(Convert.ToInt32(userId), RolesConvert.Convert(userRole));
+            if (result.IsFailed)
+            {
+                return TypedResults.BadRequest();
+            }
+            return TypedResults.Ok(result.Value);
+
+        }).RequireAuthorization(Policies.AllowClassroomRoles);
 
         classroomV2.MapDelete("{classroomId:int}", async Task<Results<NoContent, BadRequest>> (int classroomId, ClaimsPrincipal principal, IClassroomService service) =>
         {

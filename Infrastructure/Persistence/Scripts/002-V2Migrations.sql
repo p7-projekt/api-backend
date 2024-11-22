@@ -1,7 +1,7 @@
 INSERT INTO role(name) VALUES ('Student')
 
 CREATE TABLE classroom (
-	id SERIAL PRIMARY KEY,
+	classroom_id SERIAL PRIMARY KEY,
 	title VARCHAR(100),
 	owner INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
 	roomcode VARCHAR(6) NOT NULL,
@@ -58,6 +58,6 @@ ALTER TABLE users
     ADD COLUMN anonymous BOOLEAN DEFAULT True;
 
 ALTER TABLE session
-ALTER COLUMN expirationtime_utc DROP NOT NULL,
-ALTER COLUMN session_code DROP NOT NULL;
+    ALTER COLUMN expirationtime_utc DROP NOT NULL,
+    ALTER COLUMN session_code DROP NOT NULL;
 
