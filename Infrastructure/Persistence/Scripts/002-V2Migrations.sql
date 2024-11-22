@@ -6,8 +6,8 @@ CREATE TABLE language_support(
     version VARCHAR(25) NOT NULL
 );
 
-INSERT INTO language_support(language, version) VALUES ('haskell', '9.8.2');
-INSERT INTO language_support(language, version) VALUES ('python', 'someVersion');
+INSERT INTO language_support(language, version) VALUES ('Haskell', '9.8.2');
+INSERT INTO language_support(language, version) VALUES ('Python', 'someVersion');
 
 ALTER TABLE solved RENAME TO submission;
 ALTER TABLE submission 
