@@ -121,7 +121,7 @@ public static class SessionEndpoints
         }).WithRequestValidation<JoinSessionDto>();
 
         //Get exercises in timed_session
-        app.MapGet("/{session_id:int}/timed_session", async Task<Results<Ok<GetExercisesInSessionCombinedInfo>, NotFound, BadRequest>> (int session_id, ClaimsPrincipal principal,
+        sessionV1Group.MapGet("/{sessionId:int}/timed_session", async Task<Results<Ok<GetExercisesInSessionCombinedInfo>, NotFound, BadRequest>> (int session_id, ClaimsPrincipal principal,
                 ISessionService sessionService) =>
         {
             //var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
