@@ -128,9 +128,16 @@ public class SessionService : ISessionService
         
         return session.ConvertToGetResponse();
     }
-    public async Task<Result<List<GetExercisesInSessionResponseDto>>> GetExercisesInSessionAsync(int sessionId)
+    public async Task<Result<List<GetExercisesInSessionResponseDto>>> GetExercisesInSessionAsync(int sessionId, int userId)
     {
-        //Verify Owner of session?
+        var access = false;
+        access = await _sessionRepository.VerifyAuthor(userId, sessionId);
+        if (!access)
+        {
+            _logger.LogInformation("User {userid} does not have access to {sessionid}", userId, sessionId);
+            return Result.Fail("User does not have access to session");
+        }
+
         var exercises = await _sessionRepository.GetExercisesInSessionAsync(sessionId);
         if (exercises == null || exercises.Count() == 0)
         {

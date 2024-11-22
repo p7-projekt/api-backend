@@ -124,6 +124,7 @@ public static class SessionEndpoints
         app.MapGet("/{session_id:int}/timed_session", async Task<Results<Ok<List<GetExercisesInSessionResponseDto>>, NotFound, BadRequest>> (int session_id, ClaimsPrincipal principal,
                 ISessionService sessionService) =>
         {
+            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
             var result = await sessionService.GetExercisesInSessionAsync(session_id);
             if (result.IsFailed)
             {
