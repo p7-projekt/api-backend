@@ -3,10 +3,10 @@ using API.Configuration;
 using API.Endpoints.Shared;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
-using Core.Exercises.Models;
 using Core.Sessions.Contracts;
-using Core.Sessions.Models; 
+using Core.Sessions.Models;
 using Core.Shared;
+using Infrastructure.Authentication.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -121,18 +121,20 @@ public static class SessionEndpoints
         }).WithRequestValidation<JoinSessionDto>();
 
         //Get exercises in timed_session
-        app.MapGet("/{session_id:int}/timed_session", async Task<Results<Ok<List<GetExercisesInSessionResponseDto>>, NotFound, BadRequest>> (int session_id, ClaimsPrincipal principal,
+        app.MapGet("/{session_id:int}/timed_session", async Task<Results<Ok<GetExercisesInSessionCombinedInfo>, NotFound, BadRequest>> (int session_id, ClaimsPrincipal principal,
                 ISessionService sessionService) =>
         {
-            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
-            var result = await sessionService.GetExercisesInSessionAsync(session_id);
+            //var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+            //var result = await sessionService.GetExercisesInSessionAsync(session_id, int.Parse(userId));
+            var result = await sessionService.GetExercisesInSessionAsync(session_id, 1);
+
             if (result.IsFailed)
             {
                 return TypedResults.NotFound();
             }
             return TypedResults.Ok(result.Value);
 
-        }).RequireAuthorization(nameof(Roles.Instructor));
+        });//.RequireAuthorization(nameof(Roles.Instructor));
 
         return app;
     }
