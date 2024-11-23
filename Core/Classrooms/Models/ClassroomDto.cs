@@ -7,5 +7,6 @@ using System.Threading.Tasks;
 namespace Core.Classrooms.Models;
 
 public record ClassroomDto(
-    string Title
+    string Title,
+    string Description
     );

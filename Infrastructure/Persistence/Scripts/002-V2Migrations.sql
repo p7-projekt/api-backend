@@ -3,6 +3,7 @@ INSERT INTO role(name) VALUES ('Student');
 CREATE TABLE classroom (
 	classroom_id SERIAL PRIMARY KEY,
 	title VARCHAR(100),
+    description VARCHAR(1000),
 	owner INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
 	roomcode VARCHAR(6) NOT NULL,
 	registration_open BOOLEAN NOT NULL
