@@ -102,11 +102,11 @@ public class ClassroomRepository : IClassroomRepository
         var transaction = con.BeginTransaction();
         try
         {
-            var getSessionsQuery = "SELECT session_id FROM session_in_classroom WHERE classroom_id = @ClassroomID;";
-            var sessionIds = await con.QueryAsync<List<int>>(getSessionsQuery, new { ClassroomId = classroomId });
+            var getSessionsQuery = "SELECT session_id FROM session_in_classroom WHERE classroom_id = @ClassroomId;";
+            var sessionIds = await con.QueryAsync<int>(getSessionsQuery, new { ClassroomId = classroomId });
 
             var deleteSessionsQuery = "DELETE FROM session WHERE session_id = ANY(@SessionIds);";
-            var removed = await con.ExecuteAsync(deleteSessionsQuery, new { SessionIds = sessionIds }, transaction);
+            var removed = await con.ExecuteAsync(deleteSessionsQuery, new { SessionIds = sessionIds.ToArray() }, transaction);
             if (removed != sessionIds.Count())
             {
                 transaction.Rollback();

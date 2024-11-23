@@ -227,7 +227,6 @@ public class SessionRepository : ISessionRepository
         
         return session;
     }
-
     
     public async Task<Result<Session>> GetSessionBySessionCodeAsync(string sessionCode)
     {
