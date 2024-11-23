@@ -22,7 +22,7 @@ public static class ClassroomEndpoints
             .ReportApiVersions()
             .Build();
 
-        var classroomV2 = app.MapGroup("v{version:apiVersion}/classrooms").WithApiVersionSet(apiVersionSet).WithTags("Classroom");
+        var classroomV2 = app.MapGroup("v{version:apiVersion}/classrooms").WithApiVersionSet(apiVersionSet).WithTags("Classroom").WithOpenApi();
 
         classroomV2.MapPost("/", async Task<Results<Created, BadRequest>>([FromBody]ClassroomDto dto, ClaimsPrincipal principal, IClassroomService service) =>
         {
