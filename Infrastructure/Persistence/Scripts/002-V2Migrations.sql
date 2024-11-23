@@ -1,4 +1,4 @@
-INSERT INTO role(name) VALUES ('Student')
+INSERT INTO role(name) VALUES ('Student');
 
 CREATE TABLE classroom (
 	classroom_id SERIAL PRIMARY KEY,
@@ -9,15 +9,15 @@ CREATE TABLE classroom (
 );
 
 CREATE TABLE session_in_classroom(
-	classroom_id INTEGER REFERENCES classroom(id) ON DELETE CASCADE NOT NULL,
-	session_id INTEGER REFERENCES session(id) ON DELETE CASCADE NOT NULL,
+	classroom_id INTEGER REFERENCES classroom(classroom_id) ON DELETE CASCADE NOT NULL,
+	session_id INTEGER REFERENCES session(session_id) ON DELETE CASCADE NOT NULL,
 	active BOOLEAN NOT NULL,
 	PRIMARY KEY(classroom_id, session_id)
 );
 
 CREATE TABLE student_in_classroom(
 	student_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-	classroom_id INTEGER REFERENCES classroom(id) ON DELETE CASCADE NOT NULL,
+	classroom_id INTEGER REFERENCES classroom(classroom_id) ON DELETE CASCADE NOT NULL,
 	PRIMARY KEY(student_id, classroom_id)
 );
 

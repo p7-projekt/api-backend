@@ -170,7 +170,7 @@ public class UserRepository : IUserRepository
 		                    INSERT INTO users 
 		                        (email, name, password_hash, created_at, anonymous) 
 		                    VALUES 
-		                        (@email, @Name, @password_hash, @Anon, @CreatedAt)
+		                        (@email, @Name, @password_hash, @CreatedAt, @Anon)
 		                    RETURNING id;
 		                    """;
 		_logger.LogInformation("Inserting app user into transaction: {query}", createAppUser);
