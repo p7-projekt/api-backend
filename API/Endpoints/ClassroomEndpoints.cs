@@ -99,6 +99,21 @@ public static class ClassroomEndpoints
 
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<UpdateClassroomDto>();
 
+        classroomV2.MapPut("{classroomId:int}/session", async Task<Results<NoContent, BadRequest>> (int classroomId, [FromBody] UpdateClassroomSessionDto dto, ClaimsPrincipal principal, IClassroomService service) =>
+        {
+            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+
+            var result = await service.UpdateClassroomSession(dto, classroomId, Convert.ToInt32(userId));
+            if (result.IsFailed)
+            {
+                return TypedResults.BadRequest();
+            }
+            return TypedResults.NoContent();
+
+        }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<UpdateClassroomSessionDto>();
+
+        // Join Classroom
+
         return app;
     }
 }

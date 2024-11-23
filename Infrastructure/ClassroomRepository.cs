@@ -6,7 +6,9 @@ using Core.Sessions.Models;
 using Dapper;
 using FluentResults;
 using Infrastructure.Persistence.Contracts;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Logging;
+using Quartz.Simpl;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -197,7 +199,58 @@ public class ClassroomRepository : IClassroomRepository
         transaction.Commit();
 
         return Result.Ok();
-}
+    }
+
+    public async Task<Result> UpdateClassroomSessionAsync(UpdateClassroomSessionDto dto)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var transaction = con.BeginTransaction();
+
+        var updateSessionQuery = """
+                                 UPDATE session
+                                 SET title = @Title, description = @Description
+                                 WHERE session_id = @SessionId;
+                                 """;
+
+        var sessionUpdated = await con.ExecuteAsync(updateSessionQuery, new { Title = dto.Title, Description = dto.Description, SessionId = dto.Id }, transaction);
+        if(sessionUpdated != 1)
+        {
+            _logger.LogDebug("Unintended behavior when updateing classroom session of id {classroom_id}", dto.Id);
+            transaction.Rollback();
+            return Result.Fail("Failed to update classroom session");
+        }
+
+        var updateSessionExercises = """
+                                     DELETE FROM exercise_in_session WHERE session_id = @SessionId;
+                                     """;
+
+        await con.ExecuteAsync(updateSessionExercises, new { SessionId = dto.Id }, transaction);
+
+        var UpdatedExercises = await _sessionRepository.InsertExerciseRelation(dto.ExerciseIds, dto.Id, con, transaction);
+        if (UpdatedExercises.IsFailed)
+        { 
+            transaction.Rollback();
+            return Result.Fail("Failed to update exercises of classroom session");
+        }
+
+        var updateActiveQuery = """
+                                UPDATE session_in_classroom
+                                SET active = @Active
+                                WHERE session_id = @SessionId
+                                """;
+        var activationsUpdated = await con.ExecuteAsync(updateActiveQuery, new { Active = dto.Active, SessionId = dto.Id }, transaction);
+
+        if(activationsUpdated != 1)
+        {
+            transaction.Rollback();
+            _logger.LogError("Session with id {session_id} failed to update activation status, due to incorrect amount of database rows affected", dto.Id);
+            return Result.Fail("Failed to update activation status");
+        }
+
+        transaction.Commit();
+
+        return Result.Ok();
+    }
 
     public async Task<bool> VerifyClassroomAuthor(int classroomId, int authorId)
     {

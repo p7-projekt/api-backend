@@ -17,5 +17,7 @@ public interface IClassroomService
     Task<Result<GetClassroomResponseDto>> GetClassroomById(int classroomId);
     Task<Result<List<GetClassroomsResponseDto>>> GetClassroomsByUserRole(int userId, Roles userRole);
     Task<Result> UpdateClassroomDetails(UpdateClassroomDto dto, int classroomId, int authorId);
+    Task<Result> UpdateClassroomSession(UpdateClassroomSessionDto dto, int classroomId, int authorId);
+
 
 }

@@ -67,11 +67,23 @@ public class ClassroomService : IClassroomService
 
         if (!correctOwner)
         {
-            _logger.LogWarning("Invalid user with id {userId} tried to delete classroom with id {classroomId}", authorId, classroomId);
+            _logger.LogWarning("Invalid user with id {userId} tried to update classroom with id {classroomId}", authorId, classroomId);
             return Result.Fail("Invalid author");
         }
 
         return await _classroomRepository.UpdateClassroomDetailsAsync(dto, classroomId);
+    }
+
+    public async Task<Result> UpdateClassroomSession(UpdateClassroomSessionDto dto, int classroomId, int authorId)
+    {
+        var correctOwner = await _classroomRepository.VerifyClassroomAuthor(classroomId, authorId);
+        if (!correctOwner)
+        {
+            _logger.LogWarning("Invalid user with id {userId} tried to update classroom session with id {sessionId}, of classroom with id {classroomId}", authorId, classroomId, dto.Id);
+            return Result.Fail("Invalid author");
+        }
+
+        return await _classroomRepository.UpdateClassroomSessionAsync(dto);
     }
 
     private string GenerateClassroomCode()

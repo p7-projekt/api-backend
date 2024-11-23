@@ -123,14 +123,22 @@ public class SessionRepository : ISessionRepository
             await con.ExecuteAsync(sessionLanguage, new { SessionId = sessionId, LanguageId = langId }, transaction);
         }
     }
-    public async Task InsertExerciseRelation(List<int> exerciseIds, int sessionId, IDbConnection con, IDbTransaction transaction)
+    public async Task<Result> InsertExerciseRelation(List<int> exerciseIds, int sessionId, IDbConnection con, IDbTransaction transaction)
     {
         var exerciseQuery = """
                                 INSERT INTO exercise_in_session (exercise_id, session_id) VALUES (@ExerciseId, @SessionId);
                                 """;
-        await con.ExecuteAsync(exerciseQuery,
+        var AffectedRows =await con.ExecuteAsync(exerciseQuery,
             exerciseIds.Select(x => new { ExerciseId = x, SessionId = sessionId }).ToList(),
             transaction);
+
+        if(AffectedRows != exerciseIds.Count())
+        {
+            _logger.LogError("Mismatch with inserted exercise-session relations. Relations inserted: {inserted}, exercises amount: {exercises}, session id: {sessionId}", AffectedRows, exerciseIds.Count(), sessionId);
+            return Result.Fail("Inconsistency in inserted exercise/session relations");
+        }
+
+        return Result.Ok();
     }
 
     public async Task<bool> VerifyLanguagesIdsAsync(List<Language> languages)
