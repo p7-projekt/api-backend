@@ -132,7 +132,7 @@ public class ClassroomRepository : IClassroomRepository
         var classroom = await con.QuerySingleAsync<GetClassroomResponseDto>(classroomQuery, new { ClassroomId = classroomId });
 
         var sessionIdsQuery = """
-                              SELECT session_id, title, active 
+                              SELECT s.session_id AS id, s.title, sic.active 
                               FROM session_in_classroom AS sic
                               JOIN session AS s 
                               ON s.session_id = sic.session_id

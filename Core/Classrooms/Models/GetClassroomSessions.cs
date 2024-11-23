@@ -7,4 +7,4 @@ using System.Threading.Tasks;
 
 namespace Core.Classrooms.Models;
 
-public record GetClassroomSessionDto(int Id, string title, bool active);
+public record GetClassroomSessionDto(int Id, string Title, bool Active);
