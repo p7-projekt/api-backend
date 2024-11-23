@@ -83,6 +83,7 @@ public static class ClassroomEndpoints
                 return TypedResults.BadRequest();
             }
             return TypedResults.NoContent();
+
         }).RequireAuthorization(nameof(Roles.Instructor));
 
         classroomV2.MapPut("{classroomId:int}", async Task<Results<NoContent, BadRequest>> (int classroomId, [FromBody]UpdateClassroomDto dto ,ClaimsPrincipal principal, IClassroomService service) =>
@@ -90,6 +91,11 @@ public static class ClassroomEndpoints
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
 
             var result = await service.UpdateClassroomDetails(dto, classroomId, Convert.ToInt32(userId));
+            if (result.IsFailed)
+            {
+                return TypedResults.BadRequest();
+            }
+            return TypedResults.NoContent();
 
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<UpdateClassroomDto>();
 
