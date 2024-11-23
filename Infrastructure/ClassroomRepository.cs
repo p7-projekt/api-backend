@@ -76,18 +76,20 @@ public class ClassroomRepository : IClassroomRepository
                 return Result.Fail("Languages not valid");
             }
 
-            var createSessionQuery = "INSERT INTO session (title, description, author_id) VALUES(@Title, @Description, @AuhtorId) RETURNING session_id;";
-            var sessionId = await con.QuerySingleAsync<int>(createSessionQuery, new { Titel = dto.Title, Description = dto.Description, AuthorId = authorId }, transaction);
+            var createSessionQuery = "INSERT INTO session (title, description, author_id) VALUES(@Title, @Description, @AuthorId) RETURNING session_id;";
+            var sessionId = await con.QuerySingleAsync<int>(createSessionQuery, new { Title = dto.Title, Description = dto.Description, AuthorId = authorId }, transaction);
 
             var addSessionQuery = "INSERT INTO session_in_classroom (classroom_id, session_id, active) VALUES (@ClassroomId, @SessionId, FALSE);";
             await con.ExecuteAsync(addSessionQuery, new { ClassroomId = classroomId, SessionId = sessionId }, transaction);
 
             await _sessionRepository.InsertExerciseRelation(dto.ExerciseIds, sessionId, con, transaction);
             await _sessionRepository.InsertLanguageRelation(dto.LanguageIds, sessionId, con, transaction);
+
         } catch (Exception ex)
         {
             transaction.Rollback();
             _logger.LogError("Error occured during creation of classroom sesssion: {exception}", ex.Message);
+            throw;
         }
         transaction.Commit();
 
@@ -140,7 +142,7 @@ public class ClassroomRepository : IClassroomRepository
                               WHERE classroom_id = @ClassroomId
                               """;
 
-        var sessions = await con.QueryAsync<GetClassroomSessionDto>(sessionIdsQuery, new { ClassroomID = classroomId });
+        var sessions = await con.QueryAsync<GetClassroomSessionDto>(sessionIdsQuery, new { ClassroomId = classroomId });
         classroom.Sessions = sessions.ToList();
 
         return classroom;
@@ -277,9 +279,9 @@ public class ClassroomRepository : IClassroomRepository
     {
         using var con = await _connection.CreateConnectionAsync();
 
-        var query = "SELECT 1 FROM classroom WHERE author_id = @AuthorId AND classroom_id = @ClassroomId;";
+        var query = "SELECT 1 FROM classroom WHERE owner = @AuthorId AND classroom_id = @ClassroomId;";
 
-        var result = await con.ExecuteAsync(query, new { AuthorId = authorId, ClassroomId = classroomId });
+        var result = await con.QuerySingleAsync<int>(query, new { AuthorId = authorId, ClassroomId = classroomId });
 
         if(result != 1)
         {

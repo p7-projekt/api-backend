@@ -13,5 +13,5 @@ public class GetClassroomResponseDto
     public string Description { get; set; } = string.Empty;
     public string Roomcode { get; set; } = string.Empty;
     public bool IsOpen { get; set; } 
-    public List<GetClassroomSessionDto> Sessions = new();
+    public List<GetClassroomSessionDto> Sessions { get; set; } = new();
 }

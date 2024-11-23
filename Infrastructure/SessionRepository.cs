@@ -40,9 +40,9 @@ public class SessionRepository : ISessionRepository
     public async Task<bool> VerifyExerciseIdsAsync(List<int> exerciseIds, int authorId, IDbConnection con, IDbTransaction transaction)
     {
         var query = """
-                    SELECT COUNT(*) FROM EXERCISE WHERE exercise_id = ANY(@Ids) AND author_id = @AuthorId;
+                    SELECT COUNT(*) FROM exercise WHERE exercise_id = ANY(@Ids) AND author_id = @AuthorId;
                     """;
-        var result = await con.QuerySingleAsync<int>(query, new { Ids = exerciseIds.ToArray(), @AuthorID = authorId } ,transaction);
+        var result = await con.QuerySingleAsync<int>(query, new { Ids = exerciseIds.ToArray(), AuthorId = authorId } ,transaction);
         return exerciseIds.Count == result;
     }
     public async Task<int> InsertSessionAsync(Session session, int authorId)
