@@ -60,6 +60,20 @@ public class ClassroomService : IClassroomService
 
         return result;
     }
+    
+    public async Task<Result> UpdateClassroomDetails(UpdateClassroomDto dto, int classroomId, int authorId)
+    {
+        var correctOwner = await _classroomRepository.VerifyClassroomAuthor(classroomId, authorId);
+
+        if (!correctOwner)
+        {
+            _logger.LogWarning("Invalid user with id {userId} tried to delete classroom with id {classroomId}", authorId, classroomId);
+            return Result.Fail("Invalid author");
+        }
+
+        return await _classroomRepository.UpdateClassroomDetailsAsync(dto, classroomId);
+    }
+
     private string GenerateClassroomCode()
     {
         Random rnd = new Random();

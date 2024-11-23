@@ -16,4 +16,6 @@ public interface IClassroomService
     Task<Result> DeleteClassroom(int classroomId, int authorId);
     Task<Result<GetClassroomResponseDto>> GetClassroomById(int classroomId);
     Task<Result<List<GetClassroomsResponseDto>>> GetClassroomsByUserRole(int userId, Roles userRole);
+    Task<Result> UpdateClassroomDetails(UpdateClassroomDto dto, int classroomId, int authorId);
+
 }

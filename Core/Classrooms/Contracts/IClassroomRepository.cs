@@ -17,5 +17,6 @@ public interface IClassroomRepository
     Task<GetClassroomResponseDto> GetClassroomByIdAsync(int classroomId);
     Task<List<GetClassroomsResponseDto>> GetStudentClassroomsById(int studentId);
     Task<List<GetClassroomsResponseDto>> GetInstructorClassroomsById(int instructorId);
+    Task<Result> UpdateClassroomDetailsAsync(UpdateClassroomDto dto, int classroomId);
 
 }

@@ -84,10 +84,14 @@ public static class ClassroomEndpoints
             }
             return TypedResults.NoContent();
         }).RequireAuthorization(nameof(Roles.Instructor));
-        // PUT? open classroom
 
-        // PUT? open Close Classroom
+        classroomV2.MapPut("{classroomId:int}", async Task<Results<NoContent, BadRequest>> (int classroomId, [FromBody]UpdateClassroomDto dto ,ClaimsPrincipal principal, IClassroomService service) =>
+        {
+            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
 
+            var result = await service.UpdateClassroomDetails(dto, classroomId, Convert.ToInt32(userId));
+
+        }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<UpdateClassroomDto>();
 
         return app;
     }

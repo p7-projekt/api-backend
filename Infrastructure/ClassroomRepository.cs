@@ -170,6 +170,35 @@ public class ClassroomRepository : IClassroomRepository
         return classrooms.ToList();
     }
 
+    public async Task<Result> UpdateClassroomDetailsAsync(UpdateClassroomDto dto, int classroomId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var transaction = con.BeginTransaction();
+
+        var query = """
+                    UPDATE classroom 
+                    SET title = @Title, description = @Description, registration_open = @RegistrartionOpen
+                    WHERE classroom_id = @ClassroomId;
+                    """;
+        var result = await con.ExecuteAsync(query, new 
+        { 
+            Title = dto.Title, 
+            Description = dto.Description, 
+            RegistrationOpen = dto.RegistrationOpen, 
+            ClassroomId = classroomId 
+        }, transaction);
+
+        if(result != 1)
+        {
+            _logger.LogDebug("Unintended behavior when updateing classroom of id {classroom_id}", classroomId);
+            transaction.Rollback();
+            return Result.Fail("Failed to update classroom");
+        }
+        transaction.Commit();
+
+        return Result.Ok();
+}
+
     public async Task<bool> VerifyClassroomAuthor(int classroomId, int authorId)
     {
         using var con = await _connection.CreateConnectionAsync();
