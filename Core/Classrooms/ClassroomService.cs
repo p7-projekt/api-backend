@@ -86,6 +86,25 @@ public class ClassroomService : IClassroomService
         return await _classroomRepository.UpdateClassroomSessionAsync(dto);
     }
 
+    public async Task<Result> JoinClassroom(JoinClassroomDto dto, int classroomId, int studentId)
+    {
+        var validCode = await _classroomRepository.VerifyClassroomRoomcode(classroomId, dto.RoomCode);
+        if (!validCode)
+        {
+            _logger.LogWarning("Roomcode {roomcode} for classroom with id {classroomId is invalid}", dto.RoomCode, classroomId);
+            return Result.Fail("Incorrect roomcode");
+        }
+        
+        var result = await _classroomRepository.JoinClassroomAsync(studentId, classroomId);
+        if (result.IsFailed)
+        {
+
+            return Result.Fail("Failed to join classroom");
+        }
+
+        return Result.Ok();
+    }
+
     private string GenerateClassroomCode()
     {
         Random rnd = new Random();

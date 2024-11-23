@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Quartz.Simpl;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -252,6 +253,26 @@ public class ClassroomRepository : IClassroomRepository
         return Result.Ok();
     }
 
+    public async Task<Result> JoinClassroomAsync(int studentId, int classroomId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var transaction = con.BeginTransaction();
+
+        var query = "INSERT INTO student_in_classroom (student_id, classroom_id) VALUES (@StudentId, @ClassroomId);";
+
+        var result = await con.ExecuteAsync(query, new { StudentId = studentId, ClassroomId = classroomId }, transaction);
+
+        if(result != 1)
+        {
+            transaction.Rollback();
+            _logger.LogWarning("Mismatch in number of students added on a joined classroom. Studentid: {studentId}, Classroom id: {classroomID}", studentId, classroomId);
+            return Result.Fail("Failed to join student");
+        }
+        transaction.Commit();
+
+        return Result.Ok();
+    }
+
     public async Task<bool> VerifyClassroomAuthor(int classroomId, int authorId)
     {
         using var con = await _connection.CreateConnectionAsync();
@@ -267,5 +288,16 @@ public class ClassroomRepository : IClassroomRepository
         }
 
         return true;
+    }
+
+    public async Task<bool> VerifyClassroomRoomcode(int classroomId, string roomCode)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+
+        var query = "SELECT roomcode FROM classroom WHERE classroom_id = @ClassroomId;";
+
+        var quriedRoomCode = await con.QuerySingleAsync<string>(query, new { ClassroomId = classroomId });
+
+        return quriedRoomCode == roomCode;
     }
 }
