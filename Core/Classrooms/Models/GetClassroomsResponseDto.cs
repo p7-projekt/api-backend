@@ -6,4 +6,4 @@ using System.Threading.Tasks;
 
 namespace Core.Classrooms.Models;
 
-public record GetClassroomsResponseDto(int Id, string Title);
+public record GetClassroomsResponseDto(int Id, string Title, string Description);

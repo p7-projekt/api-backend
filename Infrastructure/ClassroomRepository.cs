@@ -129,7 +129,7 @@ public class ClassroomRepository : IClassroomRepository
     {
         using var con = await _connection.CreateConnectionAsync();
         
-        var classroomQuery = "SELECT classroom_id AS id, title, roomcode, registration_open AS isOpen FROM classroom WHERE classroom_id = @ClassroomId;";
+        var classroomQuery = "SELECT classroom_id AS id, title, description, roomcode, registration_open AS isOpen FROM classroom WHERE classroom_id = @ClassroomId;";
         var classroom = await con.QuerySingleAsync<GetClassroomResponseDto>(classroomQuery, new { ClassroomId = classroomId });
 
         var sessionIdsQuery = """
@@ -151,7 +151,7 @@ public class ClassroomRepository : IClassroomRepository
         using var con = await _connection.CreateConnectionAsync();
 
         var query = """
-                    SELECT classroom_id AS id, title 
+                    SELECT classroom_id AS id, title, description 
                     FROM classroom AS c
                     JOIN student_in_classroom AS sic
                     ON c.classroom_id = sic.classroom_id
@@ -166,7 +166,7 @@ public class ClassroomRepository : IClassroomRepository
     {
         using var con = await _connection.CreateConnectionAsync();
 
-        var query = "SELECT classroom_id AS id, title FROM classroom WHERE owner = @InstructorId;";
+        var query = "SELECT classroom_id AS id, title, description FROM classroom WHERE owner = @InstructorId;";
 
         var classrooms = await con.QueryAsync<GetClassroomsResponseDto>(query, new { InstructorId = instructorId });
 
