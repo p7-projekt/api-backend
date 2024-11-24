@@ -31,8 +31,23 @@ public class SessionRepository : ISessionRepository
     public async Task DeleteExpiredSessions()
     {
         using var con = await _connection.CreateConnectionAsync();
+        // https://www.postgresql.org/docs/current/queries-with.html#QUERIES-WITH-MODIFYING -- ALl statements work on the same snapshot
+        // Expired timesession is executed first and have a data structure containg the ids of the sessions which where
+        // deleted. Next we delete from users where the id exist within the user_in_timedsession, and check if the session id was deleted. 
         var query = """
-                    DELETE FROM session WHERE expirationtime_utc <= NOW();
+                    WITH expired_timesessions AS (
+                        DELETE FROM session
+                        WHERE expirationtime_utc <= NOW()
+                        AND expirationtime_utc IS NOT NULL
+                        RETURNING session_id
+                    ) 
+                    DELETE FROM users
+                    WHERE id IN (
+                        SELECT user_id
+                        FROM user_in_timedsession
+                        WHERE session_id IN (SELECT session_id FROM expired_timesessions)
+                    )
+                    AND anonymous = true
                     """;
         await con.ExecuteAsync(query);
     }
