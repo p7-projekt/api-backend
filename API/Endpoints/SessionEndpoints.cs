@@ -6,6 +6,7 @@ using Asp.Versioning.Builder;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models; 
 using Core.Shared;
+using FluentResults;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -115,7 +116,16 @@ public static class SessionEndpoints
                 return TypedResults.Ok(result.Value);
             }
             // TODO
-            return TypedResults.Ok(new JoinSessionResponseDto("helo", DateTime.UtcNow));
+            var userId = Convert.ToInt32(principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value);
+            var studentResult = await service.JoinStudent(userId, dto.SessionCode);
+            if (studentResult.IsFailed)
+            {
+                
+                var error = CreateBadRequest.CreateValidationProblemDetails(studentResult.Errors, "Error", "Errors");
+                return TypedResults.BadRequest(error);
+            }
+
+            return TypedResults.Ok(studentResult.Value);
         }).WithRequestValidation<JoinSessionDto>();
         return app;
     }

@@ -221,6 +221,55 @@ public class SessionRepository : ISessionRepository
         return session;
     }
 
+
+    public async Task<Result> StudentJoinSession(string code, int userId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        using var transaction = con.BeginTransaction();
+        try
+        {
+
+            var sessionExistQuery = """
+                                    SELECT session_id
+                                    FROM session
+                                    WHERE session_code = @SessionCode
+                                    """;
+            var session = await con.QueryFirstOrDefaultAsync<int>(sessionExistQuery, new { SessionCode = code });
+            if (session == 0)
+            {
+                _logger.LogInformation("Sessioncode {sessionCode} was wrong!", code);
+                return Result.Fail("Invalid session code");
+            }
+
+            var alreadyJoinedQuery = """
+                                     SELECT COUNT(*) 
+                                     FROM user_in_timedsession
+                                     WHERE user_id = @UserId
+                                     AND session_id = @SessionId
+                                     """;
+            var joinedResult = con.ExecuteScalar<int>(alreadyJoinedQuery, new { UserId = userId, SessionId = session });
+            if (joinedResult != 0)
+            {
+                return Result.Fail("Already joined");
+            }
+            
+            var insertRelationQuery = """
+                                      INSERT INTO user_in_timedsession
+                                      (user_id, session_id)
+                                      VALUES
+                                      (@UserId, @SessionId);
+                                      """;
+            await con.ExecuteScalarAsync<int>(insertRelationQuery, new { UserId = userId, SessionId = session });
+            _logger.LogInformation("User with id {userId} is added to session id {sessionId}", userId, session);
+            transaction.Commit();
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning("Exception happend: {exception}, userd did not join session!", e.Message);
+            transaction.Rollback();
+        }
+        return Result.Ok();
+    }
     
     public async Task<Result<Session>> GetSessionBySessionCodeAsync(string sessionCode)
     {

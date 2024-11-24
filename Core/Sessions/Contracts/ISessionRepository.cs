@@ -15,4 +15,5 @@ public interface ISessionRepository
     Task<Session?> GetSessionOverviewAsync(int sessionId, int userId);
     Task<IEnumerable<Session>?> GetSessionsAsync(int authorId);
     Task<bool> DeleteSessionAsync(int sessionId, int authorId);
+    Task<Result> StudentJoinSession(string code, int userId);
 }
