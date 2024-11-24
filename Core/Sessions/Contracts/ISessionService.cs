@@ -11,5 +11,7 @@ public interface ISessionService
     Task<Result<GetSessionResponseDto>> GetSessionByIdAsync(int sessionId, int userId, Roles role);
     Task<Result<List<GetSessionsResponseDto>>> GetSessions(int userId);
 
+    Task<Result<JoinSessionResponseDto>> JoinStudent(int userId, string code);
+
     Task<Result> DeleteSession(int sessionId, int userId);
 }

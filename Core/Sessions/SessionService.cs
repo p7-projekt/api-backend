@@ -83,8 +83,72 @@ public class SessionService : ISessionService
         return new CreateSessionResponseDto(sessionId, sessionCode);
     }
 
+    public async Task<Result<JoinSessionResponseDto>> JoinStudent(int userId, string code)
+    {
+        Codes actualCode = DetermineCode(code);
+        if (actualCode == Codes.None)
+        {
+            return Result.Fail("Invalid code");
+        }
+
+        if (actualCode == Codes.SessionCode)
+        {
+            return await JoinTimedSessionStudent(userId, code);
+        }
+
+        if (actualCode == Codes.ClassRoomCode)
+        {
+            throw new NotImplementedException();
+        }
+        
+        return Result.Fail("Internal error happend");
+    }
+
+    private async Task<Result<JoinSessionResponseDto>> JoinTimedSessionStudent(int userId, string code)
+    {
+        var result = await _sessionRepository.StudentJoinSession(code, userId);
+        if (result.IsFailed)
+        {
+            return result;
+        }
+        return new JoinSessionResponseDto(null, null);
+    }
+
+    // private async Task<Result> JoinClassRoomStudent()
+    // {
+    //     TODO
+    // }
+    
+    public enum Codes
+    {
+        None,
+        SessionCode,
+        ClassRoomCode,
+    }
+
+    private Codes DetermineCode(string code)
+    {
+        if (char.IsUpper(code[0]) && char.IsUpper(code[1]))
+        {
+            _logger.LogInformation("Code {code} determined to be {codes}", code, nameof(Codes.SessionCode));
+            return Codes.SessionCode;
+        }
+
+        if (char.IsUpper(code[4]) && char.IsUpper(code[5]))
+        {
+            _logger.LogInformation("Code {code} determined to be {codes}", code, nameof(Codes.ClassRoomCode));
+            return Codes.ClassRoomCode;
+        }
+        _logger.LogInformation("Code {code} determined to be {codes}", code, nameof(Codes.None));
+        return Codes.None;
+    }
+
     public async Task<Result<JoinSessionResponseDto>> JoinSessionAnonUser(JoinSessionDto dto)
     {
+        if (dto.Name == null)
+        {
+            return Result.Fail("Missing name");
+        }
         // create anon user entry in table
         var session = await _sessionRepository.GetSessionBySessionCodeAsync(dto.SessionCode);
         if (session.IsFailed)

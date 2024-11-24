@@ -6,6 +6,7 @@ using Asp.Versioning.Builder;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models; 
 using Core.Shared;
+using FluentResults;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -99,16 +100,32 @@ public static class SessionEndpoints
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<CreateSessionDto>();
         
         // Join session
-        app.MapPost("/join", async Task<Results<Ok<JoinSessionResponseDto>, BadRequest<ValidationProblemDetails>>> ([FromBody]JoinSessionDto dto, ISessionService service) =>
+        app.MapPost("/join", async Task<Results<Ok<JoinSessionResponseDto>, BadRequest<ValidationProblemDetails>>> ([FromBody]JoinSessionDto dto, ISessionService service, ClaimsPrincipal principal) =>
         {
-            var result = await service.JoinSessionAnonUser(dto);
-            if (result.IsFailed)
+            var hasToken = principal.Claims.Any();
+            
+            // Join as anonUser
+            if (!hasToken)
             {
-                var error = CreateBadRequest.CreateValidationProblemDetails(result.Errors, $"Invalid {nameof(dto.SessionCode)}", nameof(dto.SessionCode));
+                var result = await service.JoinSessionAnonUser(dto);
+                if (result.IsFailed)
+                {
+                    var error = CreateBadRequest.CreateValidationProblemDetails(result.Errors, $"Invalid {nameof(dto.SessionCode)}", nameof(dto.SessionCode));
+                    return TypedResults.BadRequest(error);
+                }
+                return TypedResults.Ok(result.Value);
+            }
+            // TODO
+            var userId = Convert.ToInt32(principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value);
+            var studentResult = await service.JoinStudent(userId, dto.SessionCode);
+            if (studentResult.IsFailed)
+            {
+                
+                var error = CreateBadRequest.CreateValidationProblemDetails(studentResult.Errors, "Error", "Errors");
                 return TypedResults.BadRequest(error);
             }
-            
-            return TypedResults.Ok(result.Value);
+
+            return TypedResults.Ok(studentResult.Value);
         }).WithRequestValidation<JoinSessionDto>();
         return app;
     }

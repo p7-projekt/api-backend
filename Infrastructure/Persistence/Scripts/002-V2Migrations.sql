@@ -6,12 +6,12 @@ CREATE TABLE language_support(
     version VARCHAR(25) NOT NULL
 );
 
-INSERT INTO language_support(language, version) VALUES ('haskell', '9.8.2');
-INSERT INTO language_support(language, version) VALUES ('python', 'someVersion');
+INSERT INTO language_support(language, version) VALUES ('Haskell', '9.8.2');
+INSERT INTO language_support(language, version) VALUES ('Python', 'someVersion');
 
 ALTER TABLE solved RENAME TO submission;
 ALTER TABLE submission 
-    ADD COLUMN solution TEXT NOT NULL DEFAULT '',
+    ADD COLUMN solution TEXT,
     ADD COLUMN language_id INTEGER REFERENCES language_support(language_id) NOT NULL DEFAULT 9999999,
     ADD COLUMN solved BOOLEAN NOT NULL DEFAULT false;
 
@@ -36,3 +36,5 @@ ALTER TABLE users
     ADD COLUMN password_hash VARCHAR(255),
     ADD COLUMN anonymous BOOLEAN DEFAULT True;
 
+DROP TRIGGER IF EXISTS anon_user_cleanup ON anon_users;
+DROP FUNCTION IF EXISTS user_cleanup();

@@ -34,7 +34,7 @@ public static class RegisterCoreServices
                 .AddTrigger(trigger =>
                 {
                     trigger.ForJob(job).WithSimpleSchedule(
-                        schedule => schedule.WithIntervalInMinutes(5).RepeatForever());
+                        schedule => schedule.WithIntervalInMinutes(2).RepeatForever());
                 });
         });
         
