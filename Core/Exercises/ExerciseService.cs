@@ -14,15 +14,15 @@ public class ExerciseService : IExerciseService
     private readonly IExerciseRepository _exerciseRepository;
     private readonly ILogger<ExerciseService> _logger;
     private readonly ISolutionRepository _solutionRepository;
-    private readonly IMozartService _iMozartService;
+    private readonly IMozartService _mozartService;
 
 
-    public ExerciseService(IExerciseRepository exerciseRepository, ILogger<ExerciseService> logger, ISolutionRepository solutionRepository, IMozartService iMozartService)
+    public ExerciseService(IExerciseRepository exerciseRepository, ILogger<ExerciseService> logger, ISolutionRepository solutionRepository, IMozartService mozartService)
     {
         _exerciseRepository = exerciseRepository;
         _logger = logger;
         _solutionRepository = solutionRepository;
-        _iMozartService = iMozartService;
+        _mozartService = mozartService;
     }
 
     public async Task<Result> DeleteExercise(int exerciseId, int userId)
@@ -82,7 +82,7 @@ public class ExerciseService : IExerciseService
             return Result.Fail("Exercise not updated");
         }
 
-        var submissionResult = await _iMozartService.SubmitSubmission(new SubmissionDto(dto), (Language)dto.SolutionLanguage);
+        var submissionResult = await _mozartService.SubmitSubmission(new SubmissionDto(dto), (Language)dto.SolutionLanguage);
 
         if (submissionResult.IsFailed) 
         {
@@ -106,7 +106,7 @@ public class ExerciseService : IExerciseService
 
     public async Task<Result<MozartResponseDto>> CreateExercise(ExerciseDto dto, int authorId)
     {
-        var result = await _iMozartService.SubmitSubmission(new SubmissionDto(dto), (Language)dto.SolutionLanguage);
+        var result = await _mozartService.SubmitSubmission(new SubmissionDto(dto), (Language)dto.SolutionLanguage);
         if (result.IsFailed)
         {
             return Result.Fail("Internal error");

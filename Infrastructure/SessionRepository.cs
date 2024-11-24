@@ -234,7 +234,7 @@ public class SessionRepository : ISessionRepository
                                     FROM session
                                     WHERE session_code = @SessionCode
                                     """;
-            var session = await con.QueryFirstOrDefaultAsync<int>(sessionExistQuery, new { SessionCode = code });
+            var session = await con.QueryFirstOrDefaultAsync<int>(sessionExistQuery, new { SessionCode = code }, transaction);
             if (session == 0)
             {
                 _logger.LogInformation("Sessioncode {sessionCode} was wrong!", code);
@@ -247,7 +247,7 @@ public class SessionRepository : ISessionRepository
                                      WHERE user_id = @UserId
                                      AND session_id = @SessionId
                                      """;
-            var joinedResult = con.ExecuteScalar<int>(alreadyJoinedQuery, new { UserId = userId, SessionId = session });
+            var joinedResult = con.ExecuteScalar<int>(alreadyJoinedQuery, new { UserId = userId, SessionId = session }, transaction);
             if (joinedResult != 0)
             {
                 return Result.Fail("Already joined");
@@ -259,7 +259,7 @@ public class SessionRepository : ISessionRepository
                                       VALUES
                                       (@UserId, @SessionId);
                                       """;
-            await con.ExecuteScalarAsync<int>(insertRelationQuery, new { UserId = userId, SessionId = session });
+            await con.ExecuteScalarAsync<int>(insertRelationQuery, new { UserId = userId, SessionId = session }, transaction);
             _logger.LogInformation("User with id {userId} is added to session id {sessionId}", userId, session);
             transaction.Commit();
         }
