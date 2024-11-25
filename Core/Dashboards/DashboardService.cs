@@ -35,15 +35,8 @@ public class DashboardService : IDashboardService
             _logger.LogInformation("No Exercises in session: {sessionID}", sessionId);
             return Result.Fail("Exercises not found");
         }
-        var combinedDtos = exercises.Select(dto => new GetExercisesAndUserDetailsInSessionResponseDto(
-        dto.Id,
-        dto.Solved,
-        dto.Attempted,
-        dto.UserIds.Zip(dto.Names, (id, name) => new UserDetailDto(id, name)).ToList())).ToList();
 
-        var combinedInfoDto = new GetExercisesInSessionCombinedInfo(usersConnected, combinedDtos);
-
-        return Result.Ok(combinedInfoDto);
+        return Result.Ok(TransformExercisesInSessionDto(exercises, usersConnected));
     }
 
     public async Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInclassSessionAsync(int sessionId, int userId)
@@ -63,6 +56,12 @@ public class DashboardService : IDashboardService
             _logger.LogInformation("No Exercises in session: {sessionID}", sessionId);
             return Result.Fail("Exercises not found");
         }
+
+        return Result.Ok(TransformExercisesInSessionDto(exercises, usersConnected));
+    }
+
+    private GetExercisesInSessionCombinedInfo TransformExercisesInSessionDto(IEnumerable<GetExercisesInSessionResponseDto> exercises, int usersConnected)
+    {
         var combinedDtos = exercises.Select(dto => new GetExercisesAndUserDetailsInSessionResponseDto(
         dto.Id,
         dto.Solved,
@@ -70,7 +69,6 @@ public class DashboardService : IDashboardService
         dto.UserIds.Zip(dto.Names, (id, name) => new UserDetailDto(id, name)).ToList())).ToList();
 
         var combinedInfoDto = new GetExercisesInSessionCombinedInfo(usersConnected, combinedDtos);
-
-        return Result.Ok(combinedInfoDto);
+        return combinedInfoDto;
     }
 }
