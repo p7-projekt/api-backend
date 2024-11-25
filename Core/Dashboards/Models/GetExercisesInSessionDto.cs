@@ -3,6 +3,7 @@
 namespace Core.Dashboards.Models;
 
 public record GetExercisesInSessionResponseDto(
+    string Title,
     int Id,
     int Solved,
     int Attempted,
@@ -16,6 +17,7 @@ public record UserDetailDto(
 );
 
 public record GetExercisesAndUserDetailsInSessionResponseDto(
+    string Title,
     int Id,
     int Solved,
     int Attemped,

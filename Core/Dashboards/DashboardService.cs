@@ -75,6 +75,7 @@ public class DashboardService : IDashboardService
     private GetExercisesInSessionCombinedInfo TransformExercisesInSessionDto(IEnumerable<GetExercisesInSessionResponseDto> exercises, int usersConnected)
     {
         var combinedDtos = exercises.Select(dto => new GetExercisesAndUserDetailsInSessionResponseDto(
+        dto.Title,
         dto.Id,
         dto.Solved,
         dto.Attempted,
