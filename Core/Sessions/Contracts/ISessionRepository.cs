@@ -1,5 +1,7 @@
+using Core.Languages.Models;
 using Core.Sessions.Models;
 using FluentResults;
+using System.Data;
 
 namespace Core.Sessions.Contracts;
 
@@ -15,6 +17,10 @@ public interface ISessionRepository
     Task<Session?> GetSessionOverviewAsync(int sessionId, int userId);
     Task<IEnumerable<Session>?> GetSessionsAsync(int authorId);
     Task<bool> DeleteSessionAsync(int sessionId, int authorId);
+    Task<bool> VerifyExerciseIdsAsync(List<int> exerciseIds, int authorId, IDbConnection con, IDbTransaction transaction);
+    Task<bool> VerifyLanguagesIdsAsync(List<Language> languages);
+    Task<Result> InsertExerciseRelation(List<int> exerciseIds, int sessionId, IDbConnection con, IDbTransaction transaction);
+    Task InsertLanguageRelation(List<int> languageIds, int sessionId, IDbConnection con, IDbTransaction transaction);
     Task<IEnumerable<GetExercisesInSessionResponseDto>?> GetExercisesInSessionAsync(int sessionId);
     Task<int> GetConnectedUsersAsync(int sessionId);
     Task<Result> StudentJoinSession(string code, int userId);
