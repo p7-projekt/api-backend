@@ -4,7 +4,6 @@ using Core.Languages.Models;
 using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
-using Core.Solutions.Models;
 using Dapper;
 using FluentResults;
 using Infrastructure.Authentication.Contracts;
@@ -12,7 +11,7 @@ using Infrastructure.Persistence;
 using Infrastructure.Persistence.Contracts;
 using Microsoft.Extensions.Logging;
 using Npgsql;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+
 
 namespace Infrastructure;
 
@@ -230,6 +229,18 @@ public class SessionRepository : ISessionRepository
         session.ExerciseDetails = exercises.ToList();
         
         return session;
+    }
+
+    public async Task<int> GetTimedSessionIdByUserId(int userId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var query = """
+                    SELECT session_id
+                    FROM user_in_timedsession
+                    WHERE user_id = @UserId;
+                    """;
+        var result = await con.QueryFirstOrDefaultAsync<int>(query, new { UserId = userId });
+        return result;
     }
 
 

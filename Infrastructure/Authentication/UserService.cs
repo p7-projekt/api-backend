@@ -1,3 +1,4 @@
+using Core.Sessions.Contracts;
 using Core.Shared;
 using FluentResults;
 using Infrastructure.Authentication.Contracts;
@@ -13,12 +14,14 @@ public class UserService : IUserService
 	private readonly IUserRepository _userRepository;
 	private readonly ITokenService _tokenService;
 	private readonly ILogger<UserService> _logger;
-	public UserService(IPasswordHasher<User> passwordHasher, IUserRepository userRepository, ILogger<UserService> logger, ITokenService tokenService)
+	private readonly ISessionRepository _sessionRepository;
+	public UserService(IPasswordHasher<User> passwordHasher, IUserRepository userRepository, ILogger<UserService> logger, ITokenService tokenService, ISessionRepository sessionRepository)
 	{
 		_passwordHasher = passwordHasher;
 		_userRepository = userRepository;
 		_logger = logger;
 		_tokenService = tokenService;
+		_sessionRepository = sessionRepository;
 	}
 
 	public async Task<Result> CreateUserAsync(CreateUserDto dto)
@@ -62,7 +65,7 @@ public class UserService : IUserService
 			_logger.LogWarning("Could not retrieve user {userid}", id);
 			return Result.Fail("Error getting user");
 		}
-		return Result.Ok(new GetUserResponseDto(result.Value.Email, result.Value.Name));
+		return Result.Ok(new GetUserResponseDto(result.Value.Email, result.Value.Name, null));
 	}
 
 	public async Task<Result<GetUserResponseDto>> GetAnonUserByIdAsync(int userId)
@@ -74,12 +77,18 @@ public class UserService : IUserService
         	return Result.Fail("Error getting user");
         }
 
+        var sessionId = await _sessionRepository.GetTimedSessionIdByUserId(userId);
+        if (sessionId == 0)
+        {
+	        return Result.Fail("Could not retrieve session");
+        }
+        
         if (result.Value.Anonymous == false)
         {
 	        return Result.Fail("Error getting user");
         }	
 		
-		return new GetUserResponseDto(null, result.Value.Name);
+		return new GetUserResponseDto(null, result.Value.Name, sessionId);
 	}
 
 	public async Task<Result<LoginResponse>> LoginAsync(LoginDto loginDto)

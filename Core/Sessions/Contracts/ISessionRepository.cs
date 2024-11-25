@@ -18,4 +18,6 @@ public interface ISessionRepository
     Task<IEnumerable<GetExercisesInSessionResponseDto>?> GetExercisesInSessionAsync(int sessionId);
     Task<int> GetConnectedUsersAsync(int sessionId);
     Task<Result> StudentJoinSession(string code, int userId);
+
+    Task<int> GetTimedSessionIdByUserId(int userId);
 }
