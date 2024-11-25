@@ -27,6 +27,11 @@ public static class DashboardEndpoints
                 IDashboardService dashboardService) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+            if (userId == null)
+            {
+                return TypedResults.BadRequest();
+            }
+
             var result = await dashboardService.GetExercisesInTimedSession(sessionId, int.Parse(userId));
 
             if (result.IsFailed)
@@ -42,6 +47,11 @@ public static class DashboardEndpoints
                 IDashboardService dashboardService) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+            if (userId == null)
+            {
+                return TypedResults.BadRequest();
+            }
+
             var result = await dashboardService.GetExercisesInTimedSession(sessionId, int.Parse(userId));
 
             if (result.IsFailed)
@@ -56,6 +66,11 @@ public static class DashboardEndpoints
             IDashboardService dashboardService) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+            if (userId == null)
+            {
+                return TypedResults.BadRequest();
+            }
+
             var result = await dashboardService.GetExerciseSolution(exerciseId, int.Parse(userId));
             if (result.IsFailed)
             {
