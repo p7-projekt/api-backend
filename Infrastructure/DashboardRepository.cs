@@ -23,21 +23,23 @@ public class DashboardRepository : IDashboardRepository
     {
         using var con = await _connection.CreateConnectionAsync();
         var query = """
-                    SELECT
-                    sub.exercise_id AS Id,
-                    COUNT(CASE WHEN solved THEN 1 END)::int AS Solved,
-                    COUNT(exercise_id)::int AS Attempted,
-                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN solved THEN u.user_id END), NULL) AS UserIds,
-                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN solved THEN _user.name END), NULL):: text[] AS Names
+                SELECT
+                    e.exercise_id AS Id,
+                    COUNT(CASE WHEN sub.solved THEN 1 END)::int AS Solved,
+                    COUNT(sub.exercise_id)::int AS Attempted,
+                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN u.user_id END), NULL) AS UserIds,
+                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN _user.name END), NULL)::text[] AS Names
                 FROM
                     session AS s
-                    JOIN user_in_timedsession AS u ON s.session_id = u.session_id
-                    JOIN submission AS sub ON u.user_id = sub.user_id AND s.session_id = sub.session_id
-                    JOIN users AS _user ON u.user_id = _user.id
+                    JOIN exercise_in_session AS eis ON s.session_id = eis.session_id
+                    JOIN exercise AS e ON eis.exercise_id = e.exercise_id
+                    LEFT JOIN user_in_timedsession AS u ON s.session_id = u.session_id
+                    LEFT JOIN submission AS sub ON u.user_id = sub.user_id AND s.session_id = sub.session_id AND e.exercise_id = sub.exercise_id
+                    LEFT JOIN users AS _user ON u.user_id = _user.id
                 WHERE
-                    s.session_id = @Id
+                    s.session_id = 1
                 GROUP BY
-                    sub.exercise_id;
+                    e.exercise_id;
                 """;
         var results = await con.QueryAsync<dynamic>(query, new { Id = sessionId });
         var mappedResults = results.Select(row => new GetExercisesInSessionResponseDto(
