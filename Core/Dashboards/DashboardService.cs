@@ -60,7 +60,7 @@ public class DashboardService : IDashboardService
         return Result.Ok(TransformExercisesInSessionDto(exercises, usersConnected));
     }
 
-    public async Task<Result<GetExerciseSolution>> GetExerciseSolution(int exerciseId, int UserId)
+    public async Task<Result<GetExerciseSolutionResponseDto>> GetExerciseSolution(int exerciseId, int UserId)
     {
         //TODO: validate access to get the solution
         var solution = await _dashboardRepository.GetSolutionByIdAsync(exerciseId, UserId);

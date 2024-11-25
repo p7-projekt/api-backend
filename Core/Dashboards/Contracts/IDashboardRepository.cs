@@ -14,6 +14,6 @@ namespace Core.Dashboards.Contracts
         Task<IEnumerable<GetExercisesInSessionResponseDto>?> GetExercisesInClassSessionAsync(int sessionId);
         Task<int> GetConnectedTimedUsersAsync(int sessionId);
         Task<int> GetConnectedUsersClassAsync(int sessionId);
-        Task<Result<GetExerciseSolution>> GetSolutionByIdAsync(int exerciseId,  int userId);
+        Task<Result<GetExerciseSolutionResponseDto>> GetSolutionByIdAsync(int exerciseId,  int userId);
     }
 }

@@ -109,7 +109,7 @@ public class DashboardRepository : IDashboardRepository
         var results = await con.QueryFirstOrDefaultAsync<int>(query, new { Id = sessionId });
         return results;
     }
-    public async Task<Result<GetExerciseSolution>> GetSolutionByIdAsync (int exerciseId, int userId)
+    public async Task<Result<GetExerciseSolutionResponseDto>> GetSolutionByIdAsync (int exerciseId, int userId)
     {
         using var con = await _connection.CreateConnectionAsync();
         var query = """
@@ -119,7 +119,7 @@ public class DashboardRepository : IDashboardRepository
                 JOIN users AS u ON s.user_id = u.id
             WHERE u.id = @uid AND s.exercise_id = @eid;
             """;
-        var result = await con.QueryFirstOrDefaultAsync<GetExerciseSolution>(query, new { uid = userId, eid = exerciseId });
+        var result = await con.QueryFirstOrDefaultAsync<GetExerciseSolutionResponseDto>(query, new { uid = userId, eid = exerciseId });
         if (result == null)
         {
             return Result.Fail("Failed to find solution");

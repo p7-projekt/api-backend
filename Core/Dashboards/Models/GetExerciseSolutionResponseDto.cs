@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Core.Dashboards.Models
 {
-    public record GetExerciseSolution(
+    public record GetExerciseSolutionResponseDto(
         string title,
         string description,
         string solution
