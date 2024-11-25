@@ -180,10 +180,10 @@ public class SessionRepository : ISessionRepository
     {
         using var con = await _connection.CreateConnectionAsync();
         var query = """
-                    SELECT COUNT(*) FROM app_users
+                    SELECT COUNT(*) FROM users
                     JOIN session
-                    ON session.author_id = app_users.user_id
-                    WHERE app_users.user_id = @UserId AND session.session_id = @SessionId;
+                    ON session.author_id = users.id
+                    WHERE users.id = @UserId AND session.session_id = @SessionId;
                     """;
         var result = await con.QuerySingleAsync<int>(query, new { UserId = userId, SessionId = sessionId });
         return result == 1;

@@ -291,6 +291,41 @@ public class ClassroomRepository : IClassroomRepository
         return Result.Ok();
     }
 
+    public async Task DeleteClassroomSessionAsync(int sessionId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+
+        var query = "DELETE FROM session WHERE session_id = @SessionId";
+
+        await con.ExecuteAsync(query, new { SessionId = sessionId });
+    }
+
+    public async Task<GetClassroomSessionResponseDto> GetClassroomSessionByIdAsync(int sessionId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+
+        var query = """
+                    SELECT
+                        s.session_id AS id,
+                        s.title AS title,
+                        s.description AS description,
+                        s.author_id AS authorid,
+                        sic.active AS active
+                    FROM session s
+                    JOIN session_in_classroom sic ON sic.session_id = s.session_id
+                    WHERE s.session_id = @SessionId
+                    """;
+
+        var session = await con.QuerySingleAsync<GetClassroomSessionResponseDto>(query, new { SessionId = sessionId });
+
+        var languageQuery = "SELECT language_id FROM language_in_session WHERE session_id = @SessionId;";
+
+        var languages = await con.QueryAsync<Language>(languageQuery, new { SessionId = sessionId });
+        session.Languages = languages.ToList();
+
+        return session;
+    }
+
     public async Task<bool> VerifyClassroomAuthor(int classroomId, int authorId)
     {
         using var con = await _connection.CreateConnectionAsync();

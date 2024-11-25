@@ -19,4 +19,6 @@ public interface IClassroomService
     Task<Result> UpdateClassroomDetails(UpdateClassroomDto dto, int classroomId, int authorId);
     Task<Result> UpdateClassroomSession(UpdateClassroomSessionDto dto, int classroomId, int authorId);
     Task<Result> JoinClassroom(JoinClassroomDto dto, int classroomId, int studentId);
+    Task<Result> DeleteClassroomSession(int sessionId, int authorId);
+    Task<GetClassroomSessionResponseDto> GetClassroomSessionById(int sessionId);
 }

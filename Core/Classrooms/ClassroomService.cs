@@ -1,5 +1,6 @@
 ﻿using Core.Classrooms.Contracts;
 using Core.Classrooms.Models;
+using Core.Sessions.Contracts;
 using Core.Shared;
 using FluentResults;
 using Microsoft.Extensions.Logging;
@@ -17,10 +18,12 @@ public class ClassroomService : IClassroomService
 {
     private readonly ILogger<ClassroomService> _logger;
     private readonly IClassroomRepository _classroomRepository;
-    public ClassroomService(ILogger<ClassroomService> logger, IClassroomRepository classroomRepository)
+    private readonly ISessionRepository _sessionRepository;
+    public ClassroomService(ILogger<ClassroomService> logger, IClassroomRepository classroomRepository, ISessionRepository sessionRepository)
     {
         _logger = logger;
         _classroomRepository = classroomRepository;
+        _sessionRepository = sessionRepository;
     }
     public async Task<Result> CreateClassroom(ClassroomDto dto, int authorId)
     {
@@ -110,6 +113,24 @@ public class ClassroomService : IClassroomService
         }
 
         return Result.Ok();
+    }
+
+    public async Task<Result> DeleteClassroomSession(int sessionId, int authorId)
+    {
+        var correctAuthor = await _sessionRepository.VerifyAuthor(authorId, sessionId);
+        if (!correctAuthor)
+        {
+            _logger.LogWarning("Invalid owner tried to delete session");
+            return Result.Fail("Incorrect author of session");
+        }
+        await _classroomRepository.DeleteClassroomSessionAsync(sessionId);
+
+        return Result.Ok();
+    }
+
+    public async Task<GetClassroomSessionResponseDto> GetClassroomSessionById(int sessionId)
+    {
+        return await _classroomRepository.GetClassroomSessionByIdAsync(sessionId);
     }
 
     private string GenerateClassroomCode()

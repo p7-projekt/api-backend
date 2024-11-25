@@ -19,6 +19,8 @@ public interface IClassroomRepository
     Task<Result> UpdateClassroomDetailsAsync(UpdateClassroomDto dto, int classroomId);
     Task<Result> UpdateClassroomSessionAsync(UpdateClassroomSessionDto dto);
     Task<Result> JoinClassroomAsync(int studentId, int classroomId);
+    Task DeleteClassroomSessionAsync(int sessionId);
+    Task<GetClassroomSessionResponseDto> GetClassroomSessionByIdAsync(int sessionId);
     Task<bool> VerifyClassroomAuthor(int classroomId, int authorId);
     Task<bool> VerifyClassroomRoomcode(int classroomId, string roomCode);
     Task<bool> VerifyRegistrationIsOpen(int classroomId);

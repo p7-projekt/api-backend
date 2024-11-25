@@ -130,6 +130,27 @@ public static class ClassroomEndpoints
 
         }).RequireAuthorization(nameof(Roles.Student)).WithRequestValidation<JoinClassroomDto>();
 
+        classroomV2.MapDelete("/session/{sessionId:int}", async Task<Results<NoContent, BadRequest>> (int sessionId, ClaimsPrincipal principal, IClassroomService service) =>
+        {
+            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+
+            var result = await service.DeleteClassroomSession(sessionId, Convert.ToInt32(userId));
+            if (result.IsFailed)
+            {
+                return TypedResults.BadRequest();
+            }
+            return TypedResults.NoContent();
+
+        }).RequireAuthorization(nameof(Roles.Instructor));
+
+        classroomV2.MapGet("/session/{sessionId:int}", async Task<Ok<GetClassroomSessionResponseDto>> (int sessionId, IClassroomService service) =>
+        {
+            var result = await service.GetClassroomSessionById(sessionId);
+
+            return TypedResults.Ok(result);
+
+        }).RequireAuthorization(Policies.AllowClassroomRoles);
+
         return app;
     }
 }
