@@ -12,7 +12,13 @@ services:
 
   mozart-haskell:
     container_name: p7-mozart-haskell
-    image: p7project/mozart-haskell:1.0
+    image: p7project/mozart-haskell:2.0rc1
     restart: on-failure
     ports:
       - 8080:8080
+  mozart-python:
+    container_name: p7-mozart-python
+    image: p7project/mozart-python:2.0rc1
+    restart: on-failure
+    ports:
+      - 8081:8080
