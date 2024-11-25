@@ -19,7 +19,7 @@ public class Session
 
     public List<Language> Languages { get; set; } = new();
 
-    public List<GetLanguagesResponseDto> LanguagesDto { get; set; } = new();
+    public List<LanguageSupport> LanguagesModel { get; set; } = new();
 }
 
 public static class SessionMapper
@@ -45,7 +45,7 @@ public static class SessionMapper
     {
         return new GetSessionResponseDto(session.Title, session.Description, session.AuthorName,
            session.ExpirationTimeUtc, session.ExerciseDetails.Select(x => new SolvedExerciseDto(x.ExerciseId, x.ExerciseTitle, x.Solved)).ToList(),
-           session.LanguagesDto
+           session.LanguagesModel.Select(x => new GetLanguagesResponseDto(x.Id, x.Language)).ToList()
            );
     }
 }
