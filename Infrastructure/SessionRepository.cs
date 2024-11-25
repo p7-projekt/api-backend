@@ -286,7 +286,14 @@ public class SessionRepository : ISessionRepository
     {
         using var con = await _connection.CreateConnectionAsync();
         var query = """
-                    SELECT session_id AS id, title, expirationtime_utc AS ExpirationTimeUtc, session_code as sessioncode  FROM session WHERE author_id = @Id;
+                    SELECT session_id AS id, title, expirationtime_utc AS ExpirationTimeUtc, session_code as sessioncode  
+                    FROM session 
+                    WHERE author_id = @Id
+                    AND NOT EXISTS (
+                        SELECT 1 
+                        FROM session_in_classroom 
+                        WHERE session_in_classroom.session_id = session.session_id
+                    );
                     """;
         var results = await con.QueryAsync<Session>(query, new { Id = authorId });
         return results;
