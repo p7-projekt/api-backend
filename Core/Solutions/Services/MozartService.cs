@@ -25,7 +25,7 @@ public class MozartService : IMozartService
         return language switch
         {
             Language.Haskell => new HaskellStrategy(),
-            Language.Python => throw new NotImplementedException(),
+            Language.Python => new PythonStrategy(),
             _ => throw new ArgumentOutOfRangeException(nameof(language), language, null)
         };
     }
