@@ -32,8 +32,23 @@ public class SessionRepository : ISessionRepository
     public async Task DeleteExpiredSessions()
     {
         using var con = await _connection.CreateConnectionAsync();
+        // https://www.postgresql.org/docs/current/queries-with.html#QUERIES-WITH-MODIFYING -- ALl statements work on the same snapshot
+        // Expired timesession is executed first and have a data structure containg the ids of the sessions which where
+        // deleted. Next we delete from users where the id exist within the user_in_timedsession, and check if the session id was deleted. 
         var query = """
-                    DELETE FROM session WHERE expirationtime_utc <= NOW();
+                    WITH expired_timesessions AS (
+                        DELETE FROM session
+                        WHERE expirationtime_utc <= NOW()
+                        AND expirationtime_utc IS NOT NULL
+                        RETURNING session_id
+                    ) 
+                    DELETE FROM users
+                    WHERE id IN (
+                        SELECT user_id
+                        FROM user_in_timedsession
+                        WHERE session_id IN (SELECT session_id FROM expired_timesessions)
+                    )
+                    AND anonymous = true
                     """;
         await con.ExecuteAsync(query);
     }
@@ -207,6 +222,55 @@ public class SessionRepository : ISessionRepository
         return session;
     }
 
+
+    public async Task<Result> StudentJoinSession(string code, int userId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        using var transaction = con.BeginTransaction();
+        try
+        {
+
+            var sessionExistQuery = """
+                                    SELECT session_id
+                                    FROM session
+                                    WHERE session_code = @SessionCode
+                                    """;
+            var session = await con.QueryFirstOrDefaultAsync<int>(sessionExistQuery, new { SessionCode = code }, transaction);
+            if (session == 0)
+            {
+                _logger.LogInformation("Sessioncode {sessionCode} was wrong!", code);
+                return Result.Fail("Invalid session code");
+            }
+
+            var alreadyJoinedQuery = """
+                                     SELECT COUNT(*) 
+                                     FROM user_in_timedsession
+                                     WHERE user_id = @UserId
+                                     AND session_id = @SessionId
+                                     """;
+            var joinedResult = con.ExecuteScalar<int>(alreadyJoinedQuery, new { UserId = userId, SessionId = session }, transaction);
+            if (joinedResult != 0)
+            {
+                return Result.Fail("Already joined");
+            }
+            
+            var insertRelationQuery = """
+                                      INSERT INTO user_in_timedsession
+                                      (user_id, session_id)
+                                      VALUES
+                                      (@UserId, @SessionId);
+                                      """;
+            await con.ExecuteScalarAsync<int>(insertRelationQuery, new { UserId = userId, SessionId = session }, transaction);
+            _logger.LogInformation("User with id {userId} is added to session id {sessionId}", userId, session);
+            transaction.Commit();
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning("Exception happend: {exception}, userd did not join session!", e.Message);
+            transaction.Rollback();
+        }
+        return Result.Ok();
+    }
     
     public async Task<Result<Session>> GetSessionBySessionCodeAsync(string sessionCode)
     {

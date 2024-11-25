@@ -36,3 +36,5 @@ ALTER TABLE users
     ADD COLUMN password_hash VARCHAR(255),
     ADD COLUMN anonymous BOOLEAN DEFAULT True;
 
+DROP TRIGGER IF EXISTS anon_user_cleanup ON anon_users;
+DROP FUNCTION IF EXISTS user_cleanup();
