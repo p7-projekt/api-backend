@@ -22,4 +22,6 @@ public interface ISessionRepository
     Task<Result> InsertExerciseRelation(List<int> exerciseIds, int sessionId, IDbConnection con, IDbTransaction transaction);
     Task InsertLanguageRelation(List<int> languageIds, int sessionId, IDbConnection con, IDbTransaction transaction);
     Task<Result> StudentJoinSession(string code, int userId);
+
+    Task<int> GetTimedSessionIdByUserId(int userId);
 }

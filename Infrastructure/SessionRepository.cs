@@ -4,7 +4,6 @@ using Core.Languages.Models;
 using Core.Sessions;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
-using Core.Solutions.Models;
 using Dapper;
 using FluentResults;
 using Infrastructure.Authentication.Contracts;
@@ -12,7 +11,7 @@ using Infrastructure.Persistence;
 using Infrastructure.Persistence.Contracts;
 using Microsoft.Extensions.Logging;
 using Npgsql;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+
 
 namespace Infrastructure;
 
@@ -228,16 +227,16 @@ public class SessionRepository : ISessionRepository
         var languages = await con.QueryAsync<LanguageSupport>(getLanguages, new { SessionId = sessionId });
         session.LanguagesModel = languages.ToList();
         var exercisesQuery = """
-                             SELECT e.exercise_id AS exerciseid, 
+                             SELECT e.exercise_id AS exerciseid,
                                     title AS exercisetitle,
-                                    CASE 
-                                        WHEN s.user_id IS NOT NULL THEN true
-                                        ELSE false
-                                    END AS solved
+                                    CASE
+                                        WHEN s.solved IS NULL OR s.solved = false THEN false
+                                        ELSE true
+                                        END AS solved
                              FROM exercise AS e
-                             JOIN exercise_in_session AS eis
-                                ON e.exercise_id = eis.exercise_id
-                             LEFT JOIN submission AS s 
+                                      JOIN exercise_in_session AS eis
+                                           ON e.exercise_id = eis.exercise_id
+                                      LEFT JOIN submission AS s
                                 ON e.exercise_id = s.exercise_id AND s.user_id = @UserId
                              WHERE eis.session_id = @SessionId;
                              """;
@@ -245,6 +244,18 @@ public class SessionRepository : ISessionRepository
         session.ExerciseDetails = exercises.ToList();
         
         return session;
+    }
+
+    public async Task<int> GetTimedSessionIdByUserId(int userId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var query = """
+                    SELECT session_id
+                    FROM user_in_timedsession
+                    WHERE user_id = @UserId;
+                    """;
+        var result = await con.QueryFirstOrDefaultAsync<int>(query, new { UserId = userId });
+        return result;
     }
 
     public async Task<Result> StudentJoinSession(string code, int userId)
