@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using API.Configuration;
 using FluentValidation.Internal;
 using Infrastructure.Authentication.Models;
+using FluentResults;
 
 namespace API.Endpoints;
 
@@ -50,10 +51,14 @@ public static class ClassroomEndpoints
 
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ClassroomSessionDto>();
 
-        classroomV2.MapGet("/{classroomId:int}", async Task<Ok<GetClassroomResponseDto>> (int classroomId, ClaimsPrincipal principal, IClassroomService service) =>
+        classroomV2.MapGet("/{classroomId:int}", async Task<Results<Ok<GetClassroomResponseDto>, BadRequest<string>>> (int classroomId, ClaimsPrincipal principal, IClassroomService service) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
             var result = await service.GetClassroomById(classroomId);
+            if(result.IsFailed)
+            {
+                return TypedResults.BadRequest(string.Join("; ", result.Errors.Select(e => e.Message)));
+            }
 
             return TypedResults.Ok(result.Value);
 
@@ -112,14 +117,14 @@ public static class ClassroomEndpoints
 
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<UpdateClassroomSessionDto>();
 
-        classroomV2.MapPost("/{classroomId:int}/join", async Task<Results<NoContent, BadRequest>> (int classroomId, [FromBody] JoinClassroomDto dto, ClaimsPrincipal principal, IClassroomService service) =>
+        classroomV2.MapPost("/{classroomId:int}/join", async Task<Results<NoContent, BadRequest<string>>> (int classroomId, [FromBody] JoinClassroomDto dto, ClaimsPrincipal principal, IClassroomService service) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
 
             var result = await service.JoinClassroom(dto, classroomId, Convert.ToInt32(userId));
             if (result.IsFailed)
             {
-                return TypedResults.BadRequest();
+                return TypedResults.BadRequest(result.Reasons.ToString());
             }
             return TypedResults.NoContent();
 

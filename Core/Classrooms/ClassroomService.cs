@@ -5,6 +5,7 @@ using FluentResults;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -88,6 +89,12 @@ public class ClassroomService : IClassroomService
 
     public async Task<Result> JoinClassroom(JoinClassroomDto dto, int classroomId, int studentId)
     {
+        var isOpen = await _classroomRepository.VerifyRegistrationIsOpen(classroomId);
+        if (!isOpen)
+        {
+            return Result.Fail("Classroom not open to join");
+        }
+
         var validCode = await _classroomRepository.VerifyClassroomRoomcode(classroomId, dto.RoomCode);
         if (!validCode)
         {

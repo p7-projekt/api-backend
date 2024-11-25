@@ -127,25 +127,41 @@ public class ClassroomRepository : IClassroomRepository
         return Result.Ok();
     }
 
-    public async Task<GetClassroomResponseDto> GetClassroomByIdAsync(int classroomId)
+    public async Task<Result<GetClassroomResponseDto>> GetClassroomByIdAsync(int classroomId)
     {
-        using var con = await _connection.CreateConnectionAsync();
-        
-        var classroomQuery = "SELECT classroom_id AS id, title, description, roomcode, registration_open AS isOpen FROM classroom WHERE classroom_id = @ClassroomId;";
-        var classroom = await con.QuerySingleAsync<GetClassroomResponseDto>(classroomQuery, new { ClassroomId = classroomId });
+        try
+        {
+            using var con = await _connection.CreateConnectionAsync();
 
-        var sessionIdsQuery = """
-                              SELECT s.session_id AS id, s.title, sic.active 
+            var classroomQuery = """
+                                 SELECT classroom_id AS id, title, description, roomcode, registration_open AS isOpen,
+                                   (SELECT COUNT(*) 
+                                   FROM student_in_classroom 
+                                   WHERE classroom_id = @ClassroomId) AS totalstudents
+                                 FROM classroom 
+                                 WHERE classroom_id = @ClassroomId;
+                                 """;
+            var classroom = await con.QuerySingleAsync<GetClassroomResponseDto>(classroomQuery, new { ClassroomId = classroomId });
+
+            var sessionIdsQuery = """
+                              SELECT s.session_id AS id, s.title, sic.active
                               FROM session_in_classroom AS sic
                               JOIN session AS s 
                               ON s.session_id = sic.session_id
                               WHERE classroom_id = @ClassroomId
                               """;
 
-        var sessions = await con.QueryAsync<GetClassroomSessionDto>(sessionIdsQuery, new { ClassroomId = classroomId });
-        classroom.Sessions = sessions.ToList();
+            var sessions = await con.QueryAsync<GetClassroomSessionDto>(sessionIdsQuery, new { ClassroomId = classroomId });
+            classroom.Sessions = sessions.ToList();
 
-        return classroom;
+            return classroom;
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning("Nothing found when querying for classroom: {message}", ex.Message);
+            return Result.Fail("No classroom found");
+        }
+
     }
     
     public async Task<List<GetClassroomsResponseDto>> GetStudentClassroomsById(int studentId)
@@ -297,9 +313,16 @@ public class ClassroomRepository : IClassroomRepository
         using var con = await _connection.CreateConnectionAsync();
 
         var query = "SELECT roomcode FROM classroom WHERE classroom_id = @ClassroomId;";
-
         var quriedRoomCode = await con.QuerySingleAsync<string>(query, new { ClassroomId = classroomId });
 
         return quriedRoomCode == roomCode;
+    }
+
+    public async Task<bool> VerifyRegistrationIsOpen(int classroomId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+
+        var query = "SELECT registration_open FROM classroom WHERE classroom_id = @ClassroomId;";
+        return  await con.ExecuteScalarAsync<bool>(query, new { ClassroomId = classroomId });
     }
 }

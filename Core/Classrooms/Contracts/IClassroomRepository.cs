@@ -13,12 +13,14 @@ public interface IClassroomRepository
     Task<Result> InsertClassroomAsync(ClassroomDto dto, int authorId, string roomCode);
     Task<Result> AddSessionToClassroomAsync(ClassroomSessionDto dto, int authorId, int classroomId);
     Task<Result> DeleteClassroomAsync(int classroomId);
-    Task<bool> VerifyClassroomAuthor(int classroomId, int authorId);
-    Task<GetClassroomResponseDto> GetClassroomByIdAsync(int classroomId);
+    Task<Result<GetClassroomResponseDto>> GetClassroomByIdAsync(int classroomId);
     Task<List<GetClassroomsResponseDto>> GetStudentClassroomsById(int studentId);
     Task<List<GetClassroomsResponseDto>> GetInstructorClassroomsById(int instructorId);
     Task<Result> UpdateClassroomDetailsAsync(UpdateClassroomDto dto, int classroomId);
     Task<Result> UpdateClassroomSessionAsync(UpdateClassroomSessionDto dto);
     Task<Result> JoinClassroomAsync(int studentId, int classroomId);
+    Task<bool> VerifyClassroomAuthor(int classroomId, int authorId);
     Task<bool> VerifyClassroomRoomcode(int classroomId, string roomCode);
+    Task<bool> VerifyRegistrationIsOpen(int classroomId);
+
 }
