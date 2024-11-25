@@ -5,6 +5,7 @@
 ```env
 JWT_KEY=XXXXXXXXXXXXXXX(atleast 128 bits)
 MOZART_HASKELL=HOST:PORT
+MOZART_PYTHON=HOST:PORT
 SEED_ADMIN="true"/"false"
 # if seed admin then
 ADMIN_MAIL="someEmail@email.dk"

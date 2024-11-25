@@ -1,5 +1,5 @@
 meta {
-  name: JoinSession
+  name: JoinSessionAnon
   type: http
   seq: 3
 }
@@ -12,7 +12,8 @@ post {
 
 body:json {
   {
-      "SessionCode": "{{sessionCode}}"
+    "SessionCode": "{{sessionCode}}",
+    "Name": "Peter"
   }
 }
 
