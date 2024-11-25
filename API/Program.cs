@@ -75,6 +75,7 @@ public class Program
         app.UseUserEndpoints();
         app.UseClassroomEndpoints();
         app.UseLanguageEndpoints();
+        app.UseDashboardEndpoints();
         
         app.Run();
     }

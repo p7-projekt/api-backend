@@ -1,6 +1,6 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace Core.Sessions.Models;
+namespace Core.Dashboards.Models;
 
 public record GetExercisesInSessionResponseDto(
     int Id,

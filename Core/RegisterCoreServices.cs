@@ -1,6 +1,8 @@
 using System.Reflection;
 using Core.Classrooms;
 using Core.Classrooms.Contracts;
+using Core.Dashboards;
+using Core.Dashboards.Contracts;
 using Core.Exercises;
 using Core.Exercises.Contracts;
 using Core.Languages.Contracts;
@@ -25,6 +27,7 @@ public static class RegisterCoreServices
         services.AddScoped<IExerciseService, ExerciseService>();
         services.AddScoped<IClassroomService, ClassroomService>();
         services.AddScoped<ILanguageService, LanguageService>();
+        services.AddScoped<IDashboardService, DashboardService>();
 
         services.AddQuartzHostedService(options =>
         {

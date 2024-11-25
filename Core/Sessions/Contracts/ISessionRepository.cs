@@ -21,7 +21,5 @@ public interface ISessionRepository
     Task<bool> VerifyLanguagesIdsAsync(List<Language> languages);
     Task<Result> InsertExerciseRelation(List<int> exerciseIds, int sessionId, IDbConnection con, IDbTransaction transaction);
     Task InsertLanguageRelation(List<int> languageIds, int sessionId, IDbConnection con, IDbTransaction transaction);
-    Task<IEnumerable<GetExercisesInSessionResponseDto>?> GetExercisesInSessionAsync(int sessionId);
-    Task<int> GetConnectedUsersAsync(int sessionId);
     Task<Result> StudentJoinSession(string code, int userId);
 }

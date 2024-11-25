@@ -11,6 +11,7 @@ using API.Configuration;
 using FluentValidation.Internal;
 using Infrastructure.Authentication.Models;
 
+
 namespace API.Endpoints;
 
 public static class ClassroomEndpoints
