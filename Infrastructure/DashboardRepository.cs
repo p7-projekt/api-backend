@@ -37,7 +37,7 @@ public class DashboardRepository : IDashboardRepository
                     LEFT JOIN submission AS sub ON u.user_id = sub.user_id AND s.session_id = sub.session_id AND e.exercise_id = sub.exercise_id
                     LEFT JOIN users AS _user ON u.user_id = _user.id
                 WHERE
-                    s.session_id = 1
+                    s.session_id = @Id
                 GROUP BY
                     e.exercise_id;
                 """;
