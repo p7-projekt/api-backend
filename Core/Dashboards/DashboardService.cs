@@ -29,7 +29,7 @@ public class DashboardService : IDashboardService
         }
         var usersConnected = await _dashboardRepository.GetConnectedTimedUsersAsync(sessionId);
 
-        var exercises = await _dashboardRepository.GetExercisesInTimedSessionAsync(sessionId);
+        var exercises = await _dashboardRepository.GetExercisesInTimedSessionBySessionIdAsync(sessionId);
         if (exercises == null || exercises.Count() == 0)
         {
             _logger.LogInformation("No Exercises in session: {sessionID}", sessionId);
@@ -39,7 +39,7 @@ public class DashboardService : IDashboardService
         return Result.Ok(TransformExercisesInSessionDto(exercises, usersConnected));
     }
 
-    public async Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInclassSession(int sessionId, int userId)
+    public async Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInClassSession(int sessionId, int userId)
     {
         var access = false;
         access = await _sessionRepository.VerifyAuthor(userId, sessionId);
@@ -50,7 +50,7 @@ public class DashboardService : IDashboardService
         }
         var usersConnected = await _dashboardRepository.GetConnectedUsersClassAsync(sessionId);
 
-        var exercises = await _dashboardRepository.GetExercisesInTimedSessionAsync(sessionId);
+        var exercises = await _dashboardRepository.GetExercisesInTimedSessionBySessionIdAsync(sessionId);
         if (exercises == null || exercises.Count() == 0)
         {
             _logger.LogInformation("No Exercises in session: {sessionID}", sessionId);
@@ -63,7 +63,7 @@ public class DashboardService : IDashboardService
     public async Task<Result<GetExerciseSolutionResponseDto>> GetExerciseSolution(int exerciseId, int UserId)
     {
         //TODO: validate access to get the solution
-        var solution = await _dashboardRepository.GetSolutionByIdAsync(exerciseId, UserId);
+        var solution = await _dashboardRepository.GetSolutionByUserIdAsync(exerciseId, UserId);
         if (solution.IsFailed)
         {
             _logger.LogInformation("Could not find solution with exercise id: {exerciseID} by user {UserID}", exerciseId, UserId);

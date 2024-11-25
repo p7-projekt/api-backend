@@ -10,10 +10,10 @@ namespace Core.Dashboards.Contracts
 {
     public interface IDashboardRepository
     {
-        Task<IEnumerable<GetExercisesInSessionResponseDto>?> GetExercisesInTimedSessionAsync(int sessionId);
-        Task<IEnumerable<GetExercisesInSessionResponseDto>?> GetExercisesInClassSessionAsync(int sessionId);
+        Task<IEnumerable<GetExercisesInSessionResponseDto>?> GetExercisesInTimedSessionBySessionIdAsync(int sessionId);
+        Task<IEnumerable<GetExercisesInSessionResponseDto>?> GetExercisesInClassSessionBySessionIdAsync(int sessionId);
         Task<int> GetConnectedTimedUsersAsync(int sessionId);
         Task<int> GetConnectedUsersClassAsync(int sessionId);
-        Task<Result<GetExerciseSolutionResponseDto>> GetSolutionByIdAsync(int exerciseId,  int userId);
+        Task<Result<GetExerciseSolutionResponseDto>> GetSolutionByUserIdAsync(int exerciseId,  int userId);
     }
 }

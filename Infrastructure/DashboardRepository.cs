@@ -19,7 +19,7 @@ public class DashboardRepository : IDashboardRepository
         _connection = connection;
     }
 
-    public async Task<IEnumerable<GetExercisesInSessionResponseDto>?> GetExercisesInTimedSessionAsync(int sessionId)
+    public async Task<IEnumerable<GetExercisesInSessionResponseDto>?> GetExercisesInTimedSessionBySessionIdAsync(int sessionId)
     {
         using var con = await _connection.CreateConnectionAsync();
         var query = """
@@ -55,7 +55,7 @@ public class DashboardRepository : IDashboardRepository
         return mappedResults;
     }
 
-    public async Task<IEnumerable<GetExercisesInSessionResponseDto>?> GetExercisesInClassSessionAsync(int sessionId)
+    public async Task<IEnumerable<GetExercisesInSessionResponseDto>?> GetExercisesInClassSessionBySessionIdAsync(int sessionId)
     {
         using var con = await _connection.CreateConnectionAsync();
         var query = """
@@ -118,7 +118,7 @@ public class DashboardRepository : IDashboardRepository
         var results = await con.QueryFirstOrDefaultAsync<int>(query, new { Id = sessionId });
         return results;
     }
-    public async Task<Result<GetExerciseSolutionResponseDto>> GetSolutionByIdAsync (int exerciseId, int userId)
+    public async Task<Result<GetExerciseSolutionResponseDto>> GetSolutionByUserIdAsync (int exerciseId, int userId)
     {
         using var con = await _connection.CreateConnectionAsync();
         var query = """
