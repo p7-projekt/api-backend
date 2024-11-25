@@ -27,7 +27,7 @@ public static class DashboardEndpoints
                 IDashboardService dashboardService) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
-            var result = await dashboardService.GetExercisesInTimedSessionAsync(sessionId, int.Parse(userId));
+            var result = await dashboardService.GetExercisesInTimedSession(sessionId, int.Parse(userId));
 
             if (result.IsFailed)
             {
@@ -42,7 +42,7 @@ public static class DashboardEndpoints
                 IDashboardService dashboardService) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
-            var result = await dashboardService.GetExercisesInTimedSessionAsync(sessionId, int.Parse(userId));
+            var result = await dashboardService.GetExercisesInTimedSession(sessionId, int.Parse(userId));
 
             if (result.IsFailed)
             {

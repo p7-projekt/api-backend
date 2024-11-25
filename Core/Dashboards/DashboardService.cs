@@ -18,7 +18,7 @@ public class DashboardService : IDashboardService
         _sessionRepository = sessionRepository;
     }
 
-    public async Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInTimedSessionAsync(int sessionId, int userId)
+    public async Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInTimedSession(int sessionId, int userId)
     {
         var access = false;
         access = await _sessionRepository.VerifyAuthor(userId, sessionId);
@@ -39,7 +39,7 @@ public class DashboardService : IDashboardService
         return Result.Ok(TransformExercisesInSessionDto(exercises, usersConnected));
     }
 
-    public async Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInclassSessionAsync(int sessionId, int userId)
+    public async Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInclassSession(int sessionId, int userId)
     {
         var access = false;
         access = await _sessionRepository.VerifyAuthor(userId, sessionId);
@@ -58,6 +58,18 @@ public class DashboardService : IDashboardService
         }
 
         return Result.Ok(TransformExercisesInSessionDto(exercises, usersConnected));
+    }
+
+    public async Task<Result<GetExerciseSolution>> GetExerciseSolution(int exerciseId, int UserId)
+    {
+        //TODO: validate access to get the solution
+        var solution = await _dashboardRepository.GetSolutionByIdAsync(exerciseId, UserId);
+        if (solution.IsFailed)
+        {
+            _logger.LogInformation("Could not find solution with exercise id: {exerciseID} by user {UserID}", exerciseId, UserId);
+            return Result.Fail("Could not find solution");
+        }
+        return solution;
     }
 
     private GetExercisesInSessionCombinedInfo TransformExercisesInSessionDto(IEnumerable<GetExercisesInSessionResponseDto> exercises, int usersConnected)

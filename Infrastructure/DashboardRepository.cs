@@ -3,6 +3,9 @@ using Core.Dashboards.Contracts;
 using Dapper;
 using Infrastructure.Persistence.Contracts;
 using Microsoft.Extensions.Logging;
+using Core.Exercises.Models;
+using Core.Sessions.Models;
+using FluentResults;
 
 namespace Infrastructure;
 
@@ -105,5 +108,22 @@ public class DashboardRepository : IDashboardRepository
             """;
         var results = await con.QueryFirstOrDefaultAsync<int>(query, new { Id = sessionId });
         return results;
+    }
+    public async Task<Result<GetExerciseSolution>> GetSolutionByIdAsync (int exerciseId, int userId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var query = """
+            SELECT e.title, e.description, s.solution
+            FROM submission AS s
+                JOIN exercise AS e ON s.exercise_id = e.exercise_id
+                JOIN users AS u ON s.user_id = u.id
+            WHERE u.id = @uid AND s.exercise_id = @eid;
+            """;
+        var result = await con.QueryFirstOrDefaultAsync<GetExerciseSolution>(query, new { uid = userId, eid = exerciseId });
+        if (result == null)
+        {
+            return Result.Fail("Failed to find solution");
+        }
+        return Result.Ok(result);
     }
 }

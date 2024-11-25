@@ -5,8 +5,9 @@ namespace Core.Dashboards.Contracts
 {
     public interface IDashboardService
     {
-        Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInTimedSessionAsync(int sessionId, int userId);
-        Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInclassSessionAsync(int sessionId, int userId);
+        Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInTimedSession(int sessionId, int userId);
+        Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInclassSession(int sessionId, int userId);
+        Task<Result<GetExerciseSolution>> GetExerciseSolution(int exerciseId, int userId);
 
     }
 }

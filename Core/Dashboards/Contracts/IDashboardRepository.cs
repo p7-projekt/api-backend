@@ -1,4 +1,5 @@
 ﻿using Core.Dashboards.Models;
+using FluentResults;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +14,6 @@ namespace Core.Dashboards.Contracts
         Task<IEnumerable<GetExercisesInSessionResponseDto>?> GetExercisesInClassSessionAsync(int sessionId);
         Task<int> GetConnectedTimedUsersAsync(int sessionId);
         Task<int> GetConnectedUsersClassAsync(int sessionId);
+        Task<Result<GetExerciseSolution>> GetSolutionByIdAsync(int exerciseId,  int userId);
     }
 }
