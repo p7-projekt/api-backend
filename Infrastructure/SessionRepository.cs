@@ -197,11 +197,21 @@ public class SessionRepository : ISessionRepository
                     WHERE session_id = @SessionId;
                     """;
         using var con = await _connection.CreateConnectionAsync();
+        var getLanguages = """
+                           SELECT ls.language_id, ls.language
+                           FROM language_in_session AS lis
+                           JOIN language_support AS ls
+                                ON lis.language_id = ls.language_id
+                           WHERE session_id = @SessionId;
+                           """;
         var session = await con.QueryFirstOrDefaultAsync<Session>(query, new { sessionId });
         if (session == null)
         {
             return null;
         }
+
+        var languages = await con.QueryAsync<GetLanguagesResponseDto>(getLanguages, new { SessionId = sessionId });
+        session.LanguagesDto = languages.ToList();
         var exercisesQuery = """
                              SELECT e.exercise_id AS exerciseid, 
                                     title AS exercisetitle,
