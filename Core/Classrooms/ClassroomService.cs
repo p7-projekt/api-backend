@@ -128,6 +128,17 @@ public class ClassroomService : IClassroomService
         return Result.Ok();
     }
 
+    public async Task<Result> LeaveClassroom(int classroomId, int studentId)
+    {
+        var inClassroom = await _classroomRepository.VerifyStudentInClassroom(classroomId, studentId);
+        if (!inClassroom)
+        {
+            _logger.LogWarning("Student {studentId} tried to leave classroom {classroomId}, but is not part of classroom", studentId, classroomId);
+            return Result.Fail("User not part of classroom already");
+        }
+        return await _classroomRepository.LeaveClassroomAsync(classroomId, studentId);
+    }
+
     public async Task<GetClassroomSessionResponseDto> GetClassroomSessionById(int sessionId)
     {
         return await _classroomRepository.GetClassroomSessionByIdAsync(sessionId);

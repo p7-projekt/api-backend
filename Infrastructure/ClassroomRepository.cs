@@ -326,6 +326,54 @@ public class ClassroomRepository : IClassroomRepository
         return session;
     }
 
+    public async Task<Result> LeaveClassroomAsync(int classroomId, int studentId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var transaction = con.BeginTransaction();
+        try
+        {
+            var deleteSubmissionsQuery = """
+                    DELETE FROM submission
+                    WHERE user_id = @StudentId
+                    AND session_id IN (
+                        SELECT session_id
+                        FROM session_in_classroom
+                        WHERE classroom_id = @ClassroomId);
+                    """;
+
+            await con.QueryAsync(deleteSubmissionsQuery, new { StudentId = studentId, ClassroomId = classroomId }, transaction);
+
+            var deleteUserRelationQuery = "DELETE FROM student_in_classroom WHERE classroom_id = @ClassroomId AND student_id = @StudentId;";
+
+            var result = await con.ExecuteAsync(deleteUserRelationQuery, new { ClassroomId = classroomId, StudentId = studentId }, transaction);
+            if (result != 1)
+            {
+                transaction.Rollback();
+                _logger.LogError("Incorrect number of users removed from classroom with id {classroomId}, when trying to removed user {studentID} - {removed} removed", classroomId, studentId, result);
+                return Result.Fail("Error with removing user from classroom");
+            }
+
+            return Result.Ok();
+        } catch (Exception ex)
+        {
+            transaction.Rollback();
+            _logger.LogError("Error occured during student removal from classroom: {message}", ex.Message);
+            throw;
+        }
+
+    }
+
+    public async Task<bool> VerifyStudentInClassroom(int classroomId, int studentId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+
+        var query = "SELECT 1 FROM student_in_classroom WHERE classroom_id = @ClassroomId AND student_id = @StudentId;";
+
+        var result = await con.ExecuteScalarAsync<int>(query, new { ClassroomId = classroomId, StudentId = studentId });
+
+        return result == 1;
+    }
+
     public async Task<bool> VerifyClassroomAuthor(int classroomId, int authorId)
     {
         using var con = await _connection.CreateConnectionAsync();

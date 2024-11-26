@@ -151,6 +151,18 @@ public static class ClassroomEndpoints
 
         }).RequireAuthorization(Policies.AllowClassroomRoles);
 
+        classroomV2.MapDelete("/{classroomId:int}/leave", async Task<Results<NoContent, BadRequest>> (int classroomId, ClaimsPrincipal principal, IClassroomService service) =>
+        {
+            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+            
+            var result = await service.LeaveClassroom(classroomId, Convert.ToInt32(userId));
+            if (result.IsFailed)
+            {
+                return TypedResults.BadRequest();
+            }
+            return TypedResults.NoContent();
+        }).RequireAuthorization(nameof(Roles.Student));
+
         return app;
     }
 }
