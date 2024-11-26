@@ -62,7 +62,7 @@ public static class DashboardEndpoints
 
         }).RequireAuthorization(nameof(Roles.Instructor));
 
-        dashboardV1Group.MapGet("/solution/{exerciseId}", async Task<Results<Ok<GetExerciseSolutionResponseDto>, NotFound, BadRequest>> (int exerciseId, ClaimsPrincipal principal,
+        dashboardV1Group.MapGet("/solution/{exerciseId}/{appUserId}", async Task<Results<Ok<GetExerciseSolutionResponseDto>, NotFound, BadRequest>> (int exerciseId, int appUserId, ClaimsPrincipal principal,
             IDashboardService dashboardService) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
@@ -71,7 +71,7 @@ public static class DashboardEndpoints
                 return TypedResults.BadRequest();
             }
 
-            var result = await dashboardService.GetExerciseSolution(exerciseId, int.Parse(userId));
+            var result = await dashboardService.GetExerciseSolution(exerciseId, appUserId, int.Parse(userId));
             if (result.IsFailed)
             {
                 return TypedResults.NotFound();

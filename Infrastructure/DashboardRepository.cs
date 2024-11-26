@@ -135,4 +135,26 @@ public class DashboardRepository : IDashboardRepository
         }
         return Result.Ok(result);
     }
+    public async Task<bool> CheckAutherizedToGetSolution(int exerciseId, int appUserId, int userId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var query = """
+            SELECT
+                CASE
+                    WHEN COUNT(*) > 0 THEN TRUE
+                    ELSE FALSE
+                END AS not_empty
+            FROM (
+                SELECT 1
+                FROM submission AS s
+                JOIN session AS ses ON s.session_id = ses.session_id
+                WHERE s.exercise_id = @eid
+                  AND s.user_id = @auid
+                  AND ses.author_id = @uid
+            ) AS result;
+            
+            """;
+        var result = await con.QueryFirstOrDefaultAsync<bool>(query, new { eid = exerciseId, auid = appUserId, uid = userId });
+        return result;
+    }
 }

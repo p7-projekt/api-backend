@@ -15,5 +15,6 @@ namespace Core.Dashboards.Contracts
         Task<int> GetConnectedTimedUsersAsync(int sessionId);
         Task<int> GetConnectedUsersClassAsync(int sessionId);
         Task<Result<GetExerciseSolutionResponseDto>> GetSolutionByUserIdAsync(int exerciseId,  int userId);
+        Task<bool> CheckAutherizedToGetSolution (int exerciseId, int appUserId,  int userId);
     }
 }

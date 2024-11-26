@@ -60,13 +60,14 @@ public class DashboardService : IDashboardService
         return Result.Ok(TransformExercisesInSessionDto(exercises, usersConnected));
     }
 
-    public async Task<Result<GetExerciseSolutionResponseDto>> GetExerciseSolution(int exerciseId, int UserId)
+    public async Task<Result<GetExerciseSolutionResponseDto>> GetExerciseSolution(int exerciseId, int appUserId, int userId)
     {
         //TODO: validate access to get the solution
-        var solution = await _dashboardRepository.GetSolutionByUserIdAsync(exerciseId, UserId);
+        var autherized = await _dashboardRepository.CheckAutherizedToGetSolution(exerciseId, appUserId, userId);
+        var solution = await _dashboardRepository.GetSolutionByUserIdAsync(exerciseId, appUserId);
         if (solution.IsFailed)
         {
-            _logger.LogInformation("Could not find solution with exercise id: {exerciseID} by user {UserID}", exerciseId, UserId);
+            _logger.LogInformation("Could not find solution with exercise id: {exerciseID} by user {UserID}", exerciseId, appUserId);
             return Result.Fail("Could not find solution");
         }
         return solution;

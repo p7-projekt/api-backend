@@ -7,7 +7,7 @@ namespace Core.Dashboards.Contracts
     {
         Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInTimedSession(int sessionId, int userId);
         Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInClassSession(int sessionId, int userId);
-        Task<Result<GetExerciseSolutionResponseDto>> GetExerciseSolution(int exerciseId, int userId);
+        Task<Result<GetExerciseSolutionResponseDto>> GetExerciseSolution(int exerciseId, int appUserId, int userId);
 
     }
 }
