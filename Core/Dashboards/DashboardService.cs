@@ -74,7 +74,7 @@ public class DashboardService : IDashboardService
         if (solution.IsFailed)
         {
             _logger.LogInformation("Could not find solution with exercise id: {exerciseID} by user {UserID}", exerciseId, appUserId);
-            return Result.Fail("Could not find solution");
+            return Result.Fail("Not found");
         }
         return solution;
     }

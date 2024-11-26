@@ -62,7 +62,7 @@ public static class DashboardEndpoints
 
         }).RequireAuthorization(nameof(Roles.Instructor));
 
-        dashboardV1Group.MapGet("/solution/{exerciseId}/{appUserId}", async Task<Results<Ok<GetExerciseSolutionResponseDto>, NotFound, BadRequest>> (int exerciseId, int appUserId, ClaimsPrincipal principal,
+        dashboardV1Group.MapGet("/solution/{exerciseId}/{appUserId}", async Task<Results<Ok<GetExerciseSolutionResponseDto>, NotFound, ForbidHttpResult, BadRequest>> (int exerciseId, int appUserId, ClaimsPrincipal principal,
             IDashboardService dashboardService) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
@@ -74,6 +74,15 @@ public static class DashboardEndpoints
             var result = await dashboardService.GetExerciseSolution(exerciseId, appUserId, int.Parse(userId));
             if (result.IsFailed)
             {
+                var errorReason = result.Errors.FirstOrDefault()?.Message;
+                if (errorReason == "Not autherized")
+                {
+                    return TypedResults.Forbid();
+                }
+                else if (errorReason == "Not found")
+                {
+                    return TypedResults.NotFound();
+                }
                 return TypedResults.NotFound();
             }
             return TypedResults.Ok(result.Value);
