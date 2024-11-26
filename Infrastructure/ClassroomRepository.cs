@@ -367,6 +367,7 @@ public class ClassroomRepository : IClassroomRepository
                 _logger.LogError("Incorrect number of users removed from classroom with id {classroomId}, when trying to removed user {studentID} - {removed} removed", classroomId, studentId, result);
                 return Result.Fail("Error with removing user from classroom");
             }
+            transaction.Commit();
 
             return Result.Ok();
         } catch (Exception ex)
