@@ -64,6 +64,12 @@ public class DashboardService : IDashboardService
     {
         //TODO: validate access to get the solution
         var autherized = await _dashboardRepository.CheckAutherizedToGetSolution(exerciseId, appUserId, userId);
+
+        if (!autherized)
+        {
+            return Result.Fail("Not autherized");
+        }
+
         var solution = await _dashboardRepository.GetSolutionByUserIdAsync(exerciseId, appUserId);
         if (solution.IsFailed)
         {
