@@ -92,7 +92,7 @@ namespace Infrastructure
             try
             {
                 var exerciseQuery = """
-                                INSERT INTO exercise (author_id, title, description, solution) VALUES (@Author, @Title, @Description, @Solution) RETURNING exercise_id;
+                                INSERT INTO exercise (author_id, title, description, solution, solution_language_id) VALUES (@Author, @Title, @Description, @Solution, @LanguageId) RETURNING exercise_id;
                                 """;
                 var exerciseId = await con.ExecuteScalarAsync<int>(exerciseQuery,
                     new
@@ -100,7 +100,8 @@ namespace Infrastructure
                         Author = authorId,
                         Title = dto.Name,
                         Description = dto.Description,
-                        Solution = dto.Solution
+                        Solution = dto.Solution,
+                        LanguageId = dto.SolutionLanguage
                     }, transaction);
 
                 var Inserts = await InsertTestcasesOfExercise(dto, exerciseId, con, transaction);

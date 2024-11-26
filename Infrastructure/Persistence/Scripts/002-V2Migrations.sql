@@ -65,3 +65,6 @@ ALTER TABLE session
 
 DROP TRIGGER IF EXISTS anon_user_cleanup ON anon_users;
 DROP FUNCTION IF EXISTS user_cleanup();
+
+ALTER TABLE exercise
+    ADD COLUMN solution_language_id INTEGER REFERENCES language_support(language_id) NOT NULL DEFAULT 0;
