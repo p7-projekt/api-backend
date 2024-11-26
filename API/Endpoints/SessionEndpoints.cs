@@ -117,7 +117,7 @@ public static class SessionEndpoints
                 }
                 return TypedResults.Ok(result.Value);
             }
-            // TODO
+            
             var role = RolesConvert.Convert(principal.Claims.First(c => c.Type == ClaimTypes.Role).Value);
             if (role != Roles.Student)
             {
