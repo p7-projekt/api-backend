@@ -5,7 +5,11 @@ meta {
 }
 
 get {
-  url: {{baseURL}}/{{currentVersion}}/dashboard/solution/{{exerciseId}}
+  url: {{baseURL}}/{{currentVersion}}/dashboard/solution/{{exerciseId}}/{{userId}}
   body: none
-  auth: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
 }

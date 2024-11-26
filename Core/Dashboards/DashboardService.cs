@@ -66,6 +66,7 @@ public class DashboardService : IDashboardService
 
         if (!autherized)
         {
+            _logger.LogInformation("User {userId} not autherized to access solution for exercise {exerciseId} by appuser {appUserId}", userId, exerciseId, appUserId);
             return Result.Fail("Not autherized");
         }
 
