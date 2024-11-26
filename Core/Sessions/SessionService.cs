@@ -191,33 +191,6 @@ public class SessionService : ISessionService
         
         return session.ConvertToGetResponse();
     }
-    public async Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInSessionAsync(int sessionId, int userId)
-    {
-        var access = false;
-        access = await _sessionRepository.VerifyAuthor(userId, sessionId);
-        if (!access)
-        {
-            _logger.LogInformation("User {userid} does not have access to {sessionid}", userId, sessionId);
-            return Result.Fail("User does not have access to session");
-        }
-        var usersConnected = await _sessionRepository.GetConnectedUsersAsync(sessionId);
-
-        var exercises = await _sessionRepository.GetExercisesInSessionAsync(sessionId);
-        if (exercises == null || exercises.Count() == 0)
-        {
-            _logger.LogInformation("No Exercises in session: {sessionID}", sessionId);
-            return Result.Fail("Exercises not found");
-        }
-        var combinedDtos = exercises.Select(dto => new GetExercisesAndUserDetailsInSessionResponseDto(
-        dto.Id,
-        dto.Solved,
-        dto.Attempted,
-        dto.UserIds.Zip(dto.Names, (id, name) => new UserDetailDto(id, name)).ToList())).ToList();
-
-        var combinedInfoDto = new GetExercisesInSessionCombinedInfo(usersConnected, combinedDtos);
-
-        return Result.Ok(combinedInfoDto);
-    }
 
     public string GenerateSessionCode()
     {
