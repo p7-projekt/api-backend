@@ -146,7 +146,7 @@ namespace Infrastructure
         {
             using var con = await _connection.CreateConnectionAsync();
             var query = """
-                    SELECT exercise_id AS id, title, description, solution FROM exercise WHERE exercise_id = @ExerciseId;
+                    SELECT exercise_id AS id, title, description, solution, solution_language_id AS languageid FROM exercise WHERE exercise_id = @ExerciseId;
                     """;
             var results = await con.QueryFirstOrDefaultAsync<GetExerciseResponseDto>(query, new { ExerciseId = exerciseId });
 

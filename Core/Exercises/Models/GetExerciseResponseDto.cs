@@ -15,4 +15,6 @@ public class GetExerciseResponseDto
     public List<string> InputParameterType { get; set; } = new();
     public List<string> OutputParamaterType { get; set; } = new();
     public List<TestcaseDto> TestCases { get; set; } = new();
+
+    public int LanguageId { get; set; }
 }
