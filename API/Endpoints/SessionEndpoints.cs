@@ -118,6 +118,12 @@ public static class SessionEndpoints
                 return TypedResults.Ok(result.Value);
             }
             // TODO
+            var role = RolesConvert.Convert(principal.Claims.First(c => c.Type == ClaimTypes.Role).Value);
+            if (role != Roles.Student)
+            {
+                var error = CreateBadRequest.CreateValidationProblemDetails(new List<IError>{new Error("Only students can join!")}, "Error", "Errors");
+                return TypedResults.BadRequest(error);
+            }
             var userId = Convert.ToInt32(principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value);
             var studentResult = await service.JoinStudent(userId, dto.SessionCode);
             if (studentResult.IsFailed)
