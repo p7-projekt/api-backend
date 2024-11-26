@@ -117,14 +117,14 @@ public static class ClassroomEndpoints
 
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<UpdateClassroomSessionDto>();
 
-        classroomV2.MapPost("/{classroomId:int}/join", async Task<Results<NoContent, BadRequest<string>>> (int classroomId, [FromBody] JoinClassroomDto dto, ClaimsPrincipal principal, IClassroomService service) =>
+        classroomV2.MapPost("/{classroomId:int}/join", async Task<Results<NoContent, BadRequest<string>>> (int classroomId, [FromBody]JoinClassroomDto dto, ClaimsPrincipal principal, IClassroomService service) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
 
             var result = await service.JoinClassroom(dto, classroomId, Convert.ToInt32(userId));
             if (result.IsFailed)
             {
-                return TypedResults.BadRequest(result.Reasons.ToString());
+                return TypedResults.BadRequest(string.Join("; ", result.Errors.Select(e => e.Message)));
             }
             return TypedResults.NoContent();
 

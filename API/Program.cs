@@ -9,6 +9,7 @@ using Core.Solutions.Services;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Serilog;
+using System.Reflection;
 
 namespace API;
 
@@ -40,7 +41,20 @@ public class Program
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+            {
+                Title = "My API v1",
+                Version = "v1"
+            });
+
+            options.SwaggerDoc("v2", new Microsoft.OpenApi.Models.OpenApiInfo
+            {
+                Title = "My API v2",
+                Version = "v2"
+            });
+        });
 
 
 

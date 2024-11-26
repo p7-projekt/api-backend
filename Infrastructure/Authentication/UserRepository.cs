@@ -174,7 +174,7 @@ public class UserRepository : IUserRepository
 		                    RETURNING id;
 		                    """;
 		_logger.LogInformation("Inserting app user into transaction: {query}", createAppUser);
-		return await con.ExecuteAsync(createAppUser, new {email = user.Email, Name = user.Name, password_hash = user.PasswordHash, Anon = false, CreatedAt = user.CreatedAt}, transaction);
+		return await con.QuerySingleAsync<int>(createAppUser, new {email = user.Email, Name = user.Name, password_hash = user.PasswordHash, Anon = false, CreatedAt = user.CreatedAt}, transaction);
 	}
 
 	private async Task<int> InsertAnonUserAsync(IDbConnection con, IDbTransaction transaction, User user)

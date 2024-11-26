@@ -198,7 +198,7 @@ public class ClassroomRepository : IClassroomRepository
 
         var query = """
                     UPDATE classroom 
-                    SET title = @Title, description = @Description, registration_open = @RegistrartionOpen
+                    SET title = @Title, description = @Description, registration_open = @RegistrationOpen
                     WHERE classroom_id = @ClassroomId;
                     """;
         var result = await con.ExecuteAsync(query, new 
@@ -239,19 +239,6 @@ public class ClassroomRepository : IClassroomRepository
             return Result.Fail("Failed to update classroom session");
         }
 
-        var updateSessionExercises = """
-                                     DELETE FROM exercise_in_session WHERE session_id = @SessionId;
-                                     """;
-
-        await con.ExecuteAsync(updateSessionExercises, new { SessionId = dto.Id }, transaction);
-
-        var UpdatedExercises = await _sessionRepository.InsertExerciseRelation(dto.ExerciseIds, dto.Id, con, transaction);
-        if (UpdatedExercises.IsFailed)
-        { 
-            transaction.Rollback();
-            return Result.Fail("Failed to update exercises of classroom session");
-        }
-
         var updateActiveQuery = """
                                 UPDATE session_in_classroom
                                 SET active = @Active
@@ -264,6 +251,32 @@ public class ClassroomRepository : IClassroomRepository
             transaction.Rollback();
             _logger.LogError("Session with id {session_id} failed to update activation status, due to incorrect amount of database rows affected", dto.Id);
             return Result.Fail("Failed to update activation status");
+        }
+
+        var updateSessionExercises = """
+                                     DELETE FROM exercise_in_session WHERE session_id = @SessionId;
+                                     """;
+
+        await con.ExecuteAsync(updateSessionExercises, new { SessionId = dto.Id }, transaction);
+
+        var UpdatedExercises = await _sessionRepository.InsertExerciseRelation(dto.ExerciseIds, dto.Id, con, transaction);
+        if (UpdatedExercises.IsFailed)
+        {
+            transaction.Rollback();
+            return Result.Fail("Failed to update exercises of classroom session");
+        }
+
+        var updateSessionLangauges = """
+                                     DELETE FROM language_in_session WHERE session_id = @SessionId;
+                                     """;
+
+        await con.ExecuteAsync(updateSessionLangauges, new { SessionId = dto.Id }, transaction);
+
+        var UpdatedLanguages = await _sessionRepository.InsertLanguageRelation(dto.LanguageIds, dto.Id, con, transaction);
+        if (UpdatedLanguages.IsFailed)
+        {
+            transaction.Rollback();
+            return Result.Fail("Failed to update language of classroom session");
         }
 
         transaction.Commit();
@@ -317,6 +330,8 @@ public class ClassroomRepository : IClassroomRepository
                     """;
 
         var session = await con.QuerySingleAsync<GetClassroomSessionResponseDto>(query, new { SessionId = sessionId });
+
+        session.ExerciseIds = await _sessionRepository.GetExercisesOfSessionAsync(sessionId, con);
 
         var languageQuery = "SELECT language_id FROM language_in_session WHERE session_id = @SessionId;";
 

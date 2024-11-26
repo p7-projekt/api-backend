@@ -1,4 +1,5 @@
-﻿using Core.Languages.Models;
+﻿using Core.Exercises.Models;
+using Core.Languages.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ public class GetClassroomSessionResponseDto
     public string Description { get; set; } = string.Empty;
     public int AuthorId { get; set; }
     public bool Active { get; set; }
+    public List<SolvedExercise> ExerciseIds { get; set; } = new ();
     public List<Language> Languages { get; set; } = new ();
 }
 
