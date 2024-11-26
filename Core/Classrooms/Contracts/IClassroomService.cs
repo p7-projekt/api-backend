@@ -21,4 +21,5 @@ public interface IClassroomService
     Task<Result> JoinClassroom(JoinClassroomDto dto, int classroomId, int studentId);
     Task<Result> DeleteClassroomSession(int sessionId, int authorId);
     Task<GetClassroomSessionResponseDto> GetClassroomSessionById(int sessionId);
+    Task<Result> LeaveClassroom(int classroomId, int studentId);
 }
