@@ -45,12 +45,6 @@ public class ClassroomRepository : IClassroomRepository
         var transaction = con.BeginTransaction();
         try
         {
-            var correctAuthor = await VerifyClassroomAuthor(classroomId, authorId);
-            if (!correctAuthor)
-            {
-                return Result.Fail("Failed to validate author of classroom");
-            }
-
             var verifiedExercises = await _sessionRepository.VerifyExerciseIdsAsync(dto.ExerciseIds, authorId, con, transaction);
             if (!verifiedExercises)
             {

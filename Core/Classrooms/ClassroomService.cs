@@ -34,6 +34,12 @@ public class ClassroomService : IClassroomService
 
     public async Task<Result> AddSessionToClassroom(ClassroomSessionDto dto, int authorId, int classroomId)
     {
+        var correctAuthor = await _classroomRepository.VerifyClassroomAuthor(classroomId, authorId);
+        if (!correctAuthor)
+        {
+            return Result.Fail("Failed to validate author of classroom");
+        }
+
         return await _classroomRepository.AddSessionToClassroomAsync(dto, authorId, classroomId);
     }
 
