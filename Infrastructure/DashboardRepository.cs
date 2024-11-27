@@ -122,10 +122,11 @@ public class DashboardRepository : IDashboardRepository
     {
         using var con = await _connection.CreateConnectionAsync();
         var query = """
-            SELECT e.title, e.description, s.solution
+            SELECT e.title, e.description, s.solution, l.language
             FROM submission AS s
                 JOIN exercise AS e ON s.exercise_id = e.exercise_id
                 JOIN users AS u ON s.user_id = u.id
+                JOIN language_support AS l ON l.language_id = s.language_id
             WHERE u.id = @uid AND s.exercise_id = @eid;
             """;
         var result = await con.QueryFirstOrDefaultAsync<GetExerciseSolutionResponseDto>(query, new { uid = userId, eid = exerciseId });
