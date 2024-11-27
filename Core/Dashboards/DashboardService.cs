@@ -58,7 +58,7 @@ public class DashboardService : IDashboardService
 
     }
 
-    public async Task<Result<GetExerciseSolutionResponseDto>> GetExerciseSolution(int exerciseId, int appUserId, int userId)
+    public async Task<Result<GetExerciseSolutionResponseDto>> GetUserSolution(int exerciseId, int appUserId, int userId)
     {
         var autherized = await _dashboardRepository.CheckAutherizedToGetSolution(exerciseId, appUserId, userId);
 

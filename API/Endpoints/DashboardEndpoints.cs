@@ -15,14 +15,14 @@ public static class DashboardEndpoints
     public static WebApplication UseDashboardEndpoints(this WebApplication app)
     {
         ApiVersionSet apiVersionSet = app.NewApiVersionSet()
-            .HasApiVersion(new ApiVersion(1))
+            .HasApiVersion(new ApiVersion(2))
             .ReportApiVersions()
             .Build();
 
-        var dashboardV1Group = app.MapGroup("v{version:apiVersion}/dashboard").WithApiVersionSet(apiVersionSet)
-            .WithTags("Dashboard");
+        var dashboardV2Group = app.MapGroup("v{version:apiVersion}/dashboard").WithApiVersionSet(apiVersionSet)
+            .WithTags("Dashboard").WithOpenApi();
 
-        dashboardV1Group.MapGet("/{sessionId:int}", async Task<Results<Ok<GetExercisesInSessionCombinedInfo>, NotFound, BadRequest>> (int sessionId, ClaimsPrincipal principal,
+        dashboardV2Group.MapGet("/{sessionId:int}", async Task<Results<Ok<GetExercisesInSessionCombinedInfo>, NotFound, BadRequest>> (int sessionId, ClaimsPrincipal principal,
         IDashboardService dashboardService) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
@@ -41,7 +41,7 @@ public static class DashboardEndpoints
 
         }).RequireAuthorization(nameof(Roles.Instructor));
 
-        dashboardV1Group.MapGet("/solution/{exerciseId}/{appUserId}", async Task<Results<Ok<GetExerciseSolutionResponseDto>, NotFound, ForbidHttpResult, BadRequest>> (int exerciseId, int appUserId, ClaimsPrincipal principal,
+        dashboardV2Group.MapGet("/solution/{exerciseId}/{appUserId}", async Task<Results<Ok<GetExerciseSolutionResponseDto>, NotFound, ForbidHttpResult, BadRequest>> (int exerciseId, int appUserId, ClaimsPrincipal principal,
             IDashboardService dashboardService) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
@@ -50,7 +50,7 @@ public static class DashboardEndpoints
                 return TypedResults.BadRequest();
             }
 
-            var result = await dashboardService.GetExerciseSolution(exerciseId, appUserId, int.Parse(userId));
+            var result = await dashboardService.GetUserSolution(exerciseId, appUserId, int.Parse(userId));
             if (result.IsFailed)
             {
                 var errorReason = result.Errors.FirstOrDefault()?.Message;
