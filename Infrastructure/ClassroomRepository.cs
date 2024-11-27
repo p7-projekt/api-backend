@@ -242,11 +242,11 @@ public class ClassroomRepository : IClassroomRepository
             return Result.Fail("Failed to update activation status");
         }
 
-        var updateSessionExercises = """
+        var deleteSessionExercisesQuery = """
                                      DELETE FROM exercise_in_session WHERE session_id = @SessionId;
                                      """;
 
-        await con.ExecuteAsync(updateSessionExercises, new { SessionId = dto.Id }, transaction);
+        await con.ExecuteAsync(deleteSessionExercisesQuery, new { SessionId = dto.Id }, transaction);
 
         var UpdatedExercises = await _sessionRepository.InsertExerciseRelation(dto.ExerciseIds, dto.Id, con, transaction);
         if (UpdatedExercises.IsFailed)
