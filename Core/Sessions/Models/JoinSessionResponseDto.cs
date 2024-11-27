@@ -1,3 +1,9 @@
+using System.Text.Json.Serialization;
+
 namespace Core.Sessions.Models;
 
-public record JoinSessionResponseDto(string Token, DateTime ExpiresAt);
+public record JoinSessionResponseDto(
+	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	string? Token, 
+	[property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	DateTime? ExpiresAt);

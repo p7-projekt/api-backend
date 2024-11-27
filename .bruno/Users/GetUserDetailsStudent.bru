@@ -1,0 +1,15 @@
+meta {
+  name: GetUserDetailsStudent
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseURL}}/{{currentVersion}}/users/6
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{studentToken}}
+}

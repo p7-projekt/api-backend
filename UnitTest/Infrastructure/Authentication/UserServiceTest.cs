@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Core.Sessions.Contracts;
 using Core.Shared;
 using FluentResults;
 using Infrastructure.Authentication;
@@ -23,7 +24,8 @@ public class UserServiceTest
 		var userRepoMock = Substitute.For<IUserRepository>();
 		var loggerMock = Substitute.For<ILogger<UserService>>();
 		var tokenMock = Substitute.For<ITokenService>();
-		var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
+		var sessionMock = Substitute.For<ISessionRepository>();
+		var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock, sessionMock);
 		var loginDto = new LoginDto("Peter@mail.dk", "123456");
 		userRepoMock.GetUserByEmailAsync(loginDto.Email).Returns(Task.FromResult<User>(null));
 		
@@ -43,7 +45,8 @@ public class UserServiceTest
 		var userRepoMock = Substitute.For<IUserRepository>();
 		var loggerMock = Substitute.For<ILogger<UserService>>();
 		var tokenMock = Substitute.For<ITokenService>();
-		var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
+		var sessionMock = Substitute.For<ISessionRepository>();
+		var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock, sessionMock);
 		var loginDto = new LoginDto("Peter@mail.dk", "123456");
 		var user = new User
 		{
@@ -80,17 +83,19 @@ public class UserServiceTest
 		var userRepoMock = Substitute.For<IUserRepository>();
 		var loggerMock = Substitute.For<ILogger<UserService>>();
 		var tokenMock = Substitute.For<ITokenService>();
-		var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
+		var sessionMock = Substitute.For<ISessionRepository>();
+		var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock, sessionMock);
 		var loginDto = new LoginDto("Peter@mail.dk", "123456");
 		var user = new User
 		{
 			Id = 1,
 			Email = loginDto.Email,
-			CreatedAt = DateTime.UtcNow
+			CreatedAt = DateTime.UtcNow,
+			PasswordHash = "MyHash"
 		};
 		userRepoMock.GetUserByEmailAsync(Arg.Any<string>())!.Returns(Task.FromResult(user));
 		passwordMock.VerifyHashedPassword(Arg.Any<User>(), Arg.Any<string>(), Arg.Any<string>()).ReturnsForAnyArgs(PasswordVerificationResult.Failed);
-		
+		tokenMock.GenerateRefreshToken(Arg.Any<int>()).Returns(new RefreshToken{Id = 1, Token = "token", Expires = DateTime.UtcNow, CreatedAt = DateTime.UtcNow});
 		// Act
 		var result = await userService.LoginAsync(loginDto);
 		
@@ -105,7 +110,8 @@ public class UserServiceTest
         var userRepoMock = Substitute.For<IUserRepository>();
         var loggerMock = Substitute.For<ILogger<UserService>>();
         var tokenMock = Substitute.For<ITokenService>();
-        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
+        var sessionMock = Substitute.For<ISessionRepository>();
+        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock, sessionMock);
 
 		userRepoMock.CreateUserAsync(Arg.Any<User>(), Arg.Any<Roles>()).Returns(Result.Ok());
 
@@ -123,7 +129,8 @@ public class UserServiceTest
         var userRepoMock = Substitute.For<IUserRepository>();
         var loggerMock = Substitute.For<ILogger<UserService>>();
         var tokenMock = Substitute.For<ITokenService>();
-        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
+        var sessionMock = Substitute.For<ISessionRepository>();
+        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock, sessionMock);
 
         userRepoMock.CreateUserAsync(Arg.Any<User>(), Arg.Any<Roles>()).Returns(Result.Fail("Failed to create new user"));
 
@@ -141,35 +148,38 @@ public class UserServiceTest
         var userRepoMock = Substitute.For<IUserRepository>();
         var loggerMock = Substitute.For<ILogger<UserService>>();
         var tokenMock = Substitute.For<ITokenService>();
-        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
+        var sessionMock = Substitute.For<ISessionRepository>();
+        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock, sessionMock);
 
 		var user = new User { Email = "validmail@mail.com", Name = "James" };
 		userRepoMock.GetUserByIdAsync(Arg.Any<int>()).Returns(user);
 
-		var result = await userService.GetAppUserByIdAsync(1, 1);
+		var result = await userService.GetAppUserByIdAsync(1);
 
 		Assert.True(result.IsSuccess);
 		Assert.IsType<GetUserResponseDto>(result.Value);
     }
 
-    [Fact]
-    public async Task GetAppUserByIdAsync_InconsistentIds_ShouldReturn_Fail()
-    {
-        var passwordMock = Substitute.For<IPasswordHasher<User>>();
-        var userRepoMock = Substitute.For<IUserRepository>();
-        var loggerMock = Substitute.For<ILogger<UserService>>();
-        var tokenMock = Substitute.For<ITokenService>();
-        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
-
-        var user = new User { Email = "validmail@mail.com", Name = "James" };
-        userRepoMock.GetUserByIdAsync(Arg.Any<int>()).Returns(user);
-
-		var id1 = 1;
-		var id2 = 2;
-        var result = await userService.GetAppUserByIdAsync(id1, id2);
-
-        Assert.True(result.IsFailed);
-    }
+  //   [Fact]  REVIEW-------->> This logic is moved to the endpoint we can safely remove this test and create one on the endpoint. 
+  //   public async Task GetAppUserByIdAsync_InconsistentIds_ShouldReturn_Fail()
+  //   {
+  //       var passwordMock = Substitute.For<IPasswordHasher<User>>();
+  //       var userRepoMock = Substitute.For<IUserRepository>();
+  //       var loggerMock = Substitute.For<ILogger<UserService>>();
+  //       var tokenMock = Substitute.For<ITokenService>();
+  //       var sessionMock = Substitute.For<ISessionRepository>();
+  //       var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock, sessionMock);
+  //
+  //       var user = new User { Email = "validmail@mail.com", Name = "James" };
+  //       userRepoMock.GetUserByIdAsync(Arg.Any<int>()).Returns(user);
+  //       sessionMock!.GetTimedSessionIdByUserId(Arg.Any<int>()).Returns(1);
+  //
+		// var id1 = 1;
+		// var id2 = 2;
+  //       var result = await userService.GetAppUserByIdAsync(id1);
+  //
+  //       Assert.True(result.IsFailed);
+  //   }
 
 	[Fact]
 	public async Task GetAnonUserByIdAsync_ShouldReturn_Ok()
@@ -178,11 +188,13 @@ public class UserServiceTest
         var userRepoMock = Substitute.For<IUserRepository>();
         var loggerMock = Substitute.For<ILogger<UserService>>();
         var tokenMock = Substitute.For<ITokenService>();
-        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
+        var sessionMock = Substitute.For<ISessionRepository>();
+        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock, sessionMock);
 
 		userRepoMock.GetAnonUserSessionByIdAsync(Arg.Any<int>()).Returns(1);
 		var user = new User { Anonymous = true };
 		userRepoMock.GetUserByIdAsync(Arg.Any<int>()).Returns(user);
+		sessionMock!.GetTimedSessionIdByUserId(Arg.Any<int>()).Returns(1);
 		var result = await userService.GetAnonUserByIdAsync(1);
 
 		Assert.True(result.IsSuccess);
@@ -196,7 +208,8 @@ public class UserServiceTest
         var userRepoMock = Substitute.For<IUserRepository>();
         var loggerMock = Substitute.For<ILogger<UserService>>();
         var tokenMock = Substitute.For<ITokenService>();
-        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock);
+        var sessionMock = Substitute.For<ISessionRepository>();
+        var userService = new UserService(passwordMock, userRepoMock, loggerMock, tokenMock, sessionMock);
 
         userRepoMock.GetAnonUserSessionByIdAsync(Arg.Any<int>()).Returns(0);
 

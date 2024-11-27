@@ -1,0 +1,39 @@
+meta {
+  name: CreateExercisePython
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseURL}}/{{currentVersion}}/exercises
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}
+
+body:json {
+  {
+    "Name": "Spurgt",
+    "Description": "This exercise asks you to implement a Haskell function that takes an integer and returns its square.",
+    "Solution": "def solution(x: int):\n    return x + 1",
+    "solutionLanguage": 2,
+    "InputParameterType": ["int"],
+    "OutputParamaterType": ["int"],
+    "Testcases": [
+      {
+        "inputParams": ["5"],
+        "outputParams": ["6"],
+        "publicVisible": true
+      },
+      {
+        "inputParams": ["1"],
+        "outputParams": ["2"],
+        "publicVisible": false
+      }
+    ]
+  }
+  
+}

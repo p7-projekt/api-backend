@@ -1,0 +1,87 @@
+﻿using Core.Dashboards.Contracts;
+using Core.Dashboards.Models;
+using Core.Sessions.Contracts;
+using FluentResults;
+using Microsoft.Extensions.Logging;
+
+namespace Core.Dashboards;
+
+public class DashboardService : IDashboardService
+{
+    private readonly ILogger<DashboardService> _logger;
+    private readonly IDashboardRepository _dashboardRepository;
+    private readonly ISessionRepository _sessionRepository;
+    public DashboardService(ILogger<DashboardService> logger, IDashboardRepository dashboardRepository, ISessionRepository sessionRepository)
+    {
+        _logger = logger;
+        _dashboardRepository = dashboardRepository;
+        _sessionRepository = sessionRepository;
+    }
+
+    public async Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInTimedSession(int sessionId, int userId)
+    {
+        var access = false;
+        access = await _sessionRepository.VerifyAuthor(userId, sessionId);
+        if (!access)
+        {
+            _logger.LogInformation("User {userid} does not have access to {sessionid}", userId, sessionId);
+            return Result.Fail("User does not have access to session");
+        }
+        var usersConnected = await _dashboardRepository.GetConnectedTimedUsersAsync(sessionId);
+
+        var exercises = await _dashboardRepository.GetExercisesInTimedSessionAsync(sessionId);
+        if (exercises == null || exercises.Count() == 0)
+        {
+            _logger.LogInformation("No Exercises in session: {sessionID}", sessionId);
+            return Result.Fail("Exercises not found");
+        }
+
+        return Result.Ok(TransformExercisesInSessionDto(exercises, usersConnected));
+    }
+
+    public async Task<Result<GetExercisesInSessionCombinedInfo>> GetExercisesInclassSession(int sessionId, int userId)
+    {
+        var access = false;
+        access = await _sessionRepository.VerifyAuthor(userId, sessionId);
+        if (!access)
+        {
+            _logger.LogInformation("User {userid} does not have access to {sessionid}", userId, sessionId);
+            return Result.Fail("User does not have access to session");
+        }
+        var usersConnected = await _dashboardRepository.GetConnectedUsersClassAsync(sessionId);
+
+        var exercises = await _dashboardRepository.GetExercisesInTimedSessionAsync(sessionId);
+        if (exercises == null || exercises.Count() == 0)
+        {
+            _logger.LogInformation("No Exercises in session: {sessionID}", sessionId);
+            return Result.Fail("Exercises not found");
+        }
+
+        return Result.Ok(TransformExercisesInSessionDto(exercises, usersConnected));
+    }
+
+    public async Task<Result<GetExerciseSolutionResponseDto>> GetExerciseSolution(int exerciseId, int UserId)
+    {
+        //TODO: validate access to get the solution
+        var solution = await _dashboardRepository.GetSolutionByIdAsync(exerciseId, UserId);
+        if (solution.IsFailed)
+        {
+            _logger.LogInformation("Could not find solution with exercise id: {exerciseID} by user {UserID}", exerciseId, UserId);
+            return Result.Fail("Could not find solution");
+        }
+        return solution;
+    }
+
+    private GetExercisesInSessionCombinedInfo TransformExercisesInSessionDto(IEnumerable<GetExercisesInSessionResponseDto> exercises, int usersConnected)
+    {
+        var combinedDtos = exercises.Select(dto => new GetExercisesAndUserDetailsInSessionResponseDto(
+        dto.Title,
+        dto.Id,
+        dto.Solved,
+        dto.Attempted,
+        dto.UserIds.Zip(dto.Names, (id, name) => new UserDetailDto(id, name)).ToList())).ToList();
+
+        var combinedInfoDto = new GetExercisesInSessionCombinedInfo(usersConnected, combinedDtos);
+        return combinedInfoDto;
+    }
+}

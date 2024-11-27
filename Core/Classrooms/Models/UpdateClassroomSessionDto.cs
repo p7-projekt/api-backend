@@ -7,3 +7,4 @@ using System.Threading.Tasks;
 namespace Core.Classrooms.Models;
 
 public record UpdateClassroomSessionDto(int Id, string Title, string Description, bool Active, List<int> ExerciseIds, List<int> LanguageIds);
+

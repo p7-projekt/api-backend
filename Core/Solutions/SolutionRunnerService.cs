@@ -54,7 +54,7 @@ public class SolutionRunnerService : ISolutionRunnerService
             UserId = userId,
             SessionId = dto.SessionId,
             ExerciseId = exerciseId,
-            Solution = dto.Solution,
+            Solution = solved ? dto.Solution! : null,
             LanguageId = language.Id,
             Solved = solved 
         };

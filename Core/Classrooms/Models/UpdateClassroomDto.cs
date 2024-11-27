@@ -6,4 +6,4 @@ using System.Threading.Tasks;
 
 namespace Core.Classrooms.Models;
 
-public record UpdateClassroomDto(string Title, string Description, bool RegistrationOpen);
+public record UpdateClassroomDto(string Title, string? Description, bool RegistrationOpen);

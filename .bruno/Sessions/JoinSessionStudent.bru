@@ -1,0 +1,21 @@
+meta {
+  name: JoinSessionStudent
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseURL}}/join
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{studentToken}}
+}
+
+body:json {
+  {
+    "SessionCode": "{{sessionCode}}"
+  }
+}

@@ -1,5 +1,6 @@
 using System.Net;
 using API;
+using Core.Sessions.Contracts;
 using Core.Shared;
 using Infrastructure.Authentication.Contracts;
 using Infrastructure.Authentication.Models;
@@ -47,9 +48,11 @@ public class UserEndpoints : IClassFixture<TestWebApplicationFactory<Program>>
 	{
 		using var scope = _factory.Services.CreateScope();
 		var userRepo = scope.ServiceProvider.GetService<IUserRepository>();
+		var sessionRepo = scope.ServiceProvider.GetService<ISessionRepository>();
 		userRepo!.GetAnonUserSessionByIdAsync(Arg.Any<int>()).Returns(1);
 		var user = new User { Anonymous = true };
 		userRepo!.GetUserByIdAsync(Arg.Any<int>()).Returns(user);
+		sessionRepo!.GetTimedSessionIdByUserId(Arg.Any<int>()).Returns(1);
 		_client.AddAnonAuth(1,1);
 		var response = await _client.GetAsync("v1/users/1");
 

@@ -7,6 +7,7 @@ using FluentResults;
 using Infrastructure.Persistence.Contracts;
 using Microsoft.Extensions.Logging;
 
+
 namespace Infrastructure;
 
 public class ClassroomRepository : IClassroomRepository
@@ -25,7 +26,7 @@ public class ClassroomRepository : IClassroomRepository
     {
         using var con = await _connection.CreateConnectionAsync();
 
-        var query = "INSERT INTO classroom (title, description, owner, roomcode, registration_open) VALUES (@Title, @Description, @AuthorId, @Roomcode, FALSE) RETURNING classroom_id;";
+        var query = "INSERT INTO classroom (title, description, owner, roomcode, registration_open) VALUES (@Title, @Description, @AuthorId, @Roomcode, FALSE);";
 
         var result = await con.ExecuteAsync(query, new { Title = dto.Title, Description = dto.Description, AuthorId = authorId, RoomCode = roomcode } );
 

@@ -17,6 +17,8 @@ public class Session
     public List<int> Exercises { get; set; } = new (); // this needs to be changed when exercises are available
     public List<SolvedExercise> ExerciseDetails { get; set; } = new();
     public List<Language> Languages { get; set; } = new();
+
+    public List<LanguageSupport> LanguagesModel { get; set; } = new();
 }
 
 public static class SessionMapper
@@ -41,6 +43,8 @@ public static class SessionMapper
     public static GetSessionResponseDto ConvertToGetResponse(this Session session)
     {
         return new GetSessionResponseDto(session.Title, session.Description, session.AuthorName,
-           session.ExpirationTimeUtc, session.ExerciseDetails.Select(x => new SolvedExerciseDto(x.ExerciseId, x.ExerciseTitle, x.Solved)).ToList());
+           session.ExpirationTimeUtc, session.ExerciseDetails.Select(x => new SolvedExerciseDto(x.ExerciseId, x.ExerciseTitle, x.Solved)).ToList(),
+           session.LanguagesModel.Select(x => new GetLanguagesResponseDto(x.Id, x.Language)).ToList()
+           );
     }
 }

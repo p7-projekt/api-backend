@@ -12,6 +12,7 @@ using FluentValidation.Internal;
 using Infrastructure.Authentication.Models;
 using FluentResults;
 
+
 namespace API.Endpoints;
 
 public static class ClassroomEndpoints

@@ -30,14 +30,18 @@ public static class UserEndpoints
 				{
 					return TypedResults.NotFound();
 				}
-				
+				var actualUserId = Convert.ToInt32(userId);
+				if (actualUserId != id)
+				{
+					return TypedResults.NotFound();
+				}
 				// get Role handle different for anon user
 				var strRole = principal.FindFirst(ClaimTypes.Role)?.Value;
 				var actualRole = RolesConvert.Convert(strRole!);
 
 				if (actualRole == Roles.AnonymousUser)
 				{
-					var anonDetails = await service.GetAnonUserByIdAsync(Convert.ToInt32(userId));
+					var anonDetails = await service.GetAnonUserByIdAsync(actualUserId);
 					if (anonDetails.IsFailed)
 					{
 						return TypedResults.NotFound();
@@ -45,7 +49,7 @@ public static class UserEndpoints
 					return TypedResults.Ok(anonDetails.Value);
 				}
 				
-				var user = await service.GetAppUserByIdAsync(Convert.ToInt32(userId), id);
+				var user = await service.GetAppUserByIdAsync(actualUserId);
 				if (user.IsFailed)
 				{
 					return TypedResults.NotFound();

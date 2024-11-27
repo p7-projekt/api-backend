@@ -1,11 +1,11 @@
 meta {
-  name: GetUserDetailsInstructor
+  name: GetExercisesTimedSession
   type: http
   seq: 1
 }
 
 get {
-  url: {{baseURL}}/{{currentVersion}}/users/1
+  url: {{baseURL}}/{{currentVersion}}/dashboard/timedSession/{{sessionId}}
   body: none
   auth: bearer
 }

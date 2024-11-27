@@ -8,7 +8,7 @@ public class Submission
 	
 	public int ExerciseId { get; set; }
 	
-	public string Solution { get; set; } = string.Empty;
+	public string? Solution { get; set; } 
 	
 	public int LanguageId { get; set; }
 	

@@ -8,5 +8,5 @@ namespace Core.Classrooms.Models;
 
 public record ClassroomDto(
     string Title,
-    string Description
+    string? Description
     );
