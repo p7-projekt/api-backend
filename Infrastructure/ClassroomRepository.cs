@@ -2,22 +2,11 @@
 using Core.Classrooms.Models;
 using Core.Languages.Models;
 using Core.Sessions.Contracts;
-using Core.Sessions.Models;
 using Dapper;
 using FluentResults;
 using Infrastructure.Persistence.Contracts;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Logging;
-using Quartz.Simpl;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Infrastructure;
 
@@ -37,7 +26,7 @@ public class ClassroomRepository : IClassroomRepository
     {
         using var con = await _connection.CreateConnectionAsync();
 
-        var query = "INSERT INTO classroom (title, description, owner, roomcode, registration_open) VALUES (@Title, @Description, @AuthorId, @Roomcode, FALSE) RETURNING classroom_id;";
+        var query = "INSERT INTO classroom (title, description, owner, roomcode, registration_open) VALUES (@Title, @Description, @AuthorId, @Roomcode, FALSE);";
 
         var result = await con.ExecuteAsync(query, new { Title = dto.Title, Description = dto.Description, AuthorId = authorId, RoomCode = roomcode } );
 

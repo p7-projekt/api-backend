@@ -8,7 +8,7 @@ namespace Core.Dashboards.Models
 {
     public record GetExerciseSolutionResponseDto(
         string title,
-        string description,
+        string? description,
         string solution
         );
 }
