@@ -75,7 +75,7 @@ public class SolutionRepository : ISolutionRepository
 	{
 		using var con = await _dbConnection.CreateConnectionAsync();
 		var query = """
-		            SELECT Count(*) FROM public.user_in_timedsession WHERE user_id = @UserID AND session_id = @SessionId
+		            SELECT Count(*) FROM user_in_timedsession WHERE user_id = @UserID AND session_id = @SessionId
 		            """;
 		var result = await con.ExecuteScalarAsync<int>(query, new { UserId = userId, SessionId = sessionId });
 		return result > 0;

@@ -128,15 +128,20 @@ public class SessionRepository : ISessionRepository
         }
     }
 
-    public async Task InsertLanguageRelation(List<int> languageIds, int sessionId, IDbConnection con, IDbTransaction transaction)
+    public async Task<Result> InsertLanguageRelation(List<int> languageIds, int sessionId, IDbConnection con, IDbTransaction transaction)
     {
         var sessionLanguage = """
                                   INSERT INTO language_in_session(session_id, language_id) VALUES (@SessionId, @LanguageId);
                                   """;
-        foreach (var langId in languageIds)
+        var AffectedRows = await con.ExecuteAsync(sessionLanguage, 
+                                                  languageIds.Select(x => new { SessionId = sessionId, LanguageId = x }).ToList(), 
+                                                  transaction);
+        if(AffectedRows != languageIds.Count())
         {
-            await con.ExecuteAsync(sessionLanguage, new { SessionId = sessionId, LanguageId = langId }, transaction);
+            _logger.LogError("Mismatch with inserted language-session relations. Relations inserted: {inserted}, language amount: {exercises}, session id: {sessionId}", AffectedRows, languageIds.Count(), sessionId);
+            return Result.Fail("Inconsistency in inserted exercise/session relations");
         }
+        return Result.Ok();
     }
     public async Task<Result> InsertExerciseRelation(List<int> exerciseIds, int sessionId, IDbConnection con, IDbTransaction transaction)
     {
@@ -322,17 +327,9 @@ public class SessionRepository : ISessionRepository
         {
             return Result.Fail("Failed to find session"); 
         }
-        
-        var exercisesQuery = """
-                             SELECT e.exercise_id AS exerciseid, title AS exercisetitle FROM exercise AS e
-                             JOIN exercise_in_session AS eis
-                             ON e.exercise_id = eis.exercise_id
-                             WHERE eis.session_id = @SessionId;
-                             """;
-        var exercises = await con.QueryAsync<SolvedExercise>(exercisesQuery, new { SessionId = session.Id });
-        session.ExerciseDetails = exercises.ToList();
+       
+        session.ExerciseDetails = await GetExercisesOfSessionAsync(session.Id, con);
             
-        
         return Result.Ok(session);
     }
     
@@ -350,6 +347,13 @@ public class SessionRepository : ISessionRepository
         {
             return null;
         }
+        session.ExerciseDetails = await GetExercisesOfSessionAsync(sessionId, con);
+        
+        return session;
+    }
+
+    public async Task<List<SolvedExercise>>GetExercisesOfSessionAsync(int sessionId, IDbConnection con)
+    {
         var exercisesQuery = """
                              SELECT e.exercise_id AS exerciseid, title AS exercisetitle FROM exercise AS e
                              JOIN exercise_in_session AS eis
@@ -357,16 +361,21 @@ public class SessionRepository : ISessionRepository
                              WHERE eis.session_id = @SessionId;
                              """;
         var exercises = await con.QueryAsync<SolvedExercise>(exercisesQuery, new { sessionId });
-        session.ExerciseDetails = exercises.ToList();
-        
-        return session;
+        return exercises.ToList();
     }
 
     public async Task<IEnumerable<Session>?> GetSessionsAsync(int authorId)
     {
         using var con = await _connection.CreateConnectionAsync();
         var query = """
-                    SELECT session_id AS id, title, expirationtime_utc AS ExpirationTimeUtc, session_code as sessioncode  FROM session WHERE author_id = @Id;
+                    SELECT session_id AS id, title, expirationtime_utc AS ExpirationTimeUtc, session_code as sessioncode  
+                    FROM session 
+                    WHERE author_id = @Id
+                    AND NOT EXISTS (
+                        SELECT 1 
+                        FROM session_in_classroom 
+                        WHERE session_in_classroom.session_id = session.session_id
+                    );
                     """;
         var results = await con.QueryAsync<Session>(query, new { Id = authorId });
         return results;

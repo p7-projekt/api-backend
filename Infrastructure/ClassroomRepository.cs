@@ -2,22 +2,11 @@
 using Core.Classrooms.Models;
 using Core.Languages.Models;
 using Core.Sessions.Contracts;
-using Core.Sessions.Models;
 using Dapper;
 using FluentResults;
 using Infrastructure.Persistence.Contracts;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Logging;
-using Quartz.Simpl;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Infrastructure;
 
@@ -37,7 +26,7 @@ public class ClassroomRepository : IClassroomRepository
     {
         using var con = await _connection.CreateConnectionAsync();
 
-        var query = "INSERT INTO classroom (title, description, owner, roomcode, registration_open) VALUES (@Title, @Description, @AuthorId, @Roomcode, FALSE) RETURNING classroom_id;";
+        var query = "INSERT INTO classroom (title, description, owner, roomcode, registration_open) VALUES (@Title, @Description, @AuthorId, @Roomcode, FALSE);";
 
         var result = await con.ExecuteAsync(query, new { Title = dto.Title, Description = dto.Description, AuthorId = authorId, RoomCode = roomcode } );
 
@@ -127,25 +116,41 @@ public class ClassroomRepository : IClassroomRepository
         return Result.Ok();
     }
 
-    public async Task<GetClassroomResponseDto> GetClassroomByIdAsync(int classroomId)
+    public async Task<Result<GetClassroomResponseDto>> GetClassroomByIdAsync(int classroomId)
     {
-        using var con = await _connection.CreateConnectionAsync();
-        
-        var classroomQuery = "SELECT classroom_id AS id, title, description, roomcode, registration_open AS isOpen FROM classroom WHERE classroom_id = @ClassroomId;";
-        var classroom = await con.QuerySingleAsync<GetClassroomResponseDto>(classroomQuery, new { ClassroomId = classroomId });
+        try
+        {
+            using var con = await _connection.CreateConnectionAsync();
 
-        var sessionIdsQuery = """
-                              SELECT s.session_id AS id, s.title, sic.active 
+            var classroomQuery = """
+                                 SELECT classroom_id AS id, title, description, roomcode, registration_open AS isOpen,
+                                   (SELECT COUNT(*) 
+                                   FROM student_in_classroom 
+                                   WHERE classroom_id = @ClassroomId) AS totalstudents
+                                 FROM classroom 
+                                 WHERE classroom_id = @ClassroomId;
+                                 """;
+            var classroom = await con.QuerySingleAsync<GetClassroomResponseDto>(classroomQuery, new { ClassroomId = classroomId });
+
+            var sessionIdsQuery = """
+                              SELECT s.session_id AS id, s.title, sic.active
                               FROM session_in_classroom AS sic
                               JOIN session AS s 
                               ON s.session_id = sic.session_id
                               WHERE classroom_id = @ClassroomId
                               """;
 
-        var sessions = await con.QueryAsync<GetClassroomSessionDto>(sessionIdsQuery, new { ClassroomId = classroomId });
-        classroom.Sessions = sessions.ToList();
+            var sessions = await con.QueryAsync<GetClassroomSessionDto>(sessionIdsQuery, new { ClassroomId = classroomId });
+            classroom.Sessions = sessions.ToList();
 
-        return classroom;
+            return classroom;
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning("Nothing found when querying for classroom: {message}", ex.Message);
+            return Result.Fail("No classroom found");
+        }
+
     }
     
     public async Task<List<GetClassroomsResponseDto>> GetStudentClassroomsById(int studentId)
@@ -182,7 +187,7 @@ public class ClassroomRepository : IClassroomRepository
 
         var query = """
                     UPDATE classroom 
-                    SET title = @Title, description = @Description, registration_open = @RegistrartionOpen
+                    SET title = @Title, description = @Description, registration_open = @RegistrationOpen
                     WHERE classroom_id = @ClassroomId;
                     """;
         var result = await con.ExecuteAsync(query, new 
@@ -223,19 +228,6 @@ public class ClassroomRepository : IClassroomRepository
             return Result.Fail("Failed to update classroom session");
         }
 
-        var updateSessionExercises = """
-                                     DELETE FROM exercise_in_session WHERE session_id = @SessionId;
-                                     """;
-
-        await con.ExecuteAsync(updateSessionExercises, new { SessionId = dto.Id }, transaction);
-
-        var UpdatedExercises = await _sessionRepository.InsertExerciseRelation(dto.ExerciseIds, dto.Id, con, transaction);
-        if (UpdatedExercises.IsFailed)
-        { 
-            transaction.Rollback();
-            return Result.Fail("Failed to update exercises of classroom session");
-        }
-
         var updateActiveQuery = """
                                 UPDATE session_in_classroom
                                 SET active = @Active
@@ -248,6 +240,32 @@ public class ClassroomRepository : IClassroomRepository
             transaction.Rollback();
             _logger.LogError("Session with id {session_id} failed to update activation status, due to incorrect amount of database rows affected", dto.Id);
             return Result.Fail("Failed to update activation status");
+        }
+
+        var deleteSessionExercisesQuery = """
+                                     DELETE FROM exercise_in_session WHERE session_id = @SessionId;
+                                     """;
+
+        await con.ExecuteAsync(deleteSessionExercisesQuery, new { SessionId = dto.Id }, transaction);
+
+        var UpdatedExercises = await _sessionRepository.InsertExerciseRelation(dto.ExerciseIds, dto.Id, con, transaction);
+        if (UpdatedExercises.IsFailed)
+        {
+            transaction.Rollback();
+            return Result.Fail("Failed to update exercises of classroom session");
+        }
+
+        var updateSessionLangauges = """
+                                     DELETE FROM language_in_session WHERE session_id = @SessionId;
+                                     """;
+
+        await con.ExecuteAsync(updateSessionLangauges, new { SessionId = dto.Id }, transaction);
+
+        var UpdatedLanguages = await _sessionRepository.InsertLanguageRelation(dto.LanguageIds, dto.Id, con, transaction);
+        if (UpdatedLanguages.IsFailed)
+        {
+            transaction.Rollback();
+            return Result.Fail("Failed to update language of classroom session");
         }
 
         transaction.Commit();
@@ -275,6 +293,92 @@ public class ClassroomRepository : IClassroomRepository
         return Result.Ok();
     }
 
+    public async Task DeleteClassroomSessionAsync(int sessionId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+
+        var query = "DELETE FROM session WHERE session_id = @SessionId";
+
+        await con.ExecuteAsync(query, new { SessionId = sessionId });
+    }
+
+    public async Task<GetClassroomSessionResponseDto> GetClassroomSessionByIdAsync(int sessionId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+
+        var query = """
+                    SELECT
+                        s.session_id AS id,
+                        s.title AS title,
+                        s.description AS description,
+                        s.author_id AS authorid,
+                        sic.active AS active
+                    FROM session s
+                    JOIN session_in_classroom sic ON sic.session_id = s.session_id
+                    WHERE s.session_id = @SessionId
+                    """;
+
+        var session = await con.QuerySingleAsync<GetClassroomSessionResponseDto>(query, new { SessionId = sessionId });
+
+        session.ExerciseIds = await _sessionRepository.GetExercisesOfSessionAsync(sessionId, con);
+
+        var languageQuery = "SELECT language_id FROM language_in_session WHERE session_id = @SessionId;";
+
+        var languages = await con.QueryAsync<Language>(languageQuery, new { SessionId = sessionId });
+        session.Languages = languages.ToList();
+
+        return session;
+    }
+
+    public async Task<Result> LeaveClassroomAsync(int classroomId, int studentId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var transaction = con.BeginTransaction();
+        try
+        {
+            var deleteSubmissionsQuery = """
+                    DELETE FROM submission
+                    WHERE user_id = @StudentId
+                    AND session_id IN (
+                        SELECT session_id
+                        FROM session_in_classroom
+                        WHERE classroom_id = @ClassroomId);
+                    """;
+
+            await con.QueryAsync(deleteSubmissionsQuery, new { StudentId = studentId, ClassroomId = classroomId }, transaction);
+
+            var deleteUserRelationQuery = "DELETE FROM student_in_classroom WHERE classroom_id = @ClassroomId AND student_id = @StudentId;";
+
+            var result = await con.ExecuteAsync(deleteUserRelationQuery, new { ClassroomId = classroomId, StudentId = studentId }, transaction);
+            if (result != 1)
+            {
+                transaction.Rollback();
+                _logger.LogError("Incorrect number of users removed from classroom with id {classroomId}, when trying to removed user {studentID} - {removed} removed", classroomId, studentId, result);
+                return Result.Fail("Error with removing user from classroom");
+            }
+            transaction.Commit();
+
+            return Result.Ok();
+        } catch (Exception ex)
+        {
+            transaction.Rollback();
+            _logger.LogError("Error occured during student removal from classroom: {message}", ex.Message);
+            throw;
+        }
+
+    }
+
+    public async Task<bool> VerifyStudentInClassroom(int classroomId, int studentId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+
+        var query = "SELECT 1 FROM student_in_classroom WHERE classroom_id = @ClassroomId AND student_id = @StudentId;";
+
+        var result = await con.ExecuteScalarAsync<int>(query, new { ClassroomId = classroomId, StudentId = studentId });
+
+        return result == 1;
+    }
+
     public async Task<bool> VerifyClassroomAuthor(int classroomId, int authorId)
     {
         using var con = await _connection.CreateConnectionAsync();
@@ -297,9 +401,16 @@ public class ClassroomRepository : IClassroomRepository
         using var con = await _connection.CreateConnectionAsync();
 
         var query = "SELECT roomcode FROM classroom WHERE classroom_id = @ClassroomId;";
-
         var quriedRoomCode = await con.QuerySingleAsync<string>(query, new { ClassroomId = classroomId });
 
         return quriedRoomCode == roomCode;
+    }
+
+    public async Task<bool> VerifyRegistrationIsOpen(int classroomId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+
+        var query = "SELECT registration_open FROM classroom WHERE classroom_id = @ClassroomId;";
+        return  await con.ExecuteScalarAsync<bool>(query, new { ClassroomId = classroomId });
     }
 }
