@@ -1,0 +1,23 @@
+meta {
+  name: LoginUser
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseURL}}/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "student@student.dk",
+    "password": "Student!1232"
+  }
+}
+
+script:post-response {
+  bru.setEnvVar("studentToken",res.body.token);
+  bru.setEnvVar("studentRefreshToken",res.body.refreshToken);
+}

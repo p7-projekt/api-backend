@@ -11,5 +11,4 @@ public interface IExerciseRepository
     Task<bool> DeleteExerciseAsync(int exerciseId);
     Task<GetExerciseResponseDto?> GetExerciseByIdAsync(int exerciseId);
     Task<Result> UpdateExerciseAsync(ExerciseDto dto, int exerciseId);
-
 }

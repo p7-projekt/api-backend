@@ -41,8 +41,8 @@ public class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-        
-        
+
+
         var app = builder.Build();
 
         ApiVersionSet apiVersionSet = app.NewApiVersionSet()
@@ -73,8 +73,10 @@ public class Program
         app.UseAuthenticationEndpoints();
         app.UseSessionEndpoints();
         app.UseUserEndpoints();
+        app.UseClassroomEndpoints();
         app.UseLanguageEndpoints();
-
+        app.UseDashboardEndpoints();
+        
         app.Run();
     }
 }

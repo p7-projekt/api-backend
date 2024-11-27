@@ -1,0 +1,15 @@
+meta {
+  name: GetExercisesTimedSession
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseURL}}/{{currentVersion}}/dashboard/timedSession/{{sessionId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{instructorToken}}
+}

@@ -1,11 +1,11 @@
 meta {
-  name: Secret
+  name: GetExerciseByIdInstructor
   type: http
-  seq: 3
+  seq: 5
 }
 
 get {
-  url: {{baseURL}}/secret
+  url: {{baseURL}}/{{currentVersion}}/exercises/2
   body: none
   auth: bearer
 }

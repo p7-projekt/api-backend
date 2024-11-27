@@ -1,3 +1,4 @@
+using Core.Sessions.Contracts;
 using Core.Shared;
 using FluentResults;
 using Infrastructure.Authentication.Contracts;
@@ -13,12 +14,14 @@ public class UserService : IUserService
 	private readonly IUserRepository _userRepository;
 	private readonly ITokenService _tokenService;
 	private readonly ILogger<UserService> _logger;
-	public UserService(IPasswordHasher<User> passwordHasher, IUserRepository userRepository, ILogger<UserService> logger, ITokenService tokenService)
+	private readonly ISessionRepository _sessionRepository;
+	public UserService(IPasswordHasher<User> passwordHasher, IUserRepository userRepository, ILogger<UserService> logger, ITokenService tokenService, ISessionRepository sessionRepository)
 	{
 		_passwordHasher = passwordHasher;
 		_userRepository = userRepository;
 		_logger = logger;
 		_tokenService = tokenService;
+		_sessionRepository = sessionRepository;
 	}
 
 	public async Task<Result> CreateUserAsync(CreateUserDto dto)
@@ -42,15 +45,10 @@ public class UserService : IUserService
 	}
 
 
-	private async Task<Result<User>> GetUserByIdAsync(int userId, int userIdParameter)
+	private async Task<Result<User>> GetUserByIdAsync(int userId)
 	{
-		if (userId != userIdParameter)
-        {
-            return Result.Fail("User id not consistent");
-        }
-
 		var result = await _userRepository.GetUserByIdAsync(userId);
-		if (result == null) // It seems null cannot be returned from the repository function - this may need rethinking
+		if (result == null) 
         {
         	return Result.Fail("User not found");
         }
@@ -58,34 +56,39 @@ public class UserService : IUserService
 		return result;
 	}
 	
-	public async Task<Result<GetUserResponseDto>> GetAppUserByIdAsync(int id, int userIdParameter)
+	public async Task<Result<GetUserResponseDto>> GetAppUserByIdAsync(int id)
 	{
 
-		var result = await GetUserByIdAsync(id, userIdParameter);
+		var result = await GetUserByIdAsync(id);
 		if (result.IsFailed)
 		{
 			_logger.LogWarning("Could not retrieve user {userid}", id);
 			return Result.Fail("Error getting user");
 		}
-		return Result.Ok(new GetUserResponseDto(result.Value.Email, result.Value.Name));
+		return Result.Ok(new GetUserResponseDto(result.Value.Email, result.Value.Name, null));
 	}
 
 	public async Task<Result<GetUserResponseDto>> GetAnonUserByIdAsync(int userId)
 	{
-		// TODO FIX!!!!!
-		var result = await GetUserByIdAsync(userId, userId);
+		var result = await GetUserByIdAsync(userId);
         if (result.IsFailed)
         {
 			_logger.LogWarning("Could not retrieve user {userid}", userId);
         	return Result.Fail("Error getting user");
         }
 
+        var sessionId = await _sessionRepository.GetTimedSessionIdByUserId(userId);
+        if (sessionId == 0)
+        {
+	        return Result.Fail("Could not retrieve session");
+        }
+        
         if (result.Value.Anonymous == false)
         {
 	        return Result.Fail("Error getting user");
         }	
 		
-		return new GetUserResponseDto(null, result.Value.Name);
+		return new GetUserResponseDto(null, result.Value.Name, sessionId);
 	}
 
 	public async Task<Result<LoginResponse>> LoginAsync(LoginDto loginDto)
@@ -96,13 +99,18 @@ public class UserService : IUserService
 			_logger.LogInformation("User with email {email} not found", loginDto.Email);
 			return Result.Fail($"Failed to login user with email {loginDto.Email}");
 		}
-		var correctPassword = _passwordHasher.VerifyHashedPassword(new User{Email = loginDto.Email, CreatedAt = user.CreatedAt}, user.PasswordHash, loginDto.Password);
-		if (correctPassword == PasswordVerificationResult.Failed)
+
+		if (user.PasswordHash != null)
 		{
-			_logger.LogDebug("Password verification failed for user {email}", loginDto.Email);
-			return Result.Fail($"Failed to login user with email {loginDto.Email}");
+			var correctPassword = _passwordHasher.VerifyHashedPassword(new User{Email = loginDto.Email, CreatedAt = user.CreatedAt}, user.PasswordHash, loginDto.Password);
+			if (correctPassword == PasswordVerificationResult.Failed)
+			{
+				_logger.LogDebug("Password verification failed for user {email}", loginDto.Email);
+				return Result.Fail($"Failed to login user with email {loginDto.Email}");
+			}
 		}
-		var userRoles = await _userRepository.GetRolesByUserIdAsync(user.Id);
+
+		var userRoles = (await _userRepository.GetRolesByUserIdAsync(user.Id)).ToList();
 		var strUserRoles = string.Concat(userRoles.Select(x => x.RoleName));
 		var roles = userRoles.Select(x => RolesConvert.Convert(x.RoleName)).ToList();
 		
