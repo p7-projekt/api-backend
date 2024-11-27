@@ -29,7 +29,7 @@ public class DashboardService : IDashboardService
         }
         var inClassroom = await _dashboardRepository.CheckSessionInClassroomAsync(sessionId);
         
-        if (inClassroom)
+        if (!inClassroom)
         {
             var usersConnected = await _dashboardRepository.GetConnectedTimedUsersAsync(sessionId);
 
