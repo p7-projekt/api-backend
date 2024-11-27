@@ -135,7 +135,7 @@ public class ClassroomRepository : IClassroomRepository
                               """;
 
             var sessions = await con.QueryAsync<GetClassroomSessionDto>(sessionIdsQuery, new { ClassroomId = classroomId });
-            classroom.Sessions = sessions.ToList();
+            classroom.Sessions = sessions.OrderBy(x => x.Id).ToList();
 
             return classroom;
         }
@@ -160,7 +160,7 @@ public class ClassroomRepository : IClassroomRepository
                     """;
         var classrooms = await con.QueryAsync<GetClassroomsResponseDto>(query, new { StudentId = studentId });
 
-        return classrooms.ToList();
+        return classrooms.OrderBy(x => x.Id).ToList();
     }
 
     public async Task<List<GetClassroomsResponseDto>> GetInstructorClassroomsById(int instructorId)
@@ -171,7 +171,7 @@ public class ClassroomRepository : IClassroomRepository
 
         var classrooms = await con.QueryAsync<GetClassroomsResponseDto>(query, new { InstructorId = instructorId });
 
-        return classrooms.ToList();
+        return classrooms.OrderBy(x => x.Id).ToList();
     }
 
     public async Task<Result> UpdateClassroomDetailsAsync(UpdateClassroomDto dto, int classroomId)
@@ -314,7 +314,7 @@ public class ClassroomRepository : IClassroomRepository
 
         var session = await con.QuerySingleAsync<GetClassroomSessionResponseDto>(query, new { SessionId = sessionId });
 
-        session.ExerciseIds = await _sessionRepository.GetExercisesOfSessionAsync(sessionId, con);
+        session.ExerciseIds = (await _sessionRepository.GetExercisesOfSessionAsync(sessionId, con));
 
         var languageQuery = "SELECT language_id FROM language_in_session WHERE session_id = @SessionId;";
 

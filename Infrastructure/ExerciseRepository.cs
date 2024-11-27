@@ -139,7 +139,7 @@ namespace Infrastructure
                     SELECT exercise_id AS id, title as name FROM exercise WHERE author_id = @Id;
                     """;
             var results = await con.QueryAsync<GetExercisesResponseDto>(query, new { Id = authorId });
-            return results;
+            return results.OrderBy(x => x.Id);
         }
 
         public async Task<GetExerciseResponseDto?> GetExerciseByIdAsync(int exerciseId)
