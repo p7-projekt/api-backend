@@ -36,7 +36,7 @@ public class DashboardService : IDashboardService
             var exercises = await _dashboardRepository.GetExercisesInTimedSessionBySessionIdAsync(sessionId);
             if (exercises == null || exercises.Count() == 0)
             {
-                _logger.LogInformation("No Exercises in session: {sessionID}", sessionId);
+                _logger.LogInformation("No Exercises in classroom session: {sessionID}", sessionId);
                 return Result.Fail("Exercises not found");
             }
 
@@ -49,7 +49,7 @@ public class DashboardService : IDashboardService
             var exercises = await _dashboardRepository.GetExercisesInTimedSessionBySessionIdAsync(sessionId);
             if (exercises == null || exercises.Count() == 0)
             {
-                _logger.LogInformation("No Exercises in session: {sessionID}", sessionId);
+                _logger.LogInformation("No Exercises in timed session: {sessionID}", sessionId);
                 return Result.Fail("Exercises not found");
             }
 
