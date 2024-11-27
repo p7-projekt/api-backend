@@ -12,14 +12,9 @@ namespace API.Endpoints;
 
 public static class UserEndpoints
 {
-	public static WebApplication UseUserEndpoints(this WebApplication app)
+	public static WebApplication UseUserEndpoints(this WebApplication app, ApiVersionSet apiVersionSet)
 	{
-		ApiVersionSet apiVersionSet = app.NewApiVersionSet()
-			.HasApiVersion(new ApiVersion(1))
-			.ReportApiVersions()
-			.Build();
-
-		var usersV1Group = app.MapGroup("v{version:apiVersion}/users").WithApiVersionSet(apiVersionSet)
+		var usersV1Group = app.MapGroup("v{version:apiVersion}/users").WithApiVersionSet(apiVersionSet).MapToApiVersion(1)
 			.WithTags("Users");
 
 		usersV1Group.MapGet("/{id:int}",
