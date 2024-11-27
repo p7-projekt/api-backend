@@ -2,14 +2,15 @@
 
 namespace Core.Dashboards.Models;
 
-public record GetExercisesInSessionResponseDto(
-    string Title,
-    int Id,
-    int Solved,
-    int Attempted,
-    int[] UserIds,
-    string[] Names
-);
+public class GetExercisesInSessionResponseDto
+{
+    public required string Title { get; set; }
+    public int Id { get; set; }
+    public int Solved { get; set; }
+    public int Attempted { get; set; }
+    public required int[] UserIds { get; set; }
+    public required string[] Names { get; set; }
+};
 
 public record UserDetailDto(
     int Id,

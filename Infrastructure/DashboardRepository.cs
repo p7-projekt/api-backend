@@ -40,19 +40,11 @@ public class DashboardRepository : IDashboardRepository
                 WHERE
                     s.session_id = @Id
                 GROUP BY
-                    e.exercise_id;
+                    e.exercise_id, e.title;
                 """;
-        var results = await con.QueryAsync<dynamic>(query, new { Id = sessionId });
-        var mappedResults = results.Select(row => new GetExercisesInSessionResponseDto(
-            (string)row.title,
-            (int)row.id,
-            (int)row.solved,
-            (int)row.attempted,
-            ((IEnumerable<int>)row.userids).ToArray(),
-            ((IEnumerable<string>)row.names).ToArray()
-            )).ToList();
+        var results = await con.QueryAsync<GetExercisesInSessionResponseDto>(query, new { Id = sessionId });
 
-        return mappedResults;
+        return results;
     }
 
     public async Task<IEnumerable<GetExercisesInSessionResponseDto>?> GetExercisesInClassSessionBySessionIdAsync(int sessionId)
@@ -77,20 +69,12 @@ public class DashboardRepository : IDashboardRepository
                 WHERE
                     s.session_id = @Id
                 GROUP BY
-                    e.exercise_id;
+                    e.exercise_id, e.title;
                 
                 """;
-        var results = await con.QueryAsync<dynamic>(query, new { Id = sessionId });
-        var mappedResults = results.Select(row => new GetExercisesInSessionResponseDto(
-            (string)row.title,
-            (int)row.id,
-            (int)row.solved,
-            (int)row.attempted,
-            ((IEnumerable<int>)row.userids).ToArray(),
-            ((IEnumerable<string>)row.names).ToArray()
-            )).ToList();
+        var results = await con.QueryAsync<GetExercisesInSessionResponseDto>(query, new { Id = sessionId });
 
-        return mappedResults;
+        return results;
     }
 
     public async Task<int> GetConnectedTimedUsersAsync(int sessionId)
@@ -125,9 +109,8 @@ public class DashboardRepository : IDashboardRepository
             SELECT e.title, e.description, s.solution, l.language
             FROM submission AS s
                 JOIN exercise AS e ON s.exercise_id = e.exercise_id
-                JOIN users AS u ON s.user_id = u.id
                 JOIN language_support AS l ON l.language_id = s.language_id
-            WHERE u.id = @uid AND s.exercise_id = @eid;
+            WHERE s.user_id = @uid AND s.exercise_id = @eid;
             """;
         var result = await con.QueryFirstOrDefaultAsync<GetExerciseSolutionResponseDto>(query, new { uid = userId, eid = exerciseId });
         if (result == null)
