@@ -174,6 +174,7 @@ public class UserRepository : IUserRepository
 		                    RETURNING id;
 		                    """;
 		_logger.LogInformation("Inserting app user into transaction: {query}", createAppUser);
+
 		return await con.QueryFirstOrDefaultAsync<int>(createAppUser, new {email = user.Email, Name = user.Name, password_hash = user.PasswordHash, Anon = false, CreatedAt = user.CreatedAt}, transaction);
 	}
 

@@ -9,6 +9,7 @@ using Core.Solutions.Services;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Serilog;
+using System.Reflection;
 
 namespace API;
 
@@ -36,11 +37,25 @@ public class Program
         // API Configuration
         builder.Services.AddApiConfiguration();
         builder.Services.AddProblemDetails();
-        
+
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+            {
+                Title = "My API v1",
+                Version = "v1"
+            });
+
+            options.SwaggerDoc("v2", new Microsoft.OpenApi.Models.OpenApiInfo
+            {
+                Title = "My API v2",
+                Version = "v2"
+            });
+        });
+
 
 
         var app = builder.Build();
@@ -55,7 +70,11 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
-            app.UseSwaggerUI();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API v1");
+                options.SwaggerEndpoint("/swagger/v2/swagger.json", "My API v2");
+            });
             // app.Services.DevelopmentSeed();
         }
         // Seed admin account

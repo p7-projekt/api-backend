@@ -1,10 +1,12 @@
 ﻿using Core.Classrooms.Contracts;
 using Core.Classrooms.Models;
+using Core.Sessions.Contracts;
 using Core.Shared;
 using FluentResults;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -16,10 +18,12 @@ public class ClassroomService : IClassroomService
 {
     private readonly ILogger<ClassroomService> _logger;
     private readonly IClassroomRepository _classroomRepository;
-    public ClassroomService(ILogger<ClassroomService> logger, IClassroomRepository classroomRepository)
+    private readonly ISessionRepository _sessionRepository;
+    public ClassroomService(ILogger<ClassroomService> logger, IClassroomRepository classroomRepository, ISessionRepository sessionRepository)
     {
         _logger = logger;
         _classroomRepository = classroomRepository;
+        _sessionRepository = sessionRepository;
     }
     public async Task<Result> CreateClassroom(ClassroomDto dto, int authorId)
     {
@@ -88,6 +92,12 @@ public class ClassroomService : IClassroomService
 
     public async Task<Result> JoinClassroom(JoinClassroomDto dto, int classroomId, int studentId)
     {
+        var isOpen = await _classroomRepository.VerifyRegistrationIsOpen(classroomId);
+        if (!isOpen)
+        {
+            return Result.Fail("Classroom not open to join");
+        }
+
         var validCode = await _classroomRepository.VerifyClassroomRoomcode(classroomId, dto.RoomCode);
         if (!validCode)
         {
@@ -103,6 +113,35 @@ public class ClassroomService : IClassroomService
         }
 
         return Result.Ok();
+    }
+
+    public async Task<Result> DeleteClassroomSession(int sessionId, int authorId)
+    {
+        var correctAuthor = await _sessionRepository.VerifyAuthor(authorId, sessionId);
+        if (!correctAuthor)
+        {
+            _logger.LogWarning("Invalid owner tried to delete session");
+            return Result.Fail("Incorrect author of session");
+        }
+        await _classroomRepository.DeleteClassroomSessionAsync(sessionId);
+
+        return Result.Ok();
+    }
+
+    public async Task<Result> LeaveClassroom(int classroomId, int studentId)
+    {
+        var inClassroom = await _classroomRepository.VerifyStudentInClassroom(classroomId, studentId);
+        if (!inClassroom)
+        {
+            _logger.LogWarning("Student {studentId} tried to leave classroom {classroomId}, but is not part of classroom", studentId, classroomId);
+            return Result.Fail("User not part of classroom already");
+        }
+        return await _classroomRepository.LeaveClassroomAsync(classroomId, studentId);
+    }
+
+    public async Task<GetClassroomSessionResponseDto> GetClassroomSessionById(int sessionId)
+    {
+        return await _classroomRepository.GetClassroomSessionByIdAsync(sessionId);
     }
 
     private string GenerateClassroomCode()
