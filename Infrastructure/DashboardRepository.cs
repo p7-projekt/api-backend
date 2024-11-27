@@ -157,4 +157,23 @@ public class DashboardRepository : IDashboardRepository
         var result = await con.QueryFirstOrDefaultAsync<bool>(query, new { eid = exerciseId, auid = appUserId, uid = userId });
         return result;
     }
+    public async Task<bool> CheckSessionInClassroomAsync(int sessionId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var query = """
+            SELECT
+                CASE
+                    WHEN COUNT(*) > 0 THEN TRUE
+                    ELSE FALSE
+                END AS not_empty
+            FROM (
+                SELECT 1
+                FROM session AS s
+                JOIN session_in_classroom AS sic ON s.session_id = sic.session_id
+                WHERE s.session_id = @sid
+            ) AS result;
+            """;
+        var result = await con.QueryFirstOrDefaultAsync<bool>(query, new {sid = sessionId});
+        return result;
+    }
 }
