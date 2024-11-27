@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 namespace Core.Dashboards.Models
 {
     public record GetExerciseSolutionResponseDto(
-        string title,
-        string description,
-        string solution,
-        string language
+        string Title,
+        string Description,
+        string Solution,
+        string Language,
+        string Language_id
         );
 }

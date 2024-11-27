@@ -105,7 +105,7 @@ public class DashboardRepository : IDashboardRepository
     {
         using var con = await _connection.CreateConnectionAsync();
         var query = """
-            SELECT e.title, e.description, s.solution, l.language
+            SELECT e.title, e.description, s.solution, l.language, l.language_id
             FROM submission AS s
                 JOIN exercise AS e ON s.exercise_id = e.exercise_id
                 JOIN language_support AS l ON l.language_id = s.language_id
