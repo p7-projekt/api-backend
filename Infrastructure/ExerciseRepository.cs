@@ -37,7 +37,7 @@ namespace Infrastructure
 
             var exerciseQuery = """
                                 UPDATE exercise 
-                                SET title = @Title, description = @Description, solution = @Solution
+                                SET title = @Title, description = @Description, solution = @Solution, solution_language_id = @LanguageId
                                 WHERE exercise_id = @ExerciseId;
                                 """;
             var result = await con.ExecuteAsync(exerciseQuery,
@@ -46,6 +46,7 @@ namespace Infrastructure
                     Title = dto.Name,
                     Description = dto.Description,
                     Solution = dto.Solution,
+                    LanguageId = dto.SolutionLanguage,
                     ExerciseId = exerciseId
                 }, transaction);
 
