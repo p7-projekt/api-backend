@@ -188,6 +188,11 @@ public class SessionService : ISessionService
             return Result.Fail("Session does not exist");
         }
 
+        if (role == Roles.Instructor)
+        {
+            session.ExerciseDetails.ForEach(e => e.Solved = null);
+        }
+
         
         return session.ConvertToGetResponse();
     }
