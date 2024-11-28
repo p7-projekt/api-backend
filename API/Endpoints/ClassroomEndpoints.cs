@@ -51,7 +51,9 @@ public static class ClassroomEndpoints
         classroomV2.MapGet("/{classroomId:int}", async Task<Results<Ok<GetClassroomResponseDto>, BadRequest<ValidationProblemDetails>>> (int classroomId, ClaimsPrincipal principal, IClassroomService service) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
-            var result = await service.GetClassroomById(classroomId);
+            var userRole = principal.Claims.First(c => c.Type == ClaimTypes.Role).Value;
+
+            var result = await service.GetClassroomById(classroomId, int.Parse(userId), RolesConvert.Convert(userRole));
             if(result.IsFailed)
             {
                 return TypedResults.BadRequest(CreateBadRequest.CreateValidationProblemDetails(result.Errors, "Errors", "Errors"));
@@ -113,19 +115,6 @@ public static class ClassroomEndpoints
             return TypedResults.NoContent();
 
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<UpdateClassroomSessionDto>();
-
-        classroomV2.MapPost("/{classroomId:int}/join", async Task<Results<NoContent, BadRequest<ValidationProblemDetails>>> (int classroomId, [FromBody]JoinClassroomDto dto, ClaimsPrincipal principal, IClassroomService service) =>
-        {
-            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
-
-            var result = await service.JoinClassroom(dto, classroomId, Convert.ToInt32(userId));
-            if (result.IsFailed)
-            {
-                return TypedResults.BadRequest(CreateBadRequest.CreateValidationProblemDetails(result.Errors, "Errors", "Errors"));
-            }
-            return TypedResults.NoContent();
-
-        }).RequireAuthorization(nameof(Roles.Student)).WithRequestValidation<JoinClassroomDto>();
 
         classroomV2.MapDelete("/session/{sessionId:int}", async Task<Results<NoContent, BadRequest>> (int sessionId, ClaimsPrincipal principal, IClassroomService service) =>
         {

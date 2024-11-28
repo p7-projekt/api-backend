@@ -184,7 +184,7 @@ public class SessionServiceTest
 
         tokenServiceSub.GenerateAnonymousUserJwt(Arg.Any<int>(), Arg.Any<int>()).Returns("token");
 
-        var dto = new JoinSessionDto("token", "lars");
+        var dto = new JoinDto("token", "lars");
         var result = await sessionService.JoinSessionAnonUser(dto);
         
         Assert.True(result.IsSuccess);
@@ -202,7 +202,7 @@ public class SessionServiceTest
         var session = new Session();
         sessionRepoSub.GetSessionBySessionCodeAsync(Arg.Any<string>()).Returns(Result.Fail("Failed to get session"));
         
-        var dto = new JoinSessionDto("token", "lars");
+        var dto = new JoinDto("token", "lars");
         var result = await sessionService.JoinSessionAnonUser(dto);
         
         Assert.True(result.IsFailed);

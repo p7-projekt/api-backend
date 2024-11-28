@@ -98,7 +98,7 @@ public static class SessionEndpoints
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<CreateSessionDto>();
         
         // Join session
-        app.MapPost("/join", async Task<Results<Ok<JoinSessionResponseDto>, BadRequest<ValidationProblemDetails>>> ([FromBody]JoinSessionDto dto, ISessionService service, ClaimsPrincipal principal) =>
+        app.MapPost("/join", async Task<Results<Ok<JoinSessionResponseDto>, BadRequest<ValidationProblemDetails>>> ([FromBody]JoinDto dto, ISessionService service, ClaimsPrincipal principal) =>
         {
             var hasToken = principal.Claims.Any();
             
@@ -108,7 +108,7 @@ public static class SessionEndpoints
                 var result = await service.JoinSessionAnonUser(dto);
                 if (result.IsFailed)
                 {
-                    var error = CreateBadRequest.CreateValidationProblemDetails(result.Errors, $"Invalid {nameof(dto.SessionCode)}", nameof(dto.SessionCode));
+                    var error = CreateBadRequest.CreateValidationProblemDetails(result.Errors, $"Invalid {nameof(dto.Code)}", nameof(dto.Code));
                     return TypedResults.BadRequest(error);
                 }
                 return TypedResults.Ok(result.Value);
@@ -121,7 +121,7 @@ public static class SessionEndpoints
                 return TypedResults.BadRequest(error);
             }
             var userId = Convert.ToInt32(principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value);
-            var studentResult = await service.JoinStudent(userId, dto.SessionCode);
+            var studentResult = await service.JoinStudent(userId, dto.Code);
             if (studentResult.IsFailed)
             {
                 
@@ -130,7 +130,7 @@ public static class SessionEndpoints
             }
 
             return TypedResults.Ok(studentResult.Value);
-        }).WithRequestValidation<JoinSessionDto>();
+        }).WithRequestValidation<JoinDto>();
 
         return app;
     }

@@ -5,7 +5,6 @@ using Infrastructure.Persistence.Contracts;
 using Microsoft.Extensions.Logging;
 using Core.Exercises.Models;
 using Core.Exercises.Contracts;
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace Infrastructure
 {
