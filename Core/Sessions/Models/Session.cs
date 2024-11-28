@@ -37,7 +37,11 @@ public static class SessionMapper
     
     public static GetSessionsResponseDto ConvertToGetSessionsResponse(this Session session)
     {
-        return new GetSessionsResponseDto(session.Id, session.Title, Math.Floor((session.ExpirationTimeUtc - DateTime.UtcNow).TotalSeconds).ToString(CultureInfo.InvariantCulture), session.SessionCode);
+        var time = Math.Floor((session.ExpirationTimeUtc - DateTime.UtcNow).TotalSeconds);
+        return new GetSessionsResponseDto(session.Id, session.Title, 
+            time >= 0 
+                ? time.ToString(CultureInfo.InvariantCulture) 
+                : 0.ToString(CultureInfo.InvariantCulture), session.SessionCode);
     }
 
     public static GetSessionResponseDto ConvertToGetResponse(this Session session)
