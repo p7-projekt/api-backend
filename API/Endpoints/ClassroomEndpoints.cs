@@ -18,14 +18,9 @@ namespace API.Endpoints;
 
 public static class ClassroomEndpoints
 {
-    public static WebApplication UseClassroomEndpoints(this WebApplication app)
+    public static WebApplication UseClassroomEndpoints(this WebApplication app, ApiVersionSet apiVersionSet)
     {
-        ApiVersionSet apiVersionSet = app.NewApiVersionSet()
-            .HasApiVersion(new ApiVersion(2))
-            .ReportApiVersions()
-            .Build();
-
-        var classroomV2 = app.MapGroup("v{version:apiVersion}/classrooms").WithApiVersionSet(apiVersionSet).WithTags("Classroom").WithOpenApi();
+        var classroomV2 = app.MapGroup("v{version:apiVersion}/classrooms").WithApiVersionSet(apiVersionSet).MapToApiVersion(2).WithTags("Classroom").WithOpenApi();
 
         classroomV2.MapPost("/", async Task<Results<Created, BadRequest>> ([FromBody] ClassroomDto dto, ClaimsPrincipal principal, IClassroomService service) =>
         {

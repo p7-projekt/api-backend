@@ -361,7 +361,7 @@ public class SessionRepository : ISessionRepository
                              WHERE eis.session_id = @SessionId;
                              """;
         var exercises = await con.QueryAsync<SolvedExercise>(exercisesQuery, new { sessionId });
-        return exercises.ToList();
+        return exercises.OrderBy(x => x.ExerciseId).ToList();
     }
 
     public async Task<IEnumerable<Session>?> GetSessionsAsync(int authorId)

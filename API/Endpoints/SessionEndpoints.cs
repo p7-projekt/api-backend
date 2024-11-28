@@ -16,14 +16,10 @@ namespace API.Endpoints;
 
 public static class SessionEndpoints
 {
-    public static WebApplication UseSessionEndpoints(this WebApplication app)
+    public static WebApplication UseSessionEndpoints(this WebApplication app, ApiVersionSet apiVersionSet)
     {
-        ApiVersionSet apiVersionSet = app.NewApiVersionSet()
-            .HasApiVersion(new ApiVersion(1))
-            .ReportApiVersions()
-            .Build();
 
-        var sessionV1Group = app.MapGroup("v{version:apiVersion}/sessions").WithApiVersionSet(apiVersionSet)
+        var sessionV1Group = app.MapGroup("v{version:apiVersion}/sessions").WithApiVersionSet(apiVersionSet).MapToApiVersion(1)
             .WithTags("Sessions");
 
         sessionV1Group.MapDelete("/{sessionId:int}",

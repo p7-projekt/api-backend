@@ -12,14 +12,9 @@ namespace API.Endpoints;
 
 public static class DashboardEndpoints
 {
-    public static WebApplication UseDashboardEndpoints(this WebApplication app)
+    public static WebApplication UseDashboardEndpoints(this WebApplication app, ApiVersionSet apiVersionSet)
     {
-        ApiVersionSet apiVersionSet = app.NewApiVersionSet()
-            .HasApiVersion(new ApiVersion(2))
-            .ReportApiVersions()
-            .Build();
-
-        var dashboardV2Group = app.MapGroup("v{version:apiVersion}/dashboard").WithApiVersionSet(apiVersionSet)
+        var dashboardV2Group = app.MapGroup("v{version:apiVersion}/dashboard").WithApiVersionSet(apiVersionSet).MapToApiVersion(2)
             .WithTags("Dashboard").WithOpenApi();
 
         dashboardV2Group.MapGet("/{sessionId:int}", async Task<Results<Ok<GetExercisesInSessionCombinedInfo>, NotFound, BadRequest>> (int sessionId, ClaimsPrincipal principal,
