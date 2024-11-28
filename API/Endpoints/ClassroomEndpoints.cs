@@ -50,6 +50,7 @@ public static class ClassroomEndpoints
 
         classroomV2.MapGet("/{classroomId:int}", async Task<Results<Ok<GetClassroomResponseDto>, BadRequest<ValidationProblemDetails>>> (int classroomId, ClaimsPrincipal principal, IClassroomService service) =>
         {
+
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
             var userRole = principal.Claims.First(c => c.Type == ClaimTypes.Role).Value;
 
@@ -59,6 +60,13 @@ public static class ClassroomEndpoints
                 return TypedResults.BadRequest(CreateBadRequest.CreateValidationProblemDetails(result.Errors, "Errors", "Errors"));
             }
 
+            if (userRole == Roles.Student)
+            {
+                result.Value.Roomcode = null;
+                result.Value.IsOpen = null;
+            }
+            
+            
             return TypedResults.Ok(result.Value);
 
         }).RequireAuthorization(Policies.AllowClassroomRoles);
