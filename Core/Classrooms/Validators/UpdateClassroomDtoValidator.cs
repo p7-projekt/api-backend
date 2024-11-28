@@ -14,7 +14,7 @@ public class UpdateClassroomDtoValidator : AbstractValidator<UpdateClassroomDto>
     {
         RuleFor(x => x.Title).NotEmpty().WithMessage("Classrooms must have a title");
         RuleFor(x => x.Title).MaximumLength(100).WithMessage("Title must be no longer than 100 characters");
-        RuleFor(x => x.RegistrationOpen).(value => value == true || value == false).WithMessage("Registratin level of classroom must be set");
+        RuleFor(x => x.RegistrationOpen).Must(value => value == true || value == false).WithMessage("Registratin level of classroom must be set");
         RuleFor(x => x.Description).MaximumLength(1000).WithMessage("Max 1000 characters for the description");
     }
 }
