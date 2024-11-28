@@ -52,9 +52,9 @@ public static class ClassroomEndpoints
         {
 
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
-            var userRole = principal.Claims.First(c => c.Type == ClaimTypes.Role).Value;
+            var userRole = RolesConvert.Convert(principal.Claims.First(c => c.Type == ClaimTypes.Role).Value);
 
-            var result = await service.GetClassroomById(classroomId, int.Parse(userId), RolesConvert.Convert(userRole));
+            var result = await service.GetClassroomById(classroomId, int.Parse(userId), userRole);
             if(result.IsFailed)
             {
                 return TypedResults.BadRequest(CreateBadRequest.CreateValidationProblemDetails(result.Errors, "Errors", "Errors"));
