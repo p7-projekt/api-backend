@@ -1,8 +1,10 @@
 # api-backend
 
 ## Production
+Database have to be a postgres instance.
 
 ```env
+ASPNETCORE_ENVIRONMENT=Development Or Production
 JWT_KEY=XXXXXXXXXXXXXXX(atleast 128 bits)
 MOZART_HASKELL=HOST:PORT
 MOZART_PYTHON=HOST:PORT
@@ -10,6 +12,8 @@ SEED_ADMIN="true"/"false"
 # if seed admin then
 ADMIN_MAIL="someEmail@email.dk"
 ADMIN_PASS="YourPass!1231"
+#
+CONNECTIONSTRING=Host=X;Port=X;Database=X;Username=X;Password=X;
 ```
 
 ## Development
