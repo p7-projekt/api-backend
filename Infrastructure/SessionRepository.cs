@@ -366,7 +366,7 @@ public class SessionRepository : ISessionRepository
         return exercises.OrderBy(x => x.ExerciseId).ToList();
     }
 
-    public async Task<IEnumerable<Session>?> GetSessionsAsync(int authorId)
+    public async Task<List<Session>?> GetInstructorSessionsAsync(int authorId)
     {
         using var con = await _connection.CreateConnectionAsync();
         var query = """
@@ -380,7 +380,20 @@ public class SessionRepository : ISessionRepository
                     );
                     """;
         var results = await con.QueryAsync<Session>(query, new { Id = authorId });
-        return results;
+        return results.ToList();
+    }
+
+    public async Task<List<Session>?> GetStudentSessionsAsync(int studentId)
+    {
+        using var con = await _connection.CreateConnectionAsync();
+        var query = """
+                    SELECT s.session_id AS id, title, expirationtime_utc AS ExpirationTimeUtc
+                    FROM session AS s
+                    JOIN user_in_timedsession as sit ON s.session_id = sit.session_id
+                    WHERE user_id = @StudentId
+                    """;
+        var result = await con.QueryAsync<Session>(query, new { StudentId = studentId });
+        return result.ToList();
     }
 
     public async Task<bool> DeleteSessionAsync(int sessionId, int authorId)

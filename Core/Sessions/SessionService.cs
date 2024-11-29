@@ -35,9 +35,14 @@ public class SessionService : ISessionService
         return Result.Ok();
     }
     
-    public async Task<Result<List<GetSessionsResponseDto>>> GetSessions(int userId)
+    public async Task<Result<List<GetSessionsResponseDto>>> GetSessions(int userId, Roles role)
     {
-        var sessions = await _sessionRepository.GetSessionsAsync(userId);
+        var sessions = role switch
+        {
+            Roles.Instructor => await _sessionRepository.GetInstructorSessionsAsync(userId),
+            Roles.Student => await _sessionRepository.GetStudentSessionsAsync(userId),
+            _ => null
+        };
         if (sessions == null)
         {
             return Result.Fail("Sessions not found");
