@@ -31,8 +31,7 @@ public static class ExerciseEndpoints
 
             if(result.Value != null)
             {
-                var obj = JsonSerializer.Serialize(JsonSerializer.Deserialize<object>(result.Value));
-                return TypedResults.BadRequest(obj);
+                return TypedResults.BadRequest(result.Value);
             }
 
             return TypedResults.Created();
