@@ -249,7 +249,7 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
         sessionRepoSub.GetSessionBySessionCodeAsync(Arg.Any<string>()).Returns(sessionResponse);
         sessionRepoSub.CreateAnonUser(Arg.Any<string>(), Arg.Any<int>()).Returns(1);
 
-        var requestBody = new JoinSessionDto("AA1234", "lars");
+        var requestBody = new JoinDto("AA1234", "lars");
 
         var response = await _client.PostAsJsonAsync("/join", requestBody);
 
@@ -268,7 +268,7 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
         sessionRepoSub.GetSessionBySessionCodeAsync(Arg.Any<string>()).Returns(Result.Fail("Found no session on session code"));
         sessionRepoSub.CreateAnonUser(Arg.Any<string>(), Arg.Any<int>()).Returns(1);
 
-        var requestBody = new JoinSessionDto("AA1234", "lars");
+        var requestBody = new JoinDto("AA1234", "lars");
 
         var response = await _client.PostAsJsonAsync("/join", requestBody);
 

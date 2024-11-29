@@ -1,3 +1,4 @@
+using Core.Classrooms.Contracts;
 using Core.Exercises.Contracts;
 using Core.Sessions;
 using Core.Sessions.Contracts;
@@ -21,7 +22,8 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenRepoSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub);
+        var classroomRepoSub = Substitute.For<IClassroomRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub, classroomRepoSub);
         
         // Act
         var result = sessionService.GenerateSessionCode();
@@ -39,7 +41,8 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenRepoSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub);
+        var classroomRepoSub = Substitute.For<IClassroomRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub, classroomRepoSub);
 
         sessionRepoSub.DeleteSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
 
@@ -55,7 +58,8 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenRepoSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub);
+        var classroomRepoSub = Substitute.For<IClassroomRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub, classroomRepoSub);
 
         sessionRepoSub.DeleteSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
 
@@ -71,7 +75,8 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenRepoSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub);
+        var classroomRepoSub = Substitute.For<IClassroomRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub, classroomRepoSub);
 
         var session1 = new Session();
         var session2 = new Session();
@@ -90,8 +95,9 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenRepoSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub);
-        
+        var classroomRepoSub = Substitute.For<IClassroomRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub, classroomRepoSub);
+
         sessionRepoSub.GetSessionsAsync(Arg.Any<int>()).Returns(Task.FromResult<IEnumerable<Session>?>(null));
 
         var result = await sessionService.GetSessions(1);
@@ -106,7 +112,8 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenRepoSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub);
+        var classroomRepoSub = Substitute.For<IClassroomRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub, classroomRepoSub);
 
         sessionRepoSub.InsertSessionAsync(Arg.Any<Session>(), Arg.Any<int>()).Returns(1);
 
@@ -124,7 +131,8 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenRepoSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub);
+        var classroomRepoSub = Substitute.For<IClassroomRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub, classroomRepoSub);
 
         sessionRepoSub.InsertSessionAsync(Arg.Any<Session>(), Arg.Any<int>()).Returns((int)SessionService.ErrorCodes.ExerciseDoesNotExist);
 
@@ -141,7 +149,8 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenRepoSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub);
+        var classroomRepoSub = Substitute.For<IClassroomRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub, classroomRepoSub);
 
         sessionRepoSub.InsertSessionAsync(Arg.Any<Session>(), Arg.Any<int>()).Returns((int)SessionService.ErrorCodes.UniqueConstraintViolation);
 
@@ -158,7 +167,8 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenRepoSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub);
+        var classroomRepoSub = Substitute.For<IClassroomRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub, classroomRepoSub);
 
         sessionRepoSub.InsertSessionAsync(Arg.Any<Session>(), Arg.Any<int>()).Returns((int)SessionService.ErrorCodes.UniqueConstraintViolation, 1);
 
@@ -176,7 +186,8 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenServiceSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub);
+        var classroomRepoSub = Substitute.For<IClassroomRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub, classroomRepoSub);
 
         var session = new Session();
         sessionRepoSub.GetSessionBySessionCodeAsync(Arg.Any<string>()).Returns(session);
@@ -184,7 +195,7 @@ public class SessionServiceTest
 
         tokenServiceSub.GenerateAnonymousUserJwt(Arg.Any<int>(), Arg.Any<int>()).Returns("token");
 
-        var dto = new JoinSessionDto("token", "lars");
+        var dto = new JoinDto("token", "lars");
         var result = await sessionService.JoinSessionAnonUser(dto);
         
         Assert.True(result.IsSuccess);
@@ -197,12 +208,13 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenServiceSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub);
+        var classroomRepoSub = Substitute.For<IClassroomRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub, classroomRepoSub);
 
         var session = new Session();
         sessionRepoSub.GetSessionBySessionCodeAsync(Arg.Any<string>()).Returns(Result.Fail("Failed to get session"));
         
-        var dto = new JoinSessionDto("token", "lars");
+        var dto = new JoinDto("token", "lars");
         var result = await sessionService.JoinSessionAnonUser(dto);
         
         Assert.True(result.IsFailed);
@@ -215,7 +227,9 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenServiceSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub);
+        var classroomRepoSub = Substitute.For<IClassroomRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub, classroomRepoSub);
+
         sessionRepoSub.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
         
         var result = await sessionService.GetSessionByIdAsync(1, 1, Roles.Instructor);
@@ -230,7 +244,9 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenServiceSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub);
+        var classroomRepoSub = Substitute.For<IClassroomRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub, classroomRepoSub);
+
         sessionRepoSub.VerifyParticipantAccess(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
         
         var result = await sessionService.GetSessionByIdAsync(1, 1, Roles.AnonymousUser);
@@ -245,7 +261,9 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenServiceSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub);
+        var classroomRepoSub = Substitute.For<IClassroomRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub, classroomRepoSub);
+
         sessionRepoSub.VerifyParticipantAccess(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
 
         sessionRepoSub.GetSessionOverviewAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(Task.FromResult<Session?>(null));
@@ -262,7 +280,9 @@ public class SessionServiceTest
         var sessionRepoSub = Substitute.For<ISessionRepository>();
         var tokenServiceSub = Substitute.For<IAnonTokenService>();
         var exerciseRepoSub = Substitute.For<IExerciseRepository>();
-        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub);
+        var classroomRepoSub = Substitute.For<IClassroomRepository>();
+        var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenServiceSub, classroomRepoSub);
+
         sessionRepoSub.VerifyParticipantAccess(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         var session = new Session();
         sessionRepoSub.GetSessionOverviewAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(session);

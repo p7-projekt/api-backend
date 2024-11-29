@@ -6,6 +6,7 @@ using Dapper;
 using FluentResults;
 using Infrastructure.Persistence.Contracts;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 
 
 namespace Infrastructure;
@@ -45,12 +46,6 @@ public class ClassroomRepository : IClassroomRepository
         var transaction = con.BeginTransaction();
         try
         {
-            var correctAuthor = await VerifyClassroomAuthor(classroomId, authorId);
-            if (!correctAuthor)
-            {
-                return Result.Fail("Failed to validate author of classroom");
-            }
-
             var verifiedExercises = await _sessionRepository.VerifyExerciseIdsAsync(dto.ExerciseIds, authorId, con, transaction);
             if (!verifiedExercises)
             {
@@ -141,7 +136,7 @@ public class ClassroomRepository : IClassroomRepository
                               """;
 
             var sessions = await con.QueryAsync<GetClassroomSessionDto>(sessionIdsQuery, new { ClassroomId = classroomId });
-            classroom.Sessions = sessions.ToList();
+            classroom.Sessions = sessions.OrderBy(x => x.Id).ToList();
 
             return classroom;
         }
@@ -166,7 +161,7 @@ public class ClassroomRepository : IClassroomRepository
                     """;
         var classrooms = await con.QueryAsync<GetClassroomsResponseDto>(query, new { StudentId = studentId });
 
-        return classrooms.ToList();
+        return classrooms.OrderBy(x => x.Id).ToList();
     }
 
     public async Task<List<GetClassroomsResponseDto>> GetInstructorClassroomsById(int instructorId)
@@ -177,7 +172,7 @@ public class ClassroomRepository : IClassroomRepository
 
         var classrooms = await con.QueryAsync<GetClassroomsResponseDto>(query, new { InstructorId = instructorId });
 
-        return classrooms.ToList();
+        return classrooms.OrderBy(x => x.Id).ToList();
     }
 
     public async Task<Result> UpdateClassroomDetailsAsync(UpdateClassroomDto dto, int classroomId)
@@ -273,10 +268,37 @@ public class ClassroomRepository : IClassroomRepository
         return Result.Ok();
     }
 
-    public async Task<Result> JoinClassroomAsync(int studentId, int classroomId)
+    public async Task<Result> JoinClassroomAsync(int studentId, string roomCode)
     {
         using var con = await _connection.CreateConnectionAsync();
         var transaction = con.BeginTransaction();
+
+        var getClassroomIdQuery = "SELECT classroom_id FROM classroom WHERE roomcode = @RoomCode";
+
+        var classroomId = await con.QueryFirstOrDefaultAsync<int>(getClassroomIdQuery, new { RoomCode = roomCode }, transaction);
+        if (classroomId == 0)
+        {
+            transaction.Rollback();
+            _logger.LogInformation("User {userID} tried to join classroom with invalid code {code}", studentId, roomCode);
+            return Result.Fail("Invalid roomcode");
+        }
+
+        var registrationOpen = await VerifyRegistrationIsOpen(classroomId);
+        if (!registrationOpen)
+        {
+            transaction.Rollback();
+            _logger.LogInformation("User {userID} failed to join classroom {classroomID} - registration not open", studentId, classroomId);
+            return Result.Fail("Classroom cannot not open to join");
+        }
+
+        var checkJoinedQuery = "SELECT 1 FROM student_in_classroom WHERE student_id = @StudentId AND classroom_id = @ClassroomId";
+        var joinedAlready = await con.QuerySingleOrDefaultAsync<int>(checkJoinedQuery, new { StudentId = studentId, ClassroomId = classroomId });
+        if (joinedAlready != 0)
+        {
+            transaction.Rollback();
+            _logger.LogInformation("User {userID} tried to join classroom {classroomId}, but was already joined", studentId, classroomId);
+            return Result.Fail("Student already joined classroom");
+        }
 
         var query = "INSERT INTO student_in_classroom (student_id, classroom_id) VALUES (@StudentId, @ClassroomId);";
 
@@ -320,7 +342,7 @@ public class ClassroomRepository : IClassroomRepository
 
         var session = await con.QuerySingleAsync<GetClassroomSessionResponseDto>(query, new { SessionId = sessionId });
 
-        session.ExerciseIds = await _sessionRepository.GetExercisesOfSessionAsync(sessionId, con);
+        session.ExerciseIds = (await _sessionRepository.GetExercisesOfSessionAsync(sessionId, con));
 
         var languageQuery = "SELECT language_id FROM language_in_session WHERE session_id = @SessionId;";
 

@@ -10,15 +10,11 @@ namespace API.Endpoints;
 
 public static class LanguageEndpoints
 {
-	public static WebApplication UseLanguageEndpoints(this WebApplication app)
+	public static WebApplication UseLanguageEndpoints(this WebApplication app, ApiVersionSet apiVersionSet)
 	{
-		ApiVersionSet apiVersionSet = app.NewApiVersionSet()
-			.HasApiVersion(new ApiVersion(2))
-			.ReportApiVersions()
-			.Build();
-		
+
 		var languageV2 = app.MapGroup("v{version:apiVersion}/languages")
-			.WithApiVersionSet(apiVersionSet).WithTags("Languages");
+			.WithApiVersionSet(apiVersionSet).MapToApiVersion(2).WithTags("Languages");
 
 		languageV2.MapGet("/", async Task<Results<Ok<List<GetLanguagesResponseDto>>, BadRequest>> (ILanguageService service) =>
 		{
