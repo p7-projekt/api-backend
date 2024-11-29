@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using System.Text.Json;
 using API.Configuration;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
@@ -30,7 +31,8 @@ public static class ExerciseEndpoints
 
             if(result.Value != null)
             {
-                return TypedResults.BadRequest(result.Value);
+                var obj = JsonSerializer.Serialize(JsonSerializer.Deserialize<object>(result.Value));
+                return TypedResults.BadRequest(obj);
             }
 
             return TypedResults.Created();
