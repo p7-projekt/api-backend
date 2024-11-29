@@ -24,12 +24,12 @@ public class DashboardRepository : IDashboardRepository
         using var con = await _connection.CreateConnectionAsync();
         var query = """
                 SELECT
-                    e.title,
-                    e.exercise_id,
-                    COUNT(CASE WHEN sub.solved THEN 1 END) AS solved,
-                    COUNT(sub.exercise_id) AS attempted,
-                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN sub.user_id END), NULL) AS users,
-                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN u.name END), NULL) AS names
+                    e.title AS Title,
+                    e.exercise_id AS Id,
+                    COUNT(CASE WHEN sub.solved THEN 1 END) AS Solved,
+                    COUNT(sub.exercise_id) AS Attempted,
+                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN sub.user_id END), NULL) AS UserIds,
+                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN u.name END), NULL) AS Names
                 FROM exercise_in_session AS eis
                     JOIN exercise AS e
                         ON eis.exercise_id = e.exercise_id
@@ -39,9 +39,10 @@ public class DashboardRepository : IDashboardRepository
                     LEFT JOIN users AS u
                         ON u.id = sub.user_id
                 WHERE
-                    eis.session_id = @id
+                    eis.session_id = @Id
                 GROUP BY
                     e.exercise_id, e.title;
+                
                 """;
         var results = await con.QueryAsync<GetExercisesInSessionResponseDto>(query, new { Id = sessionId });
 
@@ -53,12 +54,12 @@ public class DashboardRepository : IDashboardRepository
         using var con = await _connection.CreateConnectionAsync();
         var query = """
                 SELECT
-                    e.title,
-                    e.exercise_id,
-                    COUNT(CASE WHEN sub.solved THEN 1 END) AS solved,
-                    COUNT(sub.exercise_id) AS attempted,
-                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN sub.user_id END), NULL) AS users,
-                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN u.name END), NULL) AS names
+                    e.title AS Title,
+                    e.exercise_id AS Id,
+                    COUNT(CASE WHEN sub.solved THEN 1 END) AS Solved,
+                    COUNT(sub.exercise_id) AS Attempted,
+                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN sub.user_id END), NULL) AS UserIds,
+                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN u.name END), NULL) AS Names
                 FROM exercise_in_session AS eis
                     JOIN exercise AS e
                         ON eis.exercise_id = e.exercise_id
@@ -68,7 +69,7 @@ public class DashboardRepository : IDashboardRepository
                     LEFT JOIN users AS u
                         ON u.id = sub.user_id
                 WHERE
-                    eis.session_id = @id
+                    eis.session_id = @Id
                 GROUP BY
                     e.exercise_id, e.title;
                 """;
