@@ -154,7 +154,7 @@ public class ClassroomRepository : IClassroomRepository
         using var con = await _connection.CreateConnectionAsync();
 
         var query = """
-                    SELECT classroom_id AS id, title, description 
+                    SELECT c.classroom_id AS id, title, description 
                     FROM classroom AS c
                     JOIN student_in_classroom AS sic
                     ON c.classroom_id = sic.classroom_id
