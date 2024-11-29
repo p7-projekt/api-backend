@@ -27,7 +27,7 @@ public class DashboardServiceTest
         sessionRepoSub.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         dashboardRepoSub.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(false);
         dashboardRepoSub.GetConnectedTimedUsersAsync(Arg.Any<int>()).Returns(4);
-        dashboardRepoSub.GetExercisesInTimedSessionBySessionIdAsync(Arg.Any<int>()).Returns(createExerciseResponse());
+        dashboardRepoSub.GetExercisesInSessionBySessionIdAsync(Arg.Any<int>()).Returns(createExerciseResponse());
         // Act
         var result = await dashboardService.GetExercisesInSession(1, 1);
 
@@ -47,7 +47,7 @@ public class DashboardServiceTest
         sessionRepoSub.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         dashboardRepoSub.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(false);
         dashboardRepoSub.GetConnectedTimedUsersAsync(Arg.Any<int>()).Returns(4);
-        dashboardRepoSub.GetExercisesInTimedSessionBySessionIdAsync(Arg.Any<int>()).Returns(new List<GetExercisesInSessionResponseDto>());
+        dashboardRepoSub.GetExercisesInSessionBySessionIdAsync(Arg.Any<int>()).Returns(new List<GetExercisesInSessionResponseDto>());
         // Act
         var result = await dashboardService.GetExercisesInSession(1, 1);
 
@@ -66,7 +66,7 @@ public class DashboardServiceTest
         sessionRepoSub.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         dashboardRepoSub.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(true);
         dashboardRepoSub.GetConnectedUsersClassAsync(Arg.Any<int>()).Returns(4);
-        dashboardRepoSub.GetExercisesInClassSessionBySessionIdAsync(Arg.Any<int>()).Returns(createExerciseResponse());
+        dashboardRepoSub.GetExercisesInSessionBySessionIdAsync(Arg.Any<int>()).Returns(createExerciseResponse());
         // Act
         var result = await dashboardService.GetExercisesInSession(1, 1);
 
@@ -86,7 +86,7 @@ public class DashboardServiceTest
         sessionRepoSub.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         dashboardRepoSub.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(true);
         dashboardRepoSub.GetConnectedUsersClassAsync(Arg.Any<int>()).Returns(4);
-        dashboardRepoSub.GetExercisesInClassSessionBySessionIdAsync(Arg.Any<int>()).Returns(new List<GetExercisesInSessionResponseDto>());
+        dashboardRepoSub.GetExercisesInSessionBySessionIdAsync(Arg.Any<int>()).Returns(new List<GetExercisesInSessionResponseDto>());
         // Act
         var result = await dashboardService.GetExercisesInSession(1, 1);
 
@@ -106,7 +106,7 @@ public class DashboardServiceTest
         sessionRepoSub.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
         dashboardRepoSub.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(true);
         dashboardRepoSub.GetConnectedUsersClassAsync(Arg.Any<int>()).Returns(4);
-        dashboardRepoSub.GetExercisesInClassSessionBySessionIdAsync(Arg.Any<int>()).Returns(new List<GetExercisesInSessionResponseDto>());
+        dashboardRepoSub.GetExercisesInSessionBySessionIdAsync(Arg.Any<int>()).Returns(new List<GetExercisesInSessionResponseDto>());
         // Act
         var result = await dashboardService.GetExercisesInSession(1, 1);
 
