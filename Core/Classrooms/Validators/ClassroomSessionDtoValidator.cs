@@ -15,6 +15,8 @@ public class ClassroomSessionDtoValidator : AbstractValidator<ClassroomSessionDt
         RuleFor(x => x.Title).NotEmpty().WithMessage("Session must have a title");
         RuleFor(x => x.Title).MaximumLength(100).WithMessage("Title must be no longet than 100 characters");
         RuleFor(x => x.ExerciseIds).NotEmpty().WithMessage("Exercises must be associated to session");
+        RuleFor(x => x.ExerciseIds).ForEach(y => y.GreaterThan(0).WithMessage("Exercise ids must be greater than 0"));
         RuleFor(x => x.LanguageIds).NotEmpty().WithMessage("Allowed languages of session must be defined");
+        RuleFor(x => x.LanguageIds).ForEach(y => y.GreaterThan(0).WithMessage("Language ids must be greater than 0"));
     }
 }
