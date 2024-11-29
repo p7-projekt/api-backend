@@ -98,7 +98,7 @@ public static class SessionEndpoints
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<CreateSessionDto>();
         
         // Join session
-        app.MapPost("/join", async Task<Results<Ok<JoinSessionResponseDto>, BadRequest<ValidationProblemDetails>>> ([FromBody]JoinDto dto, ISessionService service, ClaimsPrincipal principal) =>
+        app.MapPost("/join", async Task<Results<Ok<JoinResponseDto>, BadRequest<ValidationProblemDetails>>> ([FromBody]JoinDto dto, ISessionService service, ClaimsPrincipal principal) =>
         {
             var hasToken = principal.Claims.Any();
             

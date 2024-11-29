@@ -6,6 +6,7 @@ using Core.Shared;
 using Core.Shared.Contracts;
 using FluentResults;
 using Microsoft.Extensions.Logging;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Core.Sessions;
 
@@ -86,7 +87,7 @@ public class SessionService : ISessionService
         return new CreateSessionResponseDto(sessionId, sessionCode);
     }
 
-    public async Task<Result<JoinSessionResponseDto>> JoinStudent(int userId, string code)
+    public async Task<Result<JoinResponseDto>> JoinStudent(int userId, string code)
     {
         Codes actualCode = DetermineCode(code);
         if (actualCode == Codes.None)
@@ -107,24 +108,24 @@ public class SessionService : ISessionService
         return Result.Fail("Internal error happend");
     }
 
-    private async Task<Result<JoinSessionResponseDto>> JoinTimedSessionStudent(int userId, string code)
+    private async Task<Result<JoinResponseDto>> JoinTimedSessionStudent(int userId, string code)
     {
         var result = await _sessionRepository.StudentJoinSession(code, userId);
         if (result.IsFailed)
         {
             return result;
         }
-        return new JoinSessionResponseDto(null, null, JoinedType.JoinedTimedSession);
+        return new JoinResponseDto(null, null, JoinedType.JoinedTimedSession, null);
     }
 
-    private async Task<Result<JoinSessionResponseDto>> JoinClassRoomStudent(int studentId, string code)
+    private async Task<Result<JoinResponseDto>> JoinClassRoomStudent(int studentId, string code)
     {
         var result = await _classroomRepository.JoinClassroomAsync(studentId, code);
         if (result.IsFailed)
         {
-            return result;
+            return Result.Fail(result.Errors);
         }
-        return new JoinSessionResponseDto(null, null, JoinedType.JoinedClassroom);
+        return new JoinResponseDto(null, null, JoinedType.JoinedClassroom, result.Value);
     }
 
     public enum Codes
@@ -151,7 +152,7 @@ public class SessionService : ISessionService
         return Codes.None;
     }
 
-    public async Task<Result<JoinSessionResponseDto>> JoinSessionAnonUser(JoinDto dto)
+    public async Task<Result<JoinResponseDto>> JoinSessionAnonUser(JoinDto dto)
     {
         if (dto.Name == null)
         {
@@ -168,7 +169,7 @@ public class SessionService : ISessionService
         var timeOffset = session.Value.ExpirationTimeUtc - DateTime.UtcNow;
         
         var createToken = _tokenService.GenerateAnonymousUserJwt((int)Math.Ceiling(timeOffset.TotalMinutes), student);
-        return new JoinSessionResponseDto(createToken, DateTime.UtcNow.AddMinutes((int)Math.Ceiling(timeOffset.TotalMinutes)), JoinedType.JoinedTimedSession);
+        return new JoinResponseDto(createToken, DateTime.UtcNow.AddMinutes((int)Math.Ceiling(timeOffset.TotalMinutes)), JoinedType.JoinedTimedSession, null);
     }
 
     public async Task<Result<GetSessionResponseDto>> GetSessionByIdAsync(int sessionId, int userId, Roles role)

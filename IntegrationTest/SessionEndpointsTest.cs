@@ -254,8 +254,8 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
         var response = await _client.PostAsJsonAsync("/join", requestBody);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var body = await response.Content.ReadFromJsonAsync<JoinSessionResponseDto>();
-        Assert.IsType<JoinSessionResponseDto>(body);
+        var body = await response.Content.ReadFromJsonAsync<JoinResponseDto>();
+        Assert.IsType<JoinResponseDto>(body);
     }
 
     [Fact]

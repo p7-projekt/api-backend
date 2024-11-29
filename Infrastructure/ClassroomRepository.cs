@@ -268,7 +268,7 @@ public class ClassroomRepository : IClassroomRepository
         return Result.Ok();
     }
 
-    public async Task<Result> JoinClassroomAsync(int studentId, string roomCode)
+    public async Task<Result<int>> JoinClassroomAsync(int studentId, string roomCode)
     {
         using var con = await _connection.CreateConnectionAsync();
         var transaction = con.BeginTransaction();
@@ -312,7 +312,7 @@ public class ClassroomRepository : IClassroomRepository
         }
         transaction.Commit();
 
-        return Result.Ok();
+        return Result.Ok(classroomId);
     }
 
     public async Task DeleteClassroomSessionAsync(int sessionId)
