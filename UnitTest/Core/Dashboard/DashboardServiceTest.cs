@@ -16,7 +16,7 @@ namespace UnitTest.Core.Sessions;
 public class DashboardServiceTest
 {
     [Fact]
-    public async void GetExercisesInSession_Timed_ShouldReturn_GetExercisesCombinedInfoDto()
+    public async void GetExercisesInSession_Timed_ShouldReturn_OK()
     {
         // Arrange
         var loggerSub2 = Substitute.For<ILogger<DashboardService>>();
@@ -35,6 +35,143 @@ public class DashboardServiceTest
         Assert.True(result.IsSuccess);
         Assert.IsType<GetExercisesInSessionCombinedInfo>(result.Value);
     }
+    [Fact]
+    public async void GetExercisesInSession_Timed_ShouldReturn_Fail()
+    {
+        // Arrange
+        var loggerSub2 = Substitute.For<ILogger<DashboardService>>();
+        var sessionRepoSub = Substitute.For<ISessionRepository>();
+        var dashboardRepoSub = Substitute.For<IDashboardRepository>();
+        var dashboardService = new DashboardService(loggerSub2, dashboardRepoSub, sessionRepoSub);
+
+        sessionRepoSub.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        dashboardRepoSub.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(false);
+        dashboardRepoSub.GetConnectedTimedUsersAsync(Arg.Any<int>()).Returns(4);
+        dashboardRepoSub.GetExercisesInTimedSessionBySessionIdAsync(Arg.Any<int>()).Returns(new List<GetExercisesInSessionResponseDto>());
+        // Act
+        var result = await dashboardService.GetExercisesInSession(1, 1);
+
+        // Assert
+        Assert.True(result.IsFailed);
+    }
+    [Fact]
+    public async void GetExercisesInSession_Class_ShouldReturn_OK()
+    {
+        // Arrange
+        var loggerSub2 = Substitute.For<ILogger<DashboardService>>();
+        var sessionRepoSub = Substitute.For<ISessionRepository>();
+        var dashboardRepoSub = Substitute.For<IDashboardRepository>();
+        var dashboardService = new DashboardService(loggerSub2, dashboardRepoSub, sessionRepoSub);
+
+        sessionRepoSub.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        dashboardRepoSub.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(true);
+        dashboardRepoSub.GetConnectedUsersClassAsync(Arg.Any<int>()).Returns(4);
+        dashboardRepoSub.GetExercisesInClassSessionBySessionIdAsync(Arg.Any<int>()).Returns(createExerciseResponse());
+        // Act
+        var result = await dashboardService.GetExercisesInSession(1, 1);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.IsType<GetExercisesInSessionCombinedInfo>(result.Value);
+    }
+    [Fact]
+    public async void GetExercisesInSession_Class_ShouldReturn_Fail()
+    {
+        // Arrange
+        var loggerSub2 = Substitute.For<ILogger<DashboardService>>();
+        var sessionRepoSub = Substitute.For<ISessionRepository>();
+        var dashboardRepoSub = Substitute.For<IDashboardRepository>();
+        var dashboardService = new DashboardService(loggerSub2, dashboardRepoSub, sessionRepoSub);
+
+        sessionRepoSub.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        dashboardRepoSub.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(true);
+        dashboardRepoSub.GetConnectedUsersClassAsync(Arg.Any<int>()).Returns(4);
+        dashboardRepoSub.GetExercisesInClassSessionBySessionIdAsync(Arg.Any<int>()).Returns(new List<GetExercisesInSessionResponseDto>());
+        // Act
+        var result = await dashboardService.GetExercisesInSession(1, 1);
+
+        // Assert
+        Assert.True(result.IsFailed);
+    }
+
+    [Fact]
+    public async void GetExercisesInSession_ShouldReturn_Fail()
+    {
+        // Arrange
+        var loggerSub2 = Substitute.For<ILogger<DashboardService>>();
+        var sessionRepoSub = Substitute.For<ISessionRepository>();
+        var dashboardRepoSub = Substitute.For<IDashboardRepository>();
+        var dashboardService = new DashboardService(loggerSub2, dashboardRepoSub, sessionRepoSub);
+
+        sessionRepoSub.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
+        dashboardRepoSub.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(true);
+        dashboardRepoSub.GetConnectedUsersClassAsync(Arg.Any<int>()).Returns(4);
+        dashboardRepoSub.GetExercisesInClassSessionBySessionIdAsync(Arg.Any<int>()).Returns(new List<GetExercisesInSessionResponseDto>());
+        // Act
+        var result = await dashboardService.GetExercisesInSession(1, 1);
+
+        // Assert
+        Assert.True(result.IsFailed);
+    }
+    [Fact]
+    public async void GetUserSolution_ShouldReturn_OK()
+    {
+        // Arrange
+        var loggerSub2 = Substitute.For<ILogger<DashboardService>>();
+        var sessionRepoSub = Substitute.For<ISessionRepository>();
+        var dashboardRepoSub = Substitute.For<IDashboardRepository>();
+        var dashboardService = new DashboardService(loggerSub2, dashboardRepoSub, sessionRepoSub);
+
+        dashboardRepoSub.CheckAuthorizedToGetSolution(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        dashboardRepoSub.GetSolutionByUserIdAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(new GetExerciseSolutionResponseDto("","","","",1));
+
+        // Act
+        var result = await dashboardService.GetUserSolution(1,1,1);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.IsType<GetExerciseSolutionResponseDto>(result.Value);
+    }
+    [Fact]
+    public async void GetUserSolution_NotAuthorized_ShouldReturn_Fail()
+    {
+        // Arrange
+        var loggerSub2 = Substitute.For<ILogger<DashboardService>>();
+        var sessionRepoSub = Substitute.For<ISessionRepository>();
+        var dashboardRepoSub = Substitute.For<IDashboardRepository>();
+        var dashboardService = new DashboardService(loggerSub2, dashboardRepoSub, sessionRepoSub);
+
+        dashboardRepoSub.CheckAuthorizedToGetSolution(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<int>()).Returns(false);
+        dashboardRepoSub.GetSolutionByUserIdAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(new GetExerciseSolutionResponseDto("", "", "", "", 1));
+
+        // Act
+        var result = await dashboardService.GetUserSolution(1, 1, 1);
+
+        // Assert
+        Assert.True(result.IsFailed);
+    }
+    [Fact]
+    public async void GetUserSolution_ShouldReturn_Fail()
+    {
+        // Arrange
+        var loggerSub2 = Substitute.For<ILogger<DashboardService>>();
+        var sessionRepoSub = Substitute.For<ISessionRepository>();
+        var dashboardRepoSub = Substitute.For<IDashboardRepository>();
+        var dashboardService = new DashboardService(loggerSub2, dashboardRepoSub, sessionRepoSub);
+
+        dashboardRepoSub.CheckAuthorizedToGetSolution(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        dashboardRepoSub.GetSolutionByUserIdAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(Result.Fail(""));
+
+        // Act
+        var result = await dashboardService.GetUserSolution(1, 1, 1);
+
+        // Assert
+        Assert.True(result.IsFailed);
+    }
+
+
+
+
     private IEnumerable<GetExercisesInSessionResponseDto> createExerciseResponse()
     {
         return new List<GetExercisesInSessionResponseDto>
@@ -58,37 +195,5 @@ public class DashboardServiceTest
             Names = new[] { "Dave", "Eve" }
         }
     };
-    }
-    private GetExercisesInSessionCombinedInfo CreateDummyCombinedInfo()
-    {
-        return new GetExercisesInSessionCombinedInfo(
-            Participants: 4,
-            ExerciseDetails: new List<GetExercisesAndUserDetailsInSessionResponseDto>
-            {
-            new GetExercisesAndUserDetailsInSessionResponseDto(
-                Title: "Exercise 1",
-                Id: 1,
-                Solved: 10,
-                Attemped: 20,
-                UserDetails: new List<UserDetailDto>
-                {
-                    new UserDetailDto(Id: 101, Name: "Alice"),
-                    new UserDetailDto(Id: 102, Name: "Bob"),
-                    new UserDetailDto(Id: 103, Name: "Charlie")
-                }
-            ),
-            new GetExercisesAndUserDetailsInSessionResponseDto(
-                Title: "Exercise 2",
-                Id: 2,
-                Solved: 5,
-                Attemped: 10,
-                UserDetails: new List<UserDetailDto>
-                {
-                    new UserDetailDto(Id: 201, Name: "Dave"),
-                    new UserDetailDto(Id: 202, Name: "Eve")
-                }
-            )
-            }
-        );
     }
 }
