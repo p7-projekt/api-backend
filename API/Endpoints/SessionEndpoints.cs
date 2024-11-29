@@ -58,7 +58,7 @@ public static class SessionEndpoints
                     return TypedResults.NotFound();
                 }
             return TypedResults.Ok(results.Value);
-            }).RequireAuthorization(nameof(Roles.Instructor));
+            }).RequireAuthorization(Policies.AllowClassroomRoles);
         
         // Get session
         sessionV1Group.MapGet("/{id:int}", async Task<Results<Ok<GetSessionResponseDto>, NotFound, BadRequest>>(int id, ClaimsPrincipal principal, ISessionService service) =>
