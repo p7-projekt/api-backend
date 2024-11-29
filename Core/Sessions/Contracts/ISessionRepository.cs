@@ -23,7 +23,6 @@ public interface ISessionRepository
     Task<bool> VerifyLanguagesIdsAsync(List<Language> languages);
     Task<Result> InsertExerciseRelation(List<int> exerciseIds, int sessionId, IDbConnection con, IDbTransaction transaction);
     Task<Result> InsertLanguageRelation(List<int> languageIds, int sessionId, IDbConnection con, IDbTransaction transaction);
-    Task<Result> StudentJoinSession(string code, int userId);
-
+    Task<Result<int>> StudentJoinSession(string code, int userId);
     Task<int> GetTimedSessionIdByUserId(int userId);
 }

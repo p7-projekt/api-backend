@@ -113,9 +113,9 @@ public class SessionService : ISessionService
         var result = await _sessionRepository.StudentJoinSession(code, userId);
         if (result.IsFailed)
         {
-            return result;
+            return Result.Fail(result.Errors);
         }
-        return new JoinResponseDto(null, null, JoinedType.JoinedTimedSession, null);
+        return new JoinResponseDto(null, null, JoinedType.TimedSession, result.Value);
     }
 
     private async Task<Result<JoinResponseDto>> JoinClassRoomStudent(int studentId, string code)
@@ -125,7 +125,7 @@ public class SessionService : ISessionService
         {
             return Result.Fail(result.Errors);
         }
-        return new JoinResponseDto(null, null, JoinedType.JoinedClassroom, result.Value);
+        return new JoinResponseDto(null, null, JoinedType.Classroom, result.Value);
     }
 
     public enum Codes
@@ -169,7 +169,7 @@ public class SessionService : ISessionService
         var timeOffset = session.Value.ExpirationTimeUtc - DateTime.UtcNow;
         
         var createToken = _tokenService.GenerateAnonymousUserJwt((int)Math.Ceiling(timeOffset.TotalMinutes), student);
-        return new JoinResponseDto(createToken, DateTime.UtcNow.AddMinutes((int)Math.Ceiling(timeOffset.TotalMinutes)), JoinedType.JoinedTimedSession, null);
+        return new JoinResponseDto(createToken, DateTime.UtcNow.AddMinutes((int)Math.Ceiling(timeOffset.TotalMinutes)), JoinedType.TimedSession, null);
     }
 
     public async Task<Result<GetSessionResponseDto>> GetSessionByIdAsync(int sessionId, int userId, Roles role)

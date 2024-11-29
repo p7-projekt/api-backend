@@ -263,7 +263,7 @@ public class SessionRepository : ISessionRepository
         return result;
     }
 
-    public async Task<Result> StudentJoinSession(string code, int userId)
+    public async Task<Result<int>> StudentJoinSession(string code, int userId)
     {
         using var con = await _connection.CreateConnectionAsync();
         using var transaction = con.BeginTransaction();
@@ -275,8 +275,8 @@ public class SessionRepository : ISessionRepository
                                     FROM session
                                     WHERE session_code = @SessionCode
                                     """;
-            var session = await con.QueryFirstOrDefaultAsync<int>(sessionExistQuery, new { SessionCode = code }, transaction);
-            if (session == 0)
+            var sessionId = await con.QueryFirstOrDefaultAsync<int>(sessionExistQuery, new { SessionCode = code }, transaction);
+            if (sessionId == 0)
             {
                 _logger.LogInformation("Sessioncode {sessionCode} was wrong!", code);
                 return Result.Fail("Invalid session code");
@@ -288,10 +288,10 @@ public class SessionRepository : ISessionRepository
                                      WHERE user_id = @UserId
                                      AND session_id = @SessionId
                                      """;
-            var joinedResult = con.ExecuteScalar<int>(alreadyJoinedQuery, new { UserId = userId, SessionId = session }, transaction);
+            var joinedResult = con.ExecuteScalar<int>(alreadyJoinedQuery, new { UserId = userId, SessionId = sessionId }, transaction);
             if (joinedResult != 0)
             {
-                return Result.Fail("Already joined");
+                return Result.Ok(sessionId);
             }
             
             var insertRelationQuery = """
@@ -300,16 +300,18 @@ public class SessionRepository : ISessionRepository
                                       VALUES
                                       (@UserId, @SessionId);
                                       """;
-            await con.ExecuteScalarAsync<int>(insertRelationQuery, new { UserId = userId, SessionId = session }, transaction);
-            _logger.LogInformation("User with id {userId} is added to session id {sessionId}", userId, session);
+            await con.ExecuteScalarAsync<int>(insertRelationQuery, new { UserId = userId, SessionId = sessionId }, transaction);
+            _logger.LogInformation("User with id {userId} is added to session id {sessionId}", userId, sessionId);
             transaction.Commit();
+
+            return Result.Ok(sessionId);
         }
         catch (Exception e)
         {
             _logger.LogWarning("Exception happend: {exception}, userd did not join session!", e.Message);
             transaction.Rollback();
+            throw;
         }
-        return Result.Ok();
     }
 
     

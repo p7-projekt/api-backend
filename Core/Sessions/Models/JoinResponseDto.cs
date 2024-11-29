@@ -9,13 +9,12 @@ public record JoinResponseDto(
 	DateTime? ExpiresAt,
 	JoinedType JoinedType,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-	int? ClassroomId
-
+	int? JoinedId
     );
 
 // NOT SURE WHERE TO PLACE THIS ENUM
 public enum JoinedType
 {
-	JoinedTimedSession = 1,
-	JoinedClassroom = 2
+	TimedSession = 1,
+	Classroom = 2
 }
