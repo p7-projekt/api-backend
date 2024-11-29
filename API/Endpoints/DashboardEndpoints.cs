@@ -54,7 +54,7 @@ public static class DashboardEndpoints
             if (result.IsFailed)
             {
                 var errorReason = result.Errors.FirstOrDefault()?.Message;
-                if (errorReason == "Not autherized")
+                if (errorReason == "Not authorized")
                 {
                     return TypedResults.Forbid();
                 }

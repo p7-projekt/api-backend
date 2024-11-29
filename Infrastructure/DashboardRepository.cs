@@ -118,7 +118,7 @@ public class DashboardRepository : IDashboardRepository
         }
         return Result.Ok(result);
     }
-    public async Task<bool> CheckAutherizedToGetSolution(int exerciseId, int appUserId, int userId)
+    public async Task<bool> CheckAuthorizedToGetSolution(int exerciseId, int appUserId, int userId)
     {
         using var con = await _connection.CreateConnectionAsync();
         var query = """

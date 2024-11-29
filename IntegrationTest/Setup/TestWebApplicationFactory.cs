@@ -1,3 +1,4 @@
+using Core.Dashboards.Contracts;
 using Core.Exercises.Contracts;
 using Core.Sessions.Contracts;
 using Core.Shared;
@@ -40,12 +41,14 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
       var iExeciseSub = Substitute.For<IExerciseRepository>();
 			var iMozartSub = Substitute.For<IMozartService>();
 			var iSolutionSub = Substitute.For<ISolutionRepository>();
+			var iDashboardSub = Substitute.For<IDashboardRepository>();
       services.AddScoped<ITokenRepository>(_ => ItokenRepoSub);
 			services.AddScoped<IUserRepository>(_ => IUserRepo);
       services.AddScoped<ISessionRepository>(_ => iSesSub);
 			services.AddScoped<IExerciseRepository>(_ => iExeciseSub);
 			services.AddScoped<IMozartService>(_ => iMozartSub);
 			services.AddScoped<ISolutionRepository>(_ => iSolutionSub);
+			services.AddScoped<IDashboardRepository>(_ => iDashboardSub);
 		});
 		
 		return base.CreateHost(builder);

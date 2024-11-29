@@ -46,7 +46,7 @@ public class DashboardService : IDashboardService
         {
             var usersConnected = await _dashboardRepository.GetConnectedUsersClassAsync(sessionId);
 
-            var exercises = await _dashboardRepository.GetExercisesInTimedSessionBySessionIdAsync(sessionId);
+            var exercises = await _dashboardRepository.GetExercisesInClassSessionBySessionIdAsync(sessionId);
             if (exercises == null || exercises.Count() == 0)
             {
                 _logger.LogInformation("No Exercises in timed session: {sessionID}", sessionId);
@@ -60,12 +60,12 @@ public class DashboardService : IDashboardService
 
     public async Task<Result<GetExerciseSolutionResponseDto>> GetUserSolution(int exerciseId, int appUserId, int userId)
     {
-        var autherized = await _dashboardRepository.CheckAutherizedToGetSolution(exerciseId, appUserId, userId);
+        var authorized = await _dashboardRepository.CheckAuthorizedToGetSolution(exerciseId, appUserId, userId);
 
-        if (!autherized)
+        if (!authorized)
         {
             _logger.LogInformation("User {userId} not autherized to access solution for exercise {exerciseId} by appuser {appUserId}", userId, exerciseId, appUserId);
-            return Result.Fail("Not autherized");
+            return Result.Fail("Not authorized");
         }
 
         var solution = await _dashboardRepository.GetSolutionByUserIdAsync(exerciseId, appUserId);
