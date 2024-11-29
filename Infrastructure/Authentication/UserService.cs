@@ -65,7 +65,13 @@ public class UserService : IUserService
 			_logger.LogWarning("Could not retrieve user {userid}", id);
 			return Result.Fail("Error getting user");
 		}
-		return Result.Ok(new GetUserResponseDto(result.Value.Email, result.Value.Name, null));
+        var sessionId = await _sessionRepository.GetTimedSessionIdByUserId(id);
+        if (sessionId == 0)
+        {
+            return Result.Ok(new GetUserResponseDto(result.Value.Email, result.Value.Name, null));
+        }
+
+        return Result.Ok(new GetUserResponseDto(result.Value.Email, result.Value.Name, sessionId));
 	}
 
 	public async Task<Result<GetUserResponseDto>> GetAnonUserByIdAsync(int userId)

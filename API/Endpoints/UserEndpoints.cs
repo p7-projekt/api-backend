@@ -34,17 +34,12 @@ public static class UserEndpoints
 				var strRole = principal.FindFirst(ClaimTypes.Role)?.Value;
 				var actualRole = RolesConvert.Convert(strRole!);
 
-				if (actualRole == Roles.AnonymousUser)
+				var user = actualRole switch
 				{
-					var anonDetails = await service.GetAnonUserByIdAsync(actualUserId);
-					if (anonDetails.IsFailed)
-					{
-						return TypedResults.NotFound();
-					}
-					return TypedResults.Ok(anonDetails.Value);
-				}
-				
-				var user = await service.GetAppUserByIdAsync(actualUserId);
+					Roles.AnonymousUser => await service.GetAnonUserByIdAsync(actualUserId),
+					_ => await service.GetAppUserByIdAsync(actualUserId)
+				};
+			
 				if (user.IsFailed)
 				{
 					return TypedResults.NotFound();
