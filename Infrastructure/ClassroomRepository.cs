@@ -289,7 +289,7 @@ public class ClassroomRepository : IClassroomRepository
         }
 
         var checkJoinedQuery = "SELECT 1 FROM student_in_classroom WHERE student_id = @StudentId AND classroom_id = @ClassroomId";
-        var joinedAlready = await con.QuerySingleAsync<int>(checkJoinedQuery, new { StudentId = studentId, ClassroomId = classroomId });
+        var joinedAlready = await con.QuerySingleOrDefaultAsync<int>(checkJoinedQuery, new { StudentId = studentId, ClassroomId = classroomId });
         if (joinedAlready != 0)
         {
             _logger.LogInformation("User {userID} tried to join classroom {classroomId}, but was already joined", studentId, classroomId);
