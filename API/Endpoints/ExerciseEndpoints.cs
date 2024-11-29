@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using API.Configuration;
 using Asp.Versioning;
@@ -19,7 +20,7 @@ public static class ExerciseEndpoints
     {
         var exerciseV1 = app.MapGroup("v{version:apiVersion}/exercises").WithApiVersionSet(apiVersionSet).MapToApiVersion(1).WithTags("Exercise");
         var exerciseV2 = app.MapGroup("v{version:apiVersion}/exercises").WithApiVersionSet(apiVersionSet).MapToApiVersion(2).WithTags("Exercise");        
-        exerciseV1.MapPost("/", async Task<Results<Created, BadRequest<string>, IResult>>([FromBody]ExerciseDto dto, ClaimsPrincipal principal, IExerciseService service) =>
+        exerciseV1.MapPost("/", async Task<Results<Created, BadRequest<JsonContent>, IResult>>([FromBody]ExerciseDto dto, ClaimsPrincipal principal, IExerciseService service) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
             var result = await service.CreateExercise(dto, Convert.ToInt32(userId));
@@ -31,7 +32,15 @@ public static class ExerciseEndpoints
 
             if(result.Value != null)
             {
-                return TypedResults.BadRequest(result.Value);
+                var obj = JsonSerializer.Deserialize<object>(result.Value);
+                using var jsonDoc = JsonDocument.Parse(result.Value);
+
+                // Re-serialize it with WriteIndented = true
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true // Enables pretty-printing
+                };
+                return TypedResults.BadRequest(JsonSerializer.Serialize(jsonDoc.RootElement, options));
             }
 
             return TypedResults.Created();
