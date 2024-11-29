@@ -44,7 +44,7 @@ CREATE TABLE language_in_session (
 );
 
 CREATE TABLE user_in_timedsession (
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE UNIQUE,
     session_id INTEGER REFERENCES session(session_id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, session_id)
 );

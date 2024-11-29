@@ -2,6 +2,7 @@
 using Core.Classrooms.Models;
 using Core.Languages.Models;
 using Core.Sessions.Contracts;
+using Core.Sessions.Models;
 using Dapper;
 using FluentResults;
 using Infrastructure.Persistence.Contracts;
@@ -153,7 +154,7 @@ public class ClassroomRepository : IClassroomRepository
         using var con = await _connection.CreateConnectionAsync();
 
         var query = """
-                    SELECT classroom_id AS id, title, description 
+                    SELECT c.classroom_id AS id, title, description 
                     FROM classroom AS c
                     JOIN student_in_classroom AS sic
                     ON c.classroom_id = sic.classroom_id
@@ -288,7 +289,7 @@ public class ClassroomRepository : IClassroomRepository
         {
             transaction.Rollback();
             _logger.LogInformation("User {userID} failed to join classroom {classroomID} - registration not open", studentId, classroomId);
-            return Result.Fail("Classroom cannot not open to join");
+            return Result.Fail("Classroom not open to join");
         }
 
         var checkJoinedQuery = "SELECT 1 FROM student_in_classroom WHERE student_id = @StudentId AND classroom_id = @ClassroomId";
@@ -297,7 +298,7 @@ public class ClassroomRepository : IClassroomRepository
         {
             transaction.Rollback();
             _logger.LogInformation("User {userID} tried to join classroom {classroomId}, but was already joined", studentId, classroomId);
-            return Result.Fail("Student already joined classroom");
+            return Result.Ok(classroomId);
         }
 
         var query = "INSERT INTO student_in_classroom (student_id, classroom_id) VALUES (@StudentId, @ClassroomId);";

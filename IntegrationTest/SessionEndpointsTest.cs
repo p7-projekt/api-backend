@@ -33,7 +33,7 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
 	{
         using var scope = _factory.Services.CreateScope();
         var sessionSub = scope.ServiceProvider.GetService<ISessionRepository>();
-		sessionSub!.GetSessionsAsync(Arg.Any<int>()).Returns(new List<Session>{new Session{Title = "Hello"}});
+		sessionSub!.GetInstructorSessionsAsync(Arg.Any<int>()).Returns(new List<Session>{new Session{Title = "Hello"}});
 		var userId = 1;
 		var roles = new List<Roles> { Roles.Instructor};
 		_client.AddRoleAuth(userId, roles);
@@ -51,7 +51,7 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
     {
         using var scope = _factory.Services.CreateScope();
         var sessionSub = scope.ServiceProvider.GetService<ISessionRepository>();
-    	sessionSub!.GetSessionsAsync(Arg.Any<int>()).Returns(Task.FromResult<IEnumerable<Session>?>(null));
+    	sessionSub!.GetInstructorSessionsAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Session>?>(null));
     	var userId = 1;
     	var roles = new List<Roles> { Roles.Instructor};
     	_client.AddRoleAuth(userId, roles);
@@ -65,7 +65,7 @@ public class SessionEndpointsTest: IClassFixture<TestWebApplicationFactory<Progr
     {
         using var scope = _factory.Services.CreateScope();
         var sessionSub = scope.ServiceProvider.GetService<ISessionRepository>();
-    	sessionSub!.GetSessionsAsync(Arg.Any<int>()).Returns(new List<Session>{new Session{Title = "Hello"}}); 
+    	sessionSub!.GetInstructorSessionsAsync(Arg.Any<int>()).Returns(new List<Session>{new Session{Title = "Hello"}}); 
     	var userId = 1;
     	var roles = new List<Roles> { Roles.AnonymousUser};
     	_client.AddRoleAuth(userId, roles);

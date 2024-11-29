@@ -46,13 +46,15 @@ public static class SessionEndpoints
             async Task<Results<Ok<List<GetSessionsResponseDto>>, NotFound, BadRequest>> (ClaimsPrincipal principal,
                 ISessionService sessionService) =>
             {
-                var userId = principal.FindFirst( ClaimTypes.UserData)?.Value;
-                if (userId == null)
+                var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
+                var userRoles = principal.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
+
+                if (userId == null || userRoles == null)
                 {
                     return TypedResults.BadRequest();
                 }
 
-                var results = await sessionService.GetSessions(Convert.ToInt32(userId));
+                var results = await sessionService.GetSessions(Convert.ToInt32(userId), RolesConvert.Convert(userRoles));
                 if (results.IsFailed)
                 {
                     return TypedResults.NotFound();
@@ -64,7 +66,7 @@ public static class SessionEndpoints
         sessionV1Group.MapGet("/{id:int}", async Task<Results<Ok<GetSessionResponseDto>, NotFound, BadRequest>>(int id, ClaimsPrincipal principal, ISessionService service) =>
         {
 
-            var userId = principal.FindFirst( ClaimTypes.UserData)?.Value;
+            var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
             var userRoles = principal.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
             if (userRoles == null)
             {

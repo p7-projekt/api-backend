@@ -80,9 +80,9 @@ public class SessionServiceTest
 
         var session1 = new Session();
         var session2 = new Session();
-        sessionRepoSub.GetSessionsAsync(Arg.Any<int>()).Returns(new List<Session> { session1, session2 });
+        sessionRepoSub.GetInstructorSessionsAsync(Arg.Any<int>()).Returns(new List<Session> { session1, session2 });
 
-        var result = await sessionService.GetSessions(1);
+        var result = await sessionService.GetSessions(1, Roles.Instructor);
         
         Assert.True(result.IsSuccess);
         Assert.Equal(2, result.Value.Count);
@@ -98,9 +98,9 @@ public class SessionServiceTest
         var classroomRepoSub = Substitute.For<IClassroomRepository>();
         var sessionService = new SessionService(sessionRepoSub, loggerSub, tokenRepoSub, classroomRepoSub);
 
-        sessionRepoSub.GetSessionsAsync(Arg.Any<int>()).Returns(Task.FromResult<IEnumerable<Session>?>(null));
+        sessionRepoSub.GetInstructorSessionsAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Session>?>(null));
 
-        var result = await sessionService.GetSessions(1);
+        var result = await sessionService.GetSessions(1, Roles.Instructor);
         
         Assert.True(result.IsFailed);
     }

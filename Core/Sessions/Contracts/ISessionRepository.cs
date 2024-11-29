@@ -17,13 +17,13 @@ public interface ISessionRepository
     Task DeleteExpiredSessions();
     Task<Result<Session>> GetSessionBySessionCodeAsync(string sessionCode);
     Task<Session?> GetSessionOverviewAsync(int sessionId, int userId);
-    Task<IEnumerable<Session>?> GetSessionsAsync(int authorId);
+    Task<List<Session>?> GetInstructorSessionsAsync(int authorId);
+    Task<List<Session>?> GetStudentSessionsAsync(int studentId);
     Task<bool> DeleteSessionAsync(int sessionId, int authorId);
     Task<bool> VerifyExerciseIdsAsync(List<int> exerciseIds, int authorId, IDbConnection con, IDbTransaction transaction);
     Task<bool> VerifyLanguagesIdsAsync(List<Language> languages);
     Task<Result> InsertExerciseRelation(List<int> exerciseIds, int sessionId, IDbConnection con, IDbTransaction transaction);
     Task<Result> InsertLanguageRelation(List<int> languageIds, int sessionId, IDbConnection con, IDbTransaction transaction);
-    Task<Result> StudentJoinSession(string code, int userId);
-
+    Task<Result<int>> StudentJoinSession(string code, int userId);
     Task<int> GetTimedSessionIdByUserId(int userId);
 }
