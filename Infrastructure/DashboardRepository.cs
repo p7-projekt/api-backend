@@ -27,20 +27,22 @@ public class DashboardRepository : IDashboardRepository
                     e.title AS Title,
                     e.exercise_id AS Id,
                     COUNT(CASE WHEN sub.solved THEN 1 END) AS Solved,
-                    COUNT(sub.exercise_id)::int AS Attempted,
-                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN uid.user_id END), NULL) AS UserIds,
-                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN usr.name END), NULL) AS Names
-                FROM
-                    session AS s
-                    JOIN exercise_in_session AS eis ON s.session_id = eis.session_id
-                    JOIN exercise AS e ON eis.exercise_id = e.exercise_id
-                    JOIN user_in_timedsession AS uid ON s.session_id = uid.session_id
-                    LEFT JOIN submission AS sub ON uid.user_id = sub.user_id AND s.session_id = sub.session_id AND e.exercise_id = sub.exercise_id
-                    LEFT JOIN users AS usr ON uid.user_id = usr.id
+                    COUNT(sub.exercise_id) AS Attempted,
+                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN sub.user_id END), NULL) AS UserIds,
+                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN u.name END), NULL) AS Names
+                FROM exercise_in_session AS eis
+                    JOIN exercise AS e
+                        ON eis.exercise_id = e.exercise_id
+                    LEFT JOIN submission AS sub
+                        ON eis.exercise_id = sub.exercise_id
+                        AND eis.session_id = sub.session_id
+                    LEFT JOIN users AS u
+                        ON u.id = sub.user_id
                 WHERE
-                    s.session_id = @Id
+                    eis.session_id = @Id
                 GROUP BY
                     e.exercise_id, e.title;
+                
                 """;
         var results = await con.QueryAsync<GetExercisesInSessionResponseDto>(query, new { Id = sessionId });
 
@@ -56,18 +58,18 @@ public class DashboardRepository : IDashboardRepository
                     e.exercise_id AS Id,
                     COUNT(CASE WHEN sub.solved THEN 1 END) AS Solved,
                     COUNT(sub.exercise_id) AS Attempted,
-                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN usr.id END), NULL) AS UserIds,
-                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN usr.name END), NULL) AS Names
-                FROM
-                    session AS s
-                    JOIN session_in_classroom AS sc ON s.session_id = sc.session_id
-                    JOIN student_in_classroom AS student ON sc.classroom_id = student.classroom_id
-                    JOIN exercise_in_session AS eis ON s.session_id = eis.session_id
-                    JOIN exercise AS e ON eis.exercise_id = e.exercise_id
-                    LEFT JOIN submission AS sub ON student.student_id = sub.user_id AND s.session_id = sub.session_id AND e.exercise_id = sub.exercise_id
-                    LEFT JOIN users AS usr ON sub.user_id = usr.id
+                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN sub.user_id END), NULL) AS UserIds,
+                    ARRAY_REMOVE(ARRAY_AGG(CASE WHEN sub.solved THEN u.name END), NULL) AS Names
+                FROM exercise_in_session AS eis
+                    JOIN exercise AS e
+                        ON eis.exercise_id = e.exercise_id
+                    LEFT JOIN submission AS sub
+                        ON eis.exercise_id = sub.exercise_id
+                        AND eis.session_id = sub.session_id
+                    LEFT JOIN users AS u
+                        ON u.id = sub.user_id
                 WHERE
-                    s.session_id = @Id
+                    eis.session_id = @Id
                 GROUP BY
                     e.exercise_id, e.title;
                 """;
