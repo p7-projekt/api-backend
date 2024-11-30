@@ -73,29 +73,25 @@ public static class ExerciseEndpoints
             return TypedResults.Ok(result.Value);
         });
 
-        // exerciseV1.MapPut("/{exerciseId:int}", async Task<Results<Ok, BadRequest <MozartResponseDto>, IResult>> ([FromBody] ExerciseDto dto, ClaimsPrincipal principal, int exerciseId, IExerciseService exerciseService) =>
-        // {
-        //     var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
-        //
-        //     var result = await exerciseService.UpdateExercise(exerciseId, Convert.ToInt32(userId), dto);
-        //     if (result.IsFailed)
-        //     {
-        //         return TypedResults.Problem(statusCode: 500, title: "invalid request", detail: result.Errors.First().Message);
-        //     }
-        //
-        //     switch (result.Value.Action)
-        //     {
-        //         case ResponseCode.Pass:
-        //             return TypedResults.Ok();
-        //         case ResponseCode.Failure:
-        //             return TypedResults.BadRequest(new MozartResponseDto(result.Value.ResponseDto!.TestCaseResults, null));
-        //         case ResponseCode.Error:
-        //             return TypedResults.BadRequest(new MozartResponseDto(null, result.Value.ResponseDto!.Message));
-        //         default:
-        //             throw new Exception("Unexpected result received when updating exercises");
-        //     }
-        //
-        // }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ExerciseDto>();
+        exerciseV1.MapPut("/{exerciseId:int}", async Task<Results<Ok, BadRequest <string>, IResult>> ([FromBody] ExerciseDto dto, ClaimsPrincipal principal, int exerciseId, IExerciseService exerciseService) =>
+        {
+            var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
+
+            var result = await exerciseService.UpdateExercise(exerciseId, Convert.ToInt32(userId), dto);
+            if (result.IsFailed)
+            {
+                return TypedResults.Problem(statusCode: 500, title: "invalid request", detail: result.Errors.First().Message);
+            }
+
+
+            return result.Value.Action switch
+            {
+                ResponseCode.Pass => TypedResults.Ok(),
+                ResponseCode.Failure or ResponseCode.Error => TypedResults.BadRequest(result.Value.ResponseBody),
+                _ => throw new Exception("Unexpected result received when updating exercises")
+            };
+
+        }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ExerciseDto>();
 
         exerciseV1.MapDelete("/{exerciseId:int}", async Task<Results<NoContent, NotFound>> (ClaimsPrincipal principal, int exerciseId, IExerciseService exerciseService) =>
         {
