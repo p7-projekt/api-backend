@@ -103,7 +103,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var solutionRunnerResponse = new SolutionRunnerResponse
         {
             Action = ResponseCode.Failure,
-            // ResponseDto = new SolutionResponseDto("failure", null, new List<SolutionTestcaseResultDto> { new SolutionTestcaseResultDto(5, "test", null, null) })
+            ResponseBody = "{}"
         };
         mozartServiceSub!.SubmitSubmission(Arg.Any<SubmissionDto>(), Arg.Any<Language>()).Returns(solutionRunnerResponse);
         exerciseRepoSub!.InsertExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Any<int>()).Returns(Result.Ok());
@@ -128,7 +128,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var solutionRunnerResponse = new SolutionRunnerResponse
         {
             Action = ResponseCode.Error,
-            // ResponseDto = new SolutionResponseDto("error", "compilation error", null)
+            ResponseBody = "{}"
         }; 
         mozartServiceSub!.SubmitSubmission(Arg.Any<SubmissionDto>(), Arg.Any<Language>()).Returns(solutionRunnerResponse);
         exerciseRepoSub!.InsertExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Any<int>()).Returns(Result.Ok());
