@@ -14,15 +14,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using UnitTest.Core.Solutions;
 
 namespace UnitTest.Core.Exercises;
 
+public class MockResult
+{
+    public string Result { get; set; } = string.Empty;
+}
 public class ExerciseServiceTest
 {
     private readonly ILogger<MozartService> mozartlLoggerSub = Substitute.For<ILogger<MozartService>>();
 
+    
 
     [Fact]
     public async Task DeleteExercise_ShouldReturn_Ok()
@@ -447,10 +453,11 @@ public class ExerciseServiceTest
 
         var dto = new ExerciseDto("title", "description", "2+2", 1, ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
         var result = await exerciseService.CreateExercise(dto, 1);
-
+        var jsonObj = JsonSerializer.Deserialize<MockResult>(result.Value);
+        
         Assert.True(result.IsSuccess);
-        Assert.IsType<MozartResponseDto>(result.Value);
-        Assert.Null(result.Value.Message);
+        Assert.IsType<string>(result.Value);
+        Assert.Equal("failure", jsonObj!.Result);
     }
 
     [Fact]
@@ -474,10 +481,11 @@ public class ExerciseServiceTest
 
         var dto = new ExerciseDto("title", "description", "2+2", 1, ["int"], ["int"], [new TestcaseDto(["2"], ["4"], true)]);
         var result = await exerciseService.CreateExercise(dto, 1);
+        var jsonObj = JsonSerializer.Deserialize<MockResult>(result.Value);
 
         Assert.True(result.IsSuccess);
-        Assert.IsType<MozartResponseDto>(result.Value);
-        Assert.Null(result.Value.TestCaseResults);
+        Assert.IsType<string>(result.Value);
+        Assert.Equal("error", jsonObj!.Result);
     }
 
     [Fact]

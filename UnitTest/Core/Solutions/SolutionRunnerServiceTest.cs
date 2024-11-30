@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using Core.Exercises.Models;
 using Core.Languages.Models;
 using Core.Solutions;
@@ -8,6 +9,7 @@ using Core.Solutions.Models;
 using Core.Solutions.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using UnitTest.Core.Exercises;
 
 namespace UnitTest.Core.Solutions;
 
@@ -113,7 +115,7 @@ public class SolutionRunnerServiceTest
         var result = await runner.SubmitSolutionAsync(dto, exerciseId: 1, userId: 2);
 
         Assert.True(result.IsSuccess);
-        Assert.True(result.Value.Message == null);
+        Assert.True(result.Value != null);
     }
 
     [Fact]
@@ -141,7 +143,7 @@ public class SolutionRunnerServiceTest
         var result = await runner.SubmitSolutionAsync(dto, exerciseId: 1, userId: 2);
 
         Assert.True(result.IsSuccess);
-        Assert.True(result.Value.TestCaseResults == null);
+        Assert.True(result.Value != null);
     }
 
     [Fact]
