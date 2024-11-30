@@ -5,7 +5,6 @@ using Infrastructure.Persistence.Contracts;
 using Microsoft.Extensions.Logging;
 using Core.Exercises.Models;
 using Core.Exercises.Contracts;
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace Infrastructure
 {
@@ -37,7 +36,7 @@ namespace Infrastructure
 
             var exerciseQuery = """
                                 UPDATE exercise 
-                                SET title = @Title, description = @Description, solution = @Solution
+                                SET title = @Title, description = @Description, solution = @Solution, solution_language_id = @LanguageId
                                 WHERE exercise_id = @ExerciseId;
                                 """;
             var result = await con.ExecuteAsync(exerciseQuery,
@@ -46,6 +45,7 @@ namespace Infrastructure
                     Title = dto.Name,
                     Description = dto.Description,
                     Solution = dto.Solution,
+                    LanguageId = dto.SolutionLanguage,
                     ExerciseId = exerciseId
                 }, transaction);
 
@@ -139,7 +139,7 @@ namespace Infrastructure
                     SELECT exercise_id AS id, title as name FROM exercise WHERE author_id = @Id;
                     """;
             var results = await con.QueryAsync<GetExercisesResponseDto>(query, new { Id = authorId });
-            return results;
+            return results.OrderBy(x => x.Id);
         }
 
         public async Task<GetExerciseResponseDto?> GetExerciseByIdAsync(int exerciseId)

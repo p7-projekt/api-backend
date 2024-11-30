@@ -17,7 +17,6 @@ public class Session
     public List<int> Exercises { get; set; } = new (); // this needs to be changed when exercises are available
     public List<SolvedExercise> ExerciseDetails { get; set; } = new();
     public List<Language> Languages { get; set; } = new();
-
     public List<LanguageSupport> LanguagesModel { get; set; } = new();
 }
 

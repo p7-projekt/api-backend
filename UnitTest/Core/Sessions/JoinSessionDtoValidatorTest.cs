@@ -13,7 +13,7 @@ public class JoinSessionDtoValidatorTest
     public void JoinSessionValidator_ShouldReturn_Ok(string SessionCode)
     {
         var validator = new JoinSessionDtoValidator();
-        var joinSessionDto = new JoinSessionDto(SessionCode, "lars");
+        var joinSessionDto = new JoinDto(SessionCode, "lars");
         
         var result = validator.Validate(joinSessionDto);
         
@@ -39,7 +39,7 @@ public class JoinSessionDtoValidatorTest
     public void JoinSessionValidator_ShouldReturn_Fail(string SessionCode)
     {
         var validator = new JoinSessionDtoValidator();
-        var joinSessionDto = new JoinSessionDto(SessionCode, "lars");
+        var joinSessionDto = new JoinDto(SessionCode, "lars");
         
         var result = validator.Validate(joinSessionDto);
         
