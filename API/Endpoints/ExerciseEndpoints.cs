@@ -32,15 +32,7 @@ public static class ExerciseEndpoints
 
             if(result.Value != null)
             {
-                var obj = JsonSerializer.Deserialize<object>(result.Value);
-                using var jsonDoc = JsonDocument.Parse(result.Value);
-
-                // Re-serialize it with WriteIndented = true
-                var options = new JsonSerializerOptions
-                {
-                    WriteIndented = true // Enables pretty-printing
-                };
-                return TypedResults.BadRequest(JsonSerializer.Serialize(jsonDoc.RootElement, options));
+                return TypedResults.BadRequest(result.Value);
             }
 
             return TypedResults.Created();
