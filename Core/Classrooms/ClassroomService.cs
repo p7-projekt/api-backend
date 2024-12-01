@@ -73,14 +73,12 @@ public class ClassroomService : IClassroomService
 
     public async Task<Result<List<GetClassroomsResponseDto>>> GetClassroomsByUserRole(int userId, Roles userRole)
     {
-        var result = userRole switch
+        return userRole switch
         {
             Roles.Student => Result.Ok(await _classroomRepository.GetStudentClassroomsById(userId)),
             Roles.Instructor => Result.Ok(await _classroomRepository.GetInstructorClassroomsById(userId)),
             _ => Result.Fail("Invalid role")
         };
-
-        return result;
     }
     
     public async Task<Result> UpdateClassroomDetails(UpdateClassroomDto dto, int classroomId, int authorId)
