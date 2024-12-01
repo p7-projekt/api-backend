@@ -95,22 +95,13 @@ public class SessionService : ISessionService
     public async Task<Result<JoinResponseDto>> JoinStudent(int userId, string code)
     {
         Codes actualCode = DetermineCode(code);
-        if (actualCode == Codes.None)
+        return actualCode switch
         {
-            return Result.Fail("Invalid code");
-        }
-
-        if (actualCode == Codes.SessionCode)
-        {
-            return await JoinTimedSessionStudent(userId, code);
-        }
-
-        if (actualCode == Codes.ClassRoomCode)
-        {
-            return await JoinClassRoomStudent(userId, code);
-        }
-        
-        return Result.Fail("Internal error happend");
+            Codes.None => Result.Fail("Invalid code"),
+            Codes.SessionCode => await JoinTimedSessionStudent(userId, code),
+            Codes.ClassRoomCode => await JoinClassRoomStudent(userId, code),
+            _ => Result.Fail("Internal error happend")
+        };
     }
 
     private async Task<Result<JoinResponseDto>> JoinTimedSessionStudent(int userId, string code)

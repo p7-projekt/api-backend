@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Json;
 using API;
 using Core.Sessions.Contracts;
 using Core.Shared;
@@ -82,5 +83,50 @@ public class UserEndpoints : IClassFixture<TestWebApplicationFactory<Program>>
 		var response = await _client.GetAsync("v1/users/1");
 		
 		Assert.True(response.IsSuccessStatusCode);
+	}
+
+	[Fact]
+	public async Task GetAppUser_ShouldReturn_GetUserResponseDto()
+	{
+		using var scope = _factory.Services.CreateScope();
+		var userRepo = scope.ServiceProvider.GetService<IUserRepository>();
+		var sessionRepo = scope.ServiceProvider.GetService<ISessionRepository>();
+		var user = new User
+		{
+			Id = 1,
+			Email = "test@test.com",
+			Name = "test"
+		};
+		userRepo!.GetUserByIdAsync(Arg.Any<int>()).Returns(user);
+		sessionRepo!.GetTimedSessionIdByUserId(Arg.Any<int>()).Returns(1);
+		_client.AddRoleAuth(1, new List<Roles> {Roles.Student});
+		
+		var response = await _client.GetAsync("v1/users/1");
+		Assert.True(response.IsSuccessStatusCode);
+		var obj = await response.Content.ReadFromJsonAsync<GetUserResponseDto>();
+		Assert.Equal(user.Email, obj!.Email);
+		Assert.Equal(user.Name, obj!.Name);
+		Assert.Equal(1, obj!.SessionId);
+	}
+	
+	[Fact]
+	public async Task GetAnonUser_ShouldReturn_Error()
+	{
+		using var scope = _factory.Services.CreateScope();
+		var userRepo = scope.ServiceProvider.GetService<IUserRepository>();
+		var sessionRepo = scope.ServiceProvider.GetService<ISessionRepository>();
+		var user = new User
+		{
+			Id = 1,
+			Email = "test@test.com",
+			Name = "test",
+			Anonymous = false
+		};
+		userRepo!.GetUserByIdAsync(Arg.Any<int>()).Returns(user);
+		sessionRepo!.GetTimedSessionIdByUserId(Arg.Any<int>()).Returns(1);
+		_client.AddRoleAuth(1, new List<Roles> {Roles.AnonymousUser});
+		
+		var response = await _client.GetAsync("v1/users/1");
+		Assert.True(response.StatusCode == HttpStatusCode.NotFound);
 	}
 }
