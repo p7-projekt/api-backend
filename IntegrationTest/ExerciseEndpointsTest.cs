@@ -14,6 +14,7 @@ using NSubstitute;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
+using ArgumentOutOfRangeException = System.ArgumentOutOfRangeException;
 
 namespace IntegrationTest;
 
@@ -490,8 +491,11 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var solutionRepoSub = scope.ServiceProvider.GetService<ISolutionRepository>();
         var mozartServiceSub = scope.ServiceProvider.GetService<IMozartService>();
 
-        solutionRepoSub.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
-        mozartServiceSub.SubmitSubmission(Arg.Any<SubmissionDto>(), (Language)99);
+        solutionRepoSub!.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        mozartServiceSub!.SubmitSubmission(Arg.Any<SubmissionDto>(), (Language)99)
+            .Returns(Task.FromException<Result<SolutionRunnerResponse>>(
+            new ArgumentOutOfRangeException("Invalid language")
+        ));
 
         var userId = 1;
         var roles = new List<Roles> { Roles.AnonymousUser };
