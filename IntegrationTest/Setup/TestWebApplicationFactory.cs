@@ -1,4 +1,5 @@
 using Core.Exercises.Contracts;
+using Core.Languages.Contracts;
 using Core.Sessions.Contracts;
 using Core.Shared;
 using Core.Solutions.Contracts;
@@ -35,17 +36,19 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
 		{
 			Environment.SetEnvironmentVariable(AuthConstants.JwtSecret, "sdafdafdfasdfasdfasdfasfdasfdafdf"); 
 			var iSesSub = Substitute.For<ISessionRepository>();
-			var ItokenRepoSub = Substitute.For<ITokenRepository>();
-			var IUserRepo = Substitute.For<IUserRepository>();
-      var iExeciseSub = Substitute.For<IExerciseRepository>();
+			var itokenRepoSub = Substitute.For<ITokenRepository>();
+			var iUserRepo = Substitute.For<IUserRepository>();
+			var iExeciseSub = Substitute.For<IExerciseRepository>();
 			var iMozartSub = Substitute.For<IMozartService>();
 			var iSolutionSub = Substitute.For<ISolutionRepository>();
-      services.AddScoped<ITokenRepository>(_ => ItokenRepoSub);
-			services.AddScoped<IUserRepository>(_ => IUserRepo);
-      services.AddScoped<ISessionRepository>(_ => iSesSub);
+			var iLanguageSub = Substitute.For<ILanguageRepository>();
+			services.AddScoped<ITokenRepository>(_ => itokenRepoSub);
+			services.AddScoped<IUserRepository>(_ => iUserRepo);
+			services.AddScoped<ISessionRepository>(_ => iSesSub);
 			services.AddScoped<IExerciseRepository>(_ => iExeciseSub);
 			services.AddScoped<IMozartService>(_ => iMozartSub);
 			services.AddScoped<ISolutionRepository>(_ => iSolutionSub);
+			services.AddScoped<ILanguageRepository>(_ => iLanguageSub);
 		});
 		
 		return base.CreateHost(builder);
