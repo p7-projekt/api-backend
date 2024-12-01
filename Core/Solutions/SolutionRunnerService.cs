@@ -21,7 +21,7 @@ public class SolutionRunnerService : ISolutionRunnerService
         _iMozartService = iMozartService;
     }
 
-    public async Task<Result<MozartResponseDto>> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId)
+    public async Task<Result<string>> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId)
     {
         // validate anon user is part of a given session
         // Short circuit if user is not part of the session
@@ -71,7 +71,7 @@ public class SolutionRunnerService : ISolutionRunnerService
         return Result.Ok();
     }
 
-    private async Task<Result<MozartResponseDto>> ValidateInMozart(List<Testcase> testcases, SubmitSolutionDto dto)
+    private async Task<Result<string>> ValidateInMozart(List<Testcase> testcases, SubmitSolutionDto dto)
     {
         var submission = SubmissionMapper.ToSubmission(testcases, dto.Solution);
         var result = await _iMozartService.SubmitSubmission(submission, (Language)dto.LanguageId);
@@ -82,12 +82,7 @@ public class SolutionRunnerService : ISolutionRunnerService
 
         if (result.Value.Action is ResponseCode.Failure or ResponseCode.Error)
         {
-            return result.Value.Action switch
-            {
-                ResponseCode.Failure => new MozartResponseDto(result.Value.ResponseDto!.TestCaseResults, null),
-                ResponseCode.Error => new MozartResponseDto(null, result.Value.ResponseDto!.Message),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            return result.Value.ResponseBody;
         }
 
         return Result.Ok();
