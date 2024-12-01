@@ -36,29 +36,29 @@ public class MozartService : IMozartService
         using var response = await _httpClient.PostAsJsonAsync("/submit", submission);
         _logger.LogInformation("HTTP response: {response}, {body}", response.StatusCode, response.Content.ReadAsStringAsync().Result);
 
-        var haskellResponse = new SolutionRunnerResponse();
+        var mozartResponse = new SolutionRunnerResponse();
         if (response.IsSuccessStatusCode)
         {
-        var responseBody = await response.Content.ReadFromJsonAsync<SolutionResponseDto>();
-            switch (responseBody?.Result)
+        var responseAction = await response.Content.ReadFromJsonAsync<SolutionResponseDto>();
+            switch (responseAction?.Result)
             {
                 case "pass": 
-                    haskellResponse.Action = ResponseCode.Pass;
+                    mozartResponse.Action = ResponseCode.Pass;
                     break;
                 case "failure":
                     _logger.LogInformation("Testcases failed");
-                    haskellResponse.Action = ResponseCode.Failure;
+                    mozartResponse.Action = ResponseCode.Failure;
                     break;
                 case "error":
                     _logger.LogInformation("Execution of solution failed");
-                    haskellResponse.Action = ResponseCode.Error;
+                    mozartResponse.Action = ResponseCode.Error;
                     break;
                 default:
-                    _logger.LogError("Unknown result received from solution runner: {response}", responseBody);
+                    _logger.LogError("Unknown result received from solution runner: {response}", responseAction);
                     throw new Exception("Unknown result received from solution runner");
             }
-            haskellResponse.ResponseDto = responseBody;
-            return haskellResponse;
+            mozartResponse.ResponseBody = await response.Content.ReadAsStringAsync();
+            return mozartResponse;
         }
         if (response.StatusCode == HttpStatusCode.UnprocessableContent)
         {
