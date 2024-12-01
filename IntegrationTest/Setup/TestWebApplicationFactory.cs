@@ -47,7 +47,6 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
 			services.AddScoped<ISessionRepository>(_ => iSesSub);
 			services.AddScoped<IExerciseRepository>(_ => iExeciseSub);
 			services.AddScoped<IMozartService>(_ => iMozartSub);
-			services.AddScoped<IMozartService>(_ => iMozartSub);
 			services.AddScoped<ISolutionRepository>(_ => iSolutionSub);
 			services.AddScoped<IClassroomRepository>(_ => iClassroomSub);
 		});
