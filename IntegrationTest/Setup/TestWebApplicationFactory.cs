@@ -1,3 +1,4 @@
+using Core.Classrooms.Contracts;
 using Core.Exercises.Contracts;
 using Core.Sessions.Contracts;
 using Core.Shared;
@@ -37,15 +38,18 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
 			var iSesSub = Substitute.For<ISessionRepository>();
 			var ItokenRepoSub = Substitute.For<ITokenRepository>();
 			var IUserRepo = Substitute.For<IUserRepository>();
-      var iExeciseSub = Substitute.For<IExerciseRepository>();
+			var iExeciseSub = Substitute.For<IExerciseRepository>();
 			var iMozartSub = Substitute.For<IMozartService>();
 			var iSolutionSub = Substitute.For<ISolutionRepository>();
-      services.AddScoped<ITokenRepository>(_ => ItokenRepoSub);
+			var iClassroomSub = Substitute.For<IClassroomRepository>();
+			services.AddScoped<ITokenRepository>(_ => ItokenRepoSub);
 			services.AddScoped<IUserRepository>(_ => IUserRepo);
-      services.AddScoped<ISessionRepository>(_ => iSesSub);
+			services.AddScoped<ISessionRepository>(_ => iSesSub);
 			services.AddScoped<IExerciseRepository>(_ => iExeciseSub);
 			services.AddScoped<IMozartService>(_ => iMozartSub);
+			services.AddScoped<IMozartService>(_ => iMozartSub);
 			services.AddScoped<ISolutionRepository>(_ => iSolutionSub);
+			services.AddScoped<IClassroomRepository>(_ => iClassroomSub);
 		});
 		
 		return base.CreateHost(builder);
