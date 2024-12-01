@@ -1,3 +1,4 @@
+using Core.Classrooms.Contracts;
 using Core.Exercises.Contracts;
 using Core.Languages.Contracts;
 using Core.Sessions.Contracts;
@@ -42,6 +43,7 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
 			var iMozartSub = Substitute.For<IMozartService>();
 			var iSolutionSub = Substitute.For<ISolutionRepository>();
 			var iLanguageSub = Substitute.For<ILanguageRepository>();
+			var iClassroomSub = Substitute.For<IClassroomRepository>();
 			services.AddScoped<ITokenRepository>(_ => itokenRepoSub);
 			services.AddScoped<IUserRepository>(_ => iUserRepo);
 			services.AddScoped<ISessionRepository>(_ => iSesSub);
@@ -49,6 +51,7 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
 			services.AddScoped<IMozartService>(_ => iMozartSub);
 			services.AddScoped<ISolutionRepository>(_ => iSolutionSub);
 			services.AddScoped<ILanguageRepository>(_ => iLanguageSub);
+			services.AddScoped<IClassroomRepository>(_ => iClassroomSub);
 		});
 		
 		return base.CreateHost(builder);
