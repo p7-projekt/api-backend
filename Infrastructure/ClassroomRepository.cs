@@ -334,7 +334,7 @@ public class ClassroomRepository : IClassroomRepository
                         s.session_id AS id,
                         s.title AS title,
                         s.description AS description,
-                        s.author_id AS authorid,
+                        s.author_id AS author,
                         sic.active AS active
                     FROM session s
                     JOIN session_in_classroom sic ON sic.session_id = s.session_id
@@ -343,7 +343,7 @@ public class ClassroomRepository : IClassroomRepository
 
         var session = await con.QuerySingleAsync<GetClassroomSessionResponseDto>(query, new { SessionId = sessionId });
 
-        session.ExerciseIds = (await _sessionRepository.GetExercisesOfSessionAsync(sessionId, con));
+        session.Exercises = (await _sessionRepository.GetExercisesOfSessionAsync(sessionId, con));
 
         var languageQuery = "SELECT language_id FROM language_in_session WHERE session_id = @SessionId;";
 
