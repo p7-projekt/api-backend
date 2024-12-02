@@ -14,7 +14,8 @@ public class GetClassroomSessionResponseDto
     public int Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public int Author { get; set; }
+    public int AuthorId { get; set; }
+    public string Author { get; set; } = string.Empty;
     public bool Active { get; set; }
     public List<SolvedExercise> Exercises { get; set; } = new ();
     public List<GetLanguagesResponseDto> Languages { get; set; } = new ();

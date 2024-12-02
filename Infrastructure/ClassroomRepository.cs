@@ -334,10 +334,12 @@ public class ClassroomRepository : IClassroomRepository
                         s.session_id AS id,
                         s.title AS title,
                         s.description AS description,
-                        s.author_id AS author,
+                        s.author_id AS authorId,
+                        u.name AS author,
                         sic.active AS active
                     FROM session s
                     JOIN session_in_classroom sic ON sic.session_id = s.session_id
+                    JOIN users as u ON u.id = s.author_id
                     WHERE s.session_id = @SessionId
                     """;
 
