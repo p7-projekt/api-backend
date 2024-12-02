@@ -25,11 +25,11 @@ public class SolutionRunnerService : ISolutionRunnerService
     {
         // validate anon user is part of a given session
         // Short circuit if user is not part of the session
-        var userExistsInSession = await _solutionRepository.CheckAnonUserExistsInSessionAsync(userId, dto.SessionId);
+        var userExistsInSession = await _solutionRepository.CheckUserAssociationToSessionAsync(userId, dto.SessionId);
         if (!userExistsInSession)
         {
-            _logger.LogWarning("User {UserId} does not exist in Session {SessionId}", userId, dto.SessionId);
-            return Result.Fail($"User {userId} does not exist in the session.");
+            _logger.LogWarning("User {UserId} does not assocaited to Session {SessionId}", userId, dto.SessionId);
+            return Result.Fail($"User {userId} not associated to the session.");
         }
         // get selected language 
         var language = await _solutionRepository.GetSolutionLanguageBySession(dto.LanguageId, dto.SessionId);

@@ -34,7 +34,7 @@ public class SolutionRunnerServiceTest
         var runner = new SolutionRunnerService(loggerSub, solutionRepo, mozartService);
         var dto = new SubmitSolutionDto(1, "test", 1);
 
-        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
+        solutionRepo.CheckUserAssociationToSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
 
         var result = await runner.SubmitSolutionAsync(dto, exerciseId: 1, userId: 2);
 
@@ -56,7 +56,7 @@ public class SolutionRunnerServiceTest
         var runner = new SolutionRunnerService(loggerSub, solutionRepo, mozartService);
         var dto = new SubmitSolutionDto(1, "test", 1);
 
-        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        solutionRepo.CheckUserAssociationToSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(null));
 
         var result = await runner.SubmitSolutionAsync(dto, exerciseId: 1, userId: 2);
@@ -79,7 +79,7 @@ public class SolutionRunnerServiceTest
         var runner = new SolutionRunnerService(loggerSub, solutionRepo, mozartService);
         var dto = new SubmitSolutionDto(1, "test", 1);
 
-        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        solutionRepo.CheckUserAssociationToSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(null));
         solutionRepo.GetSolutionLanguageBySession(Arg.Any<int>(), Arg.Any<int>()).Returns(new LanguageSupport());
 
@@ -103,7 +103,7 @@ public class SolutionRunnerServiceTest
         var runner = new SolutionRunnerService(loggerSub, solutionRepo, mozartService);
         var dto = new SubmitSolutionDto(1, "test", 1);
 
-        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        solutionRepo.CheckUserAssociationToSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         var language = new LanguageSupport { Id = 1 };
         solutionRepo.GetSolutionLanguageBySession(Arg.Any<int>(), Arg.Any<int>()).Returns(language);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(new List<Testcase>()));
@@ -130,7 +130,7 @@ public class SolutionRunnerServiceTest
         var runner = new SolutionRunnerService(loggerSub, solutionRepo, mozartService);
         var dto = new SubmitSolutionDto(1, "test", 1);
 
-        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        solutionRepo.CheckUserAssociationToSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         var language = new LanguageSupport { Id = 1 };
         solutionRepo.GetSolutionLanguageBySession(Arg.Any<int>(), Arg.Any<int>()).Returns(language);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(new List<Testcase>()));
@@ -158,7 +158,7 @@ public class SolutionRunnerServiceTest
         var runner = new SolutionRunnerService(loggerSub, solutionRepo, mozartService);
         var dto = new SubmitSolutionDto(1, "test", 1);
         
-        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        solutionRepo.CheckUserAssociationToSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         var language = new LanguageSupport { Id = 1 };
         solutionRepo.GetSolutionLanguageBySession(Arg.Any<int>(), Arg.Any<int>()).Returns(language);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(new List<Testcase>()));
@@ -186,7 +186,7 @@ public class SolutionRunnerServiceTest
         var runner = new SolutionRunnerService(loggerSub, solutionRepo, mozartService);
         var dto = new SubmitSolutionDto(1, "test", 1);
 
-        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        solutionRepo.CheckUserAssociationToSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         var language = new LanguageSupport { Id = 1 };
         solutionRepo.GetSolutionLanguageBySession(Arg.Any<int>(), Arg.Any<int>()).Returns(language);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(new List<Testcase>()));
@@ -213,7 +213,7 @@ public class SolutionRunnerServiceTest
         var runner = new SolutionRunnerService(loggerSub, solutionRepo, mozartService);
         var dto = new SubmitSolutionDto(1, "test", 1);
 
-        solutionRepo.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        solutionRepo.CheckUserAssociationToSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         var language = new LanguageSupport { Id = 1 };
         solutionRepo.GetSolutionLanguageBySession(Arg.Any<int>(), Arg.Any<int>()).Returns(language);
         solutionRepo.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(Task.FromResult<List<Testcase>?>(new List<Testcase>()));
