@@ -1,5 +1,6 @@
 ﻿using Core.Classrooms.Contracts;
 using Core.Classrooms.Models;
+using Core.Exercises.Models;
 using Core.Languages.Models;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
@@ -345,7 +346,8 @@ public class ClassroomRepository : IClassroomRepository
 
         var session = await con.QuerySingleAsync<GetClassroomSessionResponseDto>(query, new { SessionId = sessionId });
 
-        session.Exercises = (await _sessionRepository.GetExercisesOfSessionAsync(sessionId, con));
+        var tempExercises = await _sessionRepository.GetExercisesOfSessionAsync(sessionId, con);
+        session.Exercises = tempExercises.Select(x => new SolvedExerciseDto(x.ExerciseId, x.ExerciseTitle, x.Solved)).ToList();
 
         var languageQuery = """
                             SELECT ls.language_id AS languageId, ls.language 
