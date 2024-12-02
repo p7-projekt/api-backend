@@ -90,11 +90,11 @@ public class Program
         // Endpoints
         app.UseExerciseEndpoints(apiVersionSet);
         app.UseAuthenticationEndpoints();
-        app.UseSessionEndpoints();
-        app.UseUserEndpoints();
-        app.UseClassroomEndpoints();
-        app.UseLanguageEndpoints();
-        app.UseDashboardEndpoints();
+        app.UseSessionEndpoints(apiVersionSet);
+        app.UseUserEndpoints(apiVersionSet);
+        app.UseClassroomEndpoints(apiVersionSet);
+        app.UseLanguageEndpoints(apiVersionSet);
+        app.UseDashboardEndpoints(apiVersionSet);
         
         app.Run();
     }

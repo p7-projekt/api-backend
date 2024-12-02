@@ -15,5 +15,5 @@ public interface IExerciseService
     Task<Result> DeleteExercise(int exerciseId, int userId);
     Task<Result<GetExerciseResponseDto>> GetExerciseById(int exerciseId);
     Task<Result<SolutionRunnerResponse>> UpdateExercise(int exerciseId, int authorId, ExerciseDto dto);
-    Task<Result<MozartResponseDto>> CreateExercise(ExerciseDto dto, int authorId);
+    Task<Result<string>> CreateExercise(ExerciseDto dto, int authorId);
 }

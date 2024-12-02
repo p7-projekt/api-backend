@@ -34,6 +34,12 @@ public class ClassroomService : IClassroomService
 
     public async Task<Result> AddSessionToClassroom(ClassroomSessionDto dto, int authorId, int classroomId)
     {
+        var correctAuthor = await _classroomRepository.VerifyClassroomAuthor(classroomId, authorId);
+        if (!correctAuthor)
+        {
+            return Result.Fail("Failed to validate author of classroom");
+        }
+
         return await _classroomRepository.AddSessionToClassroomAsync(dto, authorId, classroomId);
     }
 
@@ -48,21 +54,31 @@ public class ClassroomService : IClassroomService
         return await _classroomRepository.DeleteClassroomAsync(classroomId);
     }
 
-    public async Task<Result<GetClassroomResponseDto>> GetClassroomById(int classroomId)
+    public async Task<Result<GetClassroomResponseDto>> GetClassroomById(int classroomId, int userID, Roles userRole)
     {
+        var result = userRole switch
+        {
+            Roles.Student => await _classroomRepository.VerifyStudentInClassroom(classroomId, userID),
+            Roles.Instructor => await _classroomRepository.VerifyClassroomAuthor(classroomId, userID),
+            _ => false
+        }; 
+        if (!result) 
+        {
+            _logger.LogWarning("Invalid user {userId} tried to retrieve classroom {classroomID}", userID, classroomId);
+            return Result.Fail("Failed to validate user");
+        }
+
         return await _classroomRepository.GetClassroomByIdAsync(classroomId);
     }
 
     public async Task<Result<List<GetClassroomsResponseDto>>> GetClassroomsByUserRole(int userId, Roles userRole)
     {
-        var result = userRole switch
+        return userRole switch
         {
             Roles.Student => Result.Ok(await _classroomRepository.GetStudentClassroomsById(userId)),
             Roles.Instructor => Result.Ok(await _classroomRepository.GetInstructorClassroomsById(userId)),
             _ => Result.Fail("Invalid role")
         };
-
-        return result;
     }
     
     public async Task<Result> UpdateClassroomDetails(UpdateClassroomDto dto, int classroomId, int authorId)
@@ -88,31 +104,6 @@ public class ClassroomService : IClassroomService
         }
 
         return await _classroomRepository.UpdateClassroomSessionAsync(dto);
-    }
-
-    public async Task<Result> JoinClassroom(JoinClassroomDto dto, int classroomId, int studentId)
-    {
-        var isOpen = await _classroomRepository.VerifyRegistrationIsOpen(classroomId);
-        if (!isOpen)
-        {
-            return Result.Fail("Classroom not open to join");
-        }
-
-        var validCode = await _classroomRepository.VerifyClassroomRoomcode(classroomId, dto.RoomCode);
-        if (!validCode)
-        {
-            _logger.LogWarning("Roomcode {roomcode} for classroom with id {classroomId is invalid}", dto.RoomCode, classroomId);
-            return Result.Fail("Incorrect roomcode");
-        }
-        
-        var result = await _classroomRepository.JoinClassroomAsync(studentId, classroomId);
-        if (result.IsFailed)
-        {
-
-            return Result.Fail("Failed to join classroom");
-        }
-
-        return Result.Ok();
     }
 
     public async Task<Result> DeleteClassroomSession(int sessionId, int authorId)

@@ -14,6 +14,7 @@ using NSubstitute;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
+using ArgumentOutOfRangeException = System.ArgumentOutOfRangeException;
 
 namespace IntegrationTest;
 
@@ -103,7 +104,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var solutionRunnerResponse = new SolutionRunnerResponse
         {
             Action = ResponseCode.Failure,
-            ResponseDto = new SolutionResponseDto("failure", null, new List<SolutionTestcaseResultDto> { new SolutionTestcaseResultDto(5, "test", null, null) })
+            ResponseBody = "{}"
         };
         mozartServiceSub!.SubmitSubmission(Arg.Any<SubmissionDto>(), Arg.Any<Language>()).Returns(solutionRunnerResponse);
         exerciseRepoSub!.InsertExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Any<int>()).Returns(Result.Ok());
@@ -128,7 +129,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var solutionRunnerResponse = new SolutionRunnerResponse
         {
             Action = ResponseCode.Error,
-            ResponseDto = new SolutionResponseDto("error", "compilation error", null)
+            ResponseBody = "{}"
         }; 
         mozartServiceSub!.SubmitSubmission(Arg.Any<SubmissionDto>(), Arg.Any<Language>()).Returns(solutionRunnerResponse);
         exerciseRepoSub!.InsertExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Any<int>()).Returns(Result.Ok());
@@ -323,7 +324,6 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var solutionRunnerResponse = new SolutionRunnerResponse
         {
             Action = ResponseCode.Failure,
-            ResponseDto = new SolutionResponseDto("failure", null, new List<SolutionTestcaseResultDto> { new SolutionTestcaseResultDto(5, "test", null, null) })
         };
         mozartServiceSub.SubmitSubmission(Arg.Any<SubmissionDto>(), Arg.Any<Language>()).Returns(solutionRunnerResponse);
         exerciseRepoSub.UpdateExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Any<int>()).Returns(Result.Ok());
@@ -349,7 +349,6 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var solutionRunnerResponse = new SolutionRunnerResponse
         {
             Action = ResponseCode.Error,
-            ResponseDto = new SolutionResponseDto("error", "compilation error", null)
         };
         mozartServiceSub.SubmitSubmission(Arg.Any<SubmissionDto>(), Arg.Any<Language>()).Returns(solutionRunnerResponse);
         exerciseRepoSub.UpdateExerciseAsync(Arg.Any<ExerciseDto>(), Arg.Any<int>()).Returns(Result.Ok());
@@ -458,6 +457,55 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
+    
+    [Fact]
+    public async Task SubmitSolutionProposalPython_ShouldReturn_200()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var solutionRepoSub = scope.ServiceProvider.GetService<ISolutionRepository>();
+        var mozartServiceSub = scope.ServiceProvider.GetService<IMozartService>();
+
+        solutionRepoSub.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        var language = new LanguageSupport { Id = 2 };
+        solutionRepoSub.GetSolutionLanguageBySession(Arg.Any<int>(), Arg.Any<int>()).Returns(language);
+        var testcasesResponse = new List<Testcase> { new Testcase { TestCaseId = 1, IsPublicVisible = true, Input = { new TestParameter { ParameterType = "int", ParameterValue = "1" } }, Output = { new TestParameter { ParameterType = "int", ParameterValue = "1" } } } };
+        solutionRepoSub.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(testcasesResponse);
+        var solutionRunnerResponse = new SolutionRunnerResponse { Action = ResponseCode.Pass };
+        mozartServiceSub.SubmitSubmission(Arg.Any<SubmissionDto>(), Language.Python).Returns(solutionRunnerResponse);
+        solutionRepoSub.InsertSubmissionRelation(Arg.Any<Submission>()).Returns(true);
+
+        var userId = 1;
+        var roles = new List<Roles> { Roles.AnonymousUser };
+        _client.AddRoleAuth(userId, roles);
+        var requestBody = new SubmitSolutionDto(1, "x + y", 2);
+
+        var response = await _client.PostAsJsonAsync("/v2/exercises/1/submission", requestBody);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+    
+    [Fact]
+    public async Task SubmitSolutionProposalLanguageDoesntExist_ShouldReturn_500()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var solutionRepoSub = scope.ServiceProvider.GetService<ISolutionRepository>();
+        var mozartServiceSub = scope.ServiceProvider.GetService<IMozartService>();
+
+        solutionRepoSub!.CheckAnonUserExistsInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
+        mozartServiceSub!.SubmitSubmission(Arg.Any<SubmissionDto>(), (Language)99)
+            .Returns(Task.FromException<Result<SolutionRunnerResponse>>(
+            new ArgumentOutOfRangeException("Invalid language")
+        ));
+
+        var userId = 1;
+        var roles = new List<Roles> { Roles.AnonymousUser };
+        _client.AddRoleAuth(userId, roles);
+        var requestBody = new SubmitSolutionDto(1, "x + y", 99);
+
+        var response = await _client.PostAsJsonAsync("/v2/exercises/1/submission", requestBody);
+
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+    }
 
     [Fact]
     public async Task SubmitSolutionProposal_SolutionProposalFailed_ShouldReturn_400()
@@ -474,7 +522,6 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var solutionRunnerResponse = new SolutionRunnerResponse
         {
             Action = ResponseCode.Failure,
-            ResponseDto = new SolutionResponseDto("failure", null, new List<SolutionTestcaseResultDto> { new SolutionTestcaseResultDto(5, "test", null, null) })
         };
         mozartServiceSub.SubmitSubmission(Arg.Any<SubmissionDto>(), Arg.Any<Language>()).Returns(solutionRunnerResponse);
         solutionRepoSub.InsertSubmissionRelation(Arg.Any<Submission>()).Returns(true);

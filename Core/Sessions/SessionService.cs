@@ -1,3 +1,4 @@
+using Core.Classrooms.Contracts;
 using Core.Exercises.Contracts;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
@@ -5,6 +6,7 @@ using Core.Shared;
 using Core.Shared.Contracts;
 using FluentResults;
 using Microsoft.Extensions.Logging;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Core.Sessions;
 
@@ -13,12 +15,14 @@ public class SessionService : ISessionService
     private readonly ISessionRepository _sessionRepository;
     private readonly ILogger<SessionService> _logger;
     private readonly IAnonTokenService _tokenService;
+    private readonly IClassroomRepository _classroomRepository;
 
-    public SessionService(ISessionRepository sessionRepository, ILogger<SessionService> logger, IAnonTokenService tokenService)
+    public SessionService(ISessionRepository sessionRepository, ILogger<SessionService> logger, IAnonTokenService tokenService, IClassroomRepository classroomRepository)
     {
         _sessionRepository = sessionRepository;
         _logger = logger;
         _tokenService = tokenService;
+        _classroomRepository = classroomRepository;
     }
 
     public async Task<Result> DeleteSession(int sessionId, int userId)
@@ -31,9 +35,14 @@ public class SessionService : ISessionService
         return Result.Ok();
     }
     
-    public async Task<Result<List<GetSessionsResponseDto>>> GetSessions(int userId)
+    public async Task<Result<List<GetSessionsResponseDto>>> GetSessions(int userId, Roles role)
     {
-        var sessions = await _sessionRepository.GetSessionsAsync(userId);
+        var sessions = role switch
+        {
+            Roles.Instructor => await _sessionRepository.GetInstructorSessionsAsync(userId),
+            Roles.Student => await _sessionRepository.GetStudentSessionsAsync(userId),
+            _ => null
+        };
         if (sessions == null)
         {
             return Result.Fail("Sessions not found");
@@ -83,42 +92,38 @@ public class SessionService : ISessionService
         return new CreateSessionResponseDto(sessionId, sessionCode);
     }
 
-    public async Task<Result<JoinSessionResponseDto>> JoinStudent(int userId, string code)
+    public async Task<Result<JoinResponseDto>> JoinStudent(int userId, string code)
     {
         Codes actualCode = DetermineCode(code);
-        if (actualCode == Codes.None)
+        return actualCode switch
         {
-            return Result.Fail("Invalid code");
-        }
-
-        if (actualCode == Codes.SessionCode)
-        {
-            return await JoinTimedSessionStudent(userId, code);
-        }
-
-        if (actualCode == Codes.ClassRoomCode)
-        {
-            throw new NotImplementedException();
-        }
-        
-        return Result.Fail("Internal error happend");
+            Codes.None => Result.Fail("Invalid code"),
+            Codes.SessionCode => await JoinTimedSessionStudent(userId, code),
+            Codes.ClassRoomCode => await JoinClassRoomStudent(userId, code),
+            _ => Result.Fail("Internal error happend")
+        };
     }
 
-    private async Task<Result<JoinSessionResponseDto>> JoinTimedSessionStudent(int userId, string code)
+    private async Task<Result<JoinResponseDto>> JoinTimedSessionStudent(int userId, string code)
     {
         var result = await _sessionRepository.StudentJoinSession(code, userId);
         if (result.IsFailed)
         {
-            return result;
+            return Result.Fail(result.Errors);
         }
-        return new JoinSessionResponseDto(null, null);
+        return new JoinResponseDto(null, null, JoinedType.TimedSession, result.Value);
     }
 
-    // private async Task<Result> JoinClassRoomStudent()
-    // {
-    //     TODO
-    // }
-    
+    private async Task<Result<JoinResponseDto>> JoinClassRoomStudent(int studentId, string code)
+    {
+        var result = await _classroomRepository.JoinClassroomAsync(studentId, code);
+        if (result.IsFailed)
+        {
+            return Result.Fail(result.Errors);
+        }
+        return new JoinResponseDto(null, null, JoinedType.Classroom, result.Value);
+    }
+
     public enum Codes
     {
         None,
@@ -143,14 +148,14 @@ public class SessionService : ISessionService
         return Codes.None;
     }
 
-    public async Task<Result<JoinSessionResponseDto>> JoinSessionAnonUser(JoinSessionDto dto)
+    public async Task<Result<JoinResponseDto>> JoinSessionAnonUser(JoinDto dto)
     {
         if (dto.Name == null)
         {
             return Result.Fail("Missing name");
         }
         // create anon user entry in table
-        var session = await _sessionRepository.GetSessionBySessionCodeAsync(dto.SessionCode);
+        var session = await _sessionRepository.GetSessionBySessionCodeAsync(dto.Code);
         if (session.IsFailed)
         {
             return Result.Fail("Invalid session");
@@ -160,7 +165,7 @@ public class SessionService : ISessionService
         var timeOffset = session.Value.ExpirationTimeUtc - DateTime.UtcNow;
         
         var createToken = _tokenService.GenerateAnonymousUserJwt((int)Math.Ceiling(timeOffset.TotalMinutes), student);
-        return new JoinSessionResponseDto(createToken, DateTime.UtcNow.AddMinutes((int)Math.Ceiling(timeOffset.TotalMinutes)));
+        return new JoinResponseDto(createToken, DateTime.UtcNow.AddMinutes((int)Math.Ceiling(timeOffset.TotalMinutes)), JoinedType.TimedSession, null);
     }
 
     public async Task<Result<GetSessionResponseDto>> GetSessionByIdAsync(int sessionId, int userId, Roles role)
@@ -186,6 +191,11 @@ public class SessionService : ISessionService
         {
             _logger.LogInformation("Session {sessionid}, request by {userid} does not exist", sessionId, userId);
             return Result.Fail("Session does not exist");
+        }
+
+        if (role == Roles.Instructor)
+        {
+            session.ExerciseDetails.ForEach(e => e.Solved = null);
         }
 
         

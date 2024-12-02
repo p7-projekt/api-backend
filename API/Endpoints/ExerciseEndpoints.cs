@@ -1,4 +1,6 @@
 ﻿using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 using API.Configuration;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
@@ -18,7 +20,7 @@ public static class ExerciseEndpoints
     {
         var exerciseV1 = app.MapGroup("v{version:apiVersion}/exercises").WithApiVersionSet(apiVersionSet).MapToApiVersion(1).WithTags("Exercise");
         var exerciseV2 = app.MapGroup("v{version:apiVersion}/exercises").WithApiVersionSet(apiVersionSet).MapToApiVersion(2).WithTags("Exercise");        
-        exerciseV1.MapPost("/", async Task<Results<Created, BadRequest<MozartResponseDto>, IResult>>([FromBody]ExerciseDto dto, ClaimsPrincipal principal, IExerciseService service) =>
+        exerciseV1.MapPost("/", async Task<Results<Created, BadRequest<JsonContent>, IResult>>([FromBody]ExerciseDto dto, ClaimsPrincipal principal, IExerciseService service) =>
         {
             var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
             var result = await service.CreateExercise(dto, Convert.ToInt32(userId));
@@ -63,7 +65,7 @@ public static class ExerciseEndpoints
             return TypedResults.Ok(result.Value);
         });
 
-        exerciseV1.MapPut("/{exerciseId:int}", async Task<Results<Ok, BadRequest <MozartResponseDto>, IResult>> ([FromBody] ExerciseDto dto, ClaimsPrincipal principal, int exerciseId, IExerciseService exerciseService) =>
+        exerciseV1.MapPut("/{exerciseId:int}", async Task<Results<Ok, BadRequest <string>, IResult>> ([FromBody] ExerciseDto dto, ClaimsPrincipal principal, int exerciseId, IExerciseService exerciseService) =>
         {
             var userId = principal.FindFirst(ClaimTypes.UserData)?.Value;
 
@@ -73,17 +75,13 @@ public static class ExerciseEndpoints
                 return TypedResults.Problem(statusCode: 500, title: "invalid request", detail: result.Errors.First().Message);
             }
 
-            switch (result.Value.Action)
+
+            return result.Value.Action switch
             {
-                case ResponseCode.Pass:
-                    return TypedResults.Ok();
-                case ResponseCode.Failure:
-                    return TypedResults.BadRequest(new MozartResponseDto(result.Value.ResponseDto!.TestCaseResults, null));
-                case ResponseCode.Error:
-                    return TypedResults.BadRequest(new MozartResponseDto(null, result.Value.ResponseDto!.Message));
-                default:
-                    throw new Exception("Unexpected result received when updating exercises");
-            }
+                ResponseCode.Pass => TypedResults.Ok(),
+                ResponseCode.Failure or ResponseCode.Error => TypedResults.BadRequest(result.Value.ResponseBody),
+                _ => throw new Exception("Unexpected result received when updating exercises")
+            };
 
         }).RequireAuthorization(nameof(Roles.Instructor)).WithRequestValidation<ExerciseDto>();
 

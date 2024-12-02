@@ -104,7 +104,7 @@ public class ExerciseService : IExerciseService
         return submissionResult;
     }
 
-    public async Task<Result<MozartResponseDto>> CreateExercise(ExerciseDto dto, int authorId)
+    public async Task<Result<string>> CreateExercise(ExerciseDto dto, int authorId)
     {
         var result = await _mozartService.SubmitSubmission(new SubmissionDto(dto), (Language)dto.SolutionLanguage);
         if (result.IsFailed)
@@ -112,12 +112,9 @@ public class ExerciseService : IExerciseService
             return Result.Fail("Internal error");
         }
 
-        switch (result.Value.Action)
+        if(result.Value.Action != ResponseCode.Pass)
         {
-            case ResponseCode.Failure:
-                return Result.Ok(new MozartResponseDto(result.Value.ResponseDto!.TestCaseResults, null));
-            case ResponseCode.Error:
-                return Result.Ok(new MozartResponseDto(null, result.Value.ResponseDto!.Message));
+            return Result.Ok(result.Value.ResponseBody);
         }
 
         var insertResult = await _exerciseRepository.InsertExerciseAsync(dto, authorId);
