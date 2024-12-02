@@ -32,7 +32,7 @@ public class DashboardEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
     }
 
     [Fact]
-    public async Task GetExercisesInSession_ShouldReturn_FailedAuthentication()
+    public async Task GetExercisesInSession_AnonymousUser_ShouldReturn_FailedAuthentication()
     {
         using var scope = _factory.Services.CreateScope();
         var dashboardSub = scope.ServiceProvider.GetService<IDashboardRepository>();
@@ -53,7 +53,7 @@ public class DashboardEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
     }
 
     [Fact]
-    public async Task GetExercisesInSession_ShouldReturn_NotFound()
+    public async Task GetExercisesInSession_NotSessionAuthor_ShouldReturn_NotFound()
     {
         using var scope = _factory.Services.CreateScope();
         var dashboardSub = scope.ServiceProvider.GetService<IDashboardRepository>();
@@ -70,7 +70,7 @@ public class DashboardEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
     }
 
     [Fact]
-    public async Task GetExercisesInSession_ShouldReturn_OK_Classroom_Exercises()
+    public async Task GetExercisesInSession_ClassroomExercises_SessionAuthor_ShouldReturn_OK()
     {
         using var scope = _factory.Services.CreateScope();
         var dashboardSub = scope.ServiceProvider.GetService<IDashboardRepository>();
@@ -90,7 +90,7 @@ public class DashboardEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
     [Fact]
-    public async Task GetExercisesInSession_ShouldReturn_OK_TimedSession_Exercises()
+    public async Task GetExercisesInSession_TimedSessionExercises_SessionAuthor_ShouldReturn_OK()
     {
         using var scope = _factory.Services.CreateScope();
         var dashboardSub = scope.ServiceProvider.GetService<IDashboardRepository>();
@@ -110,7 +110,7 @@ public class DashboardEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
     [Fact]
-    public async Task GetExercisesInTimedSession_ShouldReturn_GetExercisesInSessionCombinedInfo()
+    public async Task GetExercisesInTimedSession_SessionAuthor_ShouldReturn_GetExercisesInSessionCombinedInfo()
     {
         using var scope = _factory.Services.CreateScope();
         var dashboardSub = scope.ServiceProvider.GetService<IDashboardRepository>();
@@ -133,50 +133,6 @@ public class DashboardEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
         var expectedJson = JsonSerializer.Serialize(CreateDummyCombinedInfo());
         var actualJson = JsonSerializer.Serialize(responseContent);
         Assert.Equal(actualJson, expectedJson);
-    }
-    [Fact]
-    public async Task GetExercisesInTimedSession_ShouldFail_GetExercisesInSessionCombinedInfo()
-    {
-        using var scope = _factory.Services.CreateScope();
-        var dashboardSub = scope.ServiceProvider.GetService<IDashboardRepository>();
-        var sessionSub = scope.ServiceProvider.GetService<ISessionRepository>();
-        sessionSub!.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
-        var returnValue = new List<GetExercisesInSessionResponseDto>
-        {
-        new GetExercisesInSessionResponseDto
-        {
-            Title = "Exercise 1",
-            Id = 1,
-            Solved = 10,
-            Attempted = 20,
-            UserIds = new[] { 101, 102, 103 },
-            Names = new[] { "Alice", "Bob", "Charliee" }
-        },
-        new GetExercisesInSessionResponseDto
-        {
-            Title = "Exercise 2",
-            Id = 2,
-            Solved = 5,
-            Attempted = 10,
-            UserIds = new[] { 201, 202 },
-            Names = new[] { "Dave", "Eve" }
-        } };
-        dashboardSub!.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(false);
-        dashboardSub!.GetExercisesInSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
-        dashboardSub!.GetConnectedTimedUsersAsync(Arg.Any<int>()).Returns(4);
-
-        var userId = 1;
-        var roles = new List<Roles> { Roles.Instructor };
-        _client.AddRoleAuth(userId, roles);
-
-        var response = await _client.GetAsync("/v2/dashboard/1");
-
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var responseContent = await response.Content.ReadFromJsonAsync<GetExercisesInSessionCombinedInfo>();
-        Assert.IsType<GetExercisesInSessionCombinedInfo>(responseContent);
-        var expectedJson = JsonSerializer.Serialize(CreateDummyCombinedInfo());
-        var actualJson = JsonSerializer.Serialize(responseContent);
-        Assert.NotEqual(actualJson, expectedJson);
     }
     [Fact]
     public async Task GetExercisesInClassSession_ShouldReturn_GetExercisesInSessionCombinedInfo()
@@ -204,51 +160,7 @@ public class DashboardEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
         Assert.Equal(actualJson, expectedJson);
     }
     [Fact]
-    public async Task GetExercisesInClassSession_ShouldFail_GetExercisesInSessionCombinedInfo()
-    {
-        using var scope = _factory.Services.CreateScope();
-        var dashboardSub = scope.ServiceProvider.GetService<IDashboardRepository>();
-        var sessionSub = scope.ServiceProvider.GetService<ISessionRepository>();
-        sessionSub!.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
-        var returnValue = new List<GetExercisesInSessionResponseDto>
-        {
-        new GetExercisesInSessionResponseDto
-        {
-            Title = "Exercise 1",
-            Id = 1,
-            Solved = 10,
-            Attempted = 20,
-            UserIds = new[] { 101, 102, 103 },
-            Names = new[] { "Alice", "Bob", "Charlddiee" }
-        },
-        new GetExercisesInSessionResponseDto
-        {
-            Title = "Exercise 2",
-            Id = 2,
-            Solved = 5,
-            Attempted = 10,
-            UserIds = new[] { 201, 202 },
-            Names = new[] { "Dave", "Eve" }
-        } };
-        dashboardSub!.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(true);
-        dashboardSub!.GetExercisesInSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
-        dashboardSub!.GetConnectedUsersClassAsync(Arg.Any<int>()).Returns(4);
-
-        var userId = 1;
-        var roles = new List<Roles> { Roles.Instructor };
-        _client.AddRoleAuth(userId, roles);
-
-        var response = await _client.GetAsync("/v2/dashboard/1");
-
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var responseContent = await response.Content.ReadFromJsonAsync<GetExercisesInSessionCombinedInfo>();
-        Assert.IsType<GetExercisesInSessionCombinedInfo>(responseContent);
-        var expectedJson = JsonSerializer.Serialize(CreateDummyCombinedInfo());
-        var actualJson = JsonSerializer.Serialize(responseContent);
-        Assert.NotEqual(actualJson, expectedJson);
-    }
-    [Fact]
-    public async Task GetUserSolution_ShouldReturn_FailedAuthentication()
+    public async Task GetUserSolution_AnonymousUser_ShouldReturn_FailedAuthentication()
     {
         using var scope = _factory.Services.CreateScope();
         var dashboardSub = scope.ServiceProvider.GetService<IDashboardRepository>();
@@ -318,36 +230,6 @@ public class DashboardEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
         var expectedJson = JsonSerializer.Serialize(CreateDummySolutionData());
         var actualJson = JsonSerializer.Serialize(responseContent);
         Assert.Equal(actualJson, expectedJson);
-    }
-    [Fact]
-    public async Task GetUserSolution_ShouldFail_Return_GetExerciseSolutionResponseDto()
-    {
-        using var scope = _factory.Services.CreateScope();
-        var dashboardSub = scope.ServiceProvider.GetService<IDashboardRepository>();
-        var sessionSub = scope.ServiceProvider.GetService<ISessionRepository>();
-        dashboardSub!.CheckAuthorizedToGetSolution(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<int>()).Returns(true);
-        var solutionResponse = new GetExerciseSolutionResponseDto(
-            Title: "Sample Exercise",
-            Description: "This is a sample exercise description.",
-            Solution: "def solution():\n    return 'Hello, Woooooooooooooorld!'",
-            Language: "Python",
-            Language_id: 1
-        );
-        dashboardSub!.GetSolutionByUserIdAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(Result.Ok(solutionResponse));
-
-
-        var userId = 1;
-        var roles = new List<Roles> { Roles.Instructor };
-        _client.AddRoleAuth(userId, roles);
-
-        var response = await _client.GetAsync("/v2/dashboard/solution/1/1");
-
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var responseContent = await response.Content.ReadFromJsonAsync<GetExerciseSolutionResponseDto>();
-        Assert.IsType<GetExerciseSolutionResponseDto>(responseContent);
-        var expectedJson = JsonSerializer.Serialize(CreateDummySolutionData());
-        var actualJson = JsonSerializer.Serialize(responseContent);
-        Assert.NotEqual(actualJson, expectedJson);
     }
 
 

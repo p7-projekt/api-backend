@@ -16,7 +16,7 @@ namespace UnitTest.Core.Sessions;
 public class DashboardServiceTest
 {
     [Fact]
-    public async void GetExercisesInSession_Timed_ShouldReturn_OK()
+    public async void GetExercisesInSession_TimedSession_ShouldReturn_OK()
     {
         // Arrange
         var loggerSub2 = Substitute.For<ILogger<DashboardService>>();
@@ -36,7 +36,7 @@ public class DashboardServiceTest
         Assert.IsType<GetExercisesInSessionCombinedInfo>(result.Value);
     }
     [Fact]
-    public async void GetExercisesInSession_Timed_ShouldReturn_Fail()
+    public async void GetExercisesInSession_TimedSession_NoExercisesFound_ShouldReturn_Fail()
     {
         // Arrange
         var loggerSub2 = Substitute.For<ILogger<DashboardService>>();
@@ -55,7 +55,7 @@ public class DashboardServiceTest
         Assert.True(result.IsFailed);
     }
     [Fact]
-    public async void GetExercisesInSession_Class_ShouldReturn_OK()
+    public async void GetExercisesInSession_ClassSession_ShouldReturn_OK()
     {
         // Arrange
         var loggerSub2 = Substitute.For<ILogger<DashboardService>>();
@@ -75,7 +75,7 @@ public class DashboardServiceTest
         Assert.IsType<GetExercisesInSessionCombinedInfo>(result.Value);
     }
     [Fact]
-    public async void GetExercisesInSession_Class_ShouldReturn_Fail()
+    public async void GetExercisesInSession_ClassSession_NoExercisesFound_ShouldReturn_Fail()
     {
         // Arrange
         var loggerSub2 = Substitute.For<ILogger<DashboardService>>();
@@ -95,7 +95,7 @@ public class DashboardServiceTest
     }
 
     [Fact]
-    public async void GetExercisesInSession_ShouldReturn_Fail()
+    public async void GetExercisesInSession_NotAuthor_ShouldReturn_Fail()
     {
         // Arrange
         var loggerSub2 = Substitute.For<ILogger<DashboardService>>();
@@ -133,7 +133,7 @@ public class DashboardServiceTest
         Assert.IsType<GetExerciseSolutionResponseDto>(result.Value);
     }
     [Fact]
-    public async void GetUserSolution_NotAuthorized_ShouldReturn_Fail()
+    public async void GetUserSolution_NotAuthor_ShouldReturn_Fail()
     {
         // Arrange
         var loggerSub2 = Substitute.For<ILogger<DashboardService>>();
@@ -151,7 +151,7 @@ public class DashboardServiceTest
         Assert.True(result.IsFailed);
     }
     [Fact]
-    public async void GetUserSolution_ShouldReturn_Fail()
+    public async void GetUserSolution_InvalidId_ShouldReturn_Fail()
     {
         // Arrange
         var loggerSub2 = Substitute.For<ILogger<DashboardService>>();
