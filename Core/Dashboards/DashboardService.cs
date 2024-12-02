@@ -28,44 +28,35 @@ public class DashboardService : IDashboardService
             return Result.Fail("User does not have access to session");
         }
         var inClassroom = await _dashboardRepository.CheckSessionInClassroomAsync(sessionId);
-        
+        int usersConnected;
+
         if (!inClassroom)
         {
-            var usersConnected = await _dashboardRepository.GetConnectedTimedUsersAsync(sessionId);
-
-            var exercises = await _dashboardRepository.GetExercisesInTimedSessionBySessionIdAsync(sessionId);
-            if (exercises == null || exercises.Count() == 0)
-            {
-                _logger.LogInformation("No Exercises in classroom session: {sessionID}", sessionId);
-                return Result.Fail("Exercises not found");
-            }
-
-            return Result.Ok(TransformExercisesInSessionDto(exercises, usersConnected));
+            usersConnected = await _dashboardRepository.GetConnectedTimedUsersAsync(sessionId);
         }
         else
         {
-            var usersConnected = await _dashboardRepository.GetConnectedUsersClassAsync(sessionId);
-
-            var exercises = await _dashboardRepository.GetExercisesInTimedSessionBySessionIdAsync(sessionId);
-            if (exercises == null || exercises.Count() == 0)
-            {
-                _logger.LogInformation("No Exercises in timed session: {sessionID}", sessionId);
-                return Result.Fail("Exercises not found");
-            }
-
-            return Result.Ok(TransformExercisesInSessionDto(exercises, usersConnected));
+            usersConnected = await _dashboardRepository.GetConnectedUsersClassAsync(sessionId);
         }
+        
+        var exercises = await _dashboardRepository.GetExercisesInSessionBySessionIdAsync(sessionId);
+        if (exercises == null || exercises.Count() == 0)
+        {
+            _logger.LogInformation("No Exercises in timed session: {sessionID}", sessionId);
+            return Result.Fail("Exercises not found");
+        }
+        return Result.Ok(TransformExercisesInSessionDto(exercises, usersConnected));
 
     }
 
     public async Task<Result<GetExerciseSolutionResponseDto>> GetUserSolution(int exerciseId, int appUserId, int userId)
     {
-        var autherized = await _dashboardRepository.CheckAutherizedToGetSolution(exerciseId, appUserId, userId);
+        var authorized = await _dashboardRepository.CheckAuthorizedToGetSolution(exerciseId, appUserId, userId);
 
-        if (!autherized)
+        if (!authorized)
         {
             _logger.LogInformation("User {userId} not autherized to access solution for exercise {exerciseId} by appuser {appUserId}", userId, exerciseId, appUserId);
-            return Result.Fail("Not autherized");
+            return Result.Fail("Not authorized");
         }
 
         var solution = await _dashboardRepository.GetSolutionByUserIdAsync(exerciseId, appUserId);

@@ -1,3 +1,4 @@
+using Core.Dashboards.Contracts;
 using Core.Classrooms.Contracts;
 using Core.Exercises.Contracts;
 using Core.Languages.Contracts;
@@ -42,7 +43,8 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
 			var iExeciseSub = Substitute.For<IExerciseRepository>();
 			var iMozartSub = Substitute.For<IMozartService>();
 			var iSolutionSub = Substitute.For<ISolutionRepository>();
-			var iLanguageSub = Substitute.For<ILanguageRepository>();
+			var iDashboardSub = Substitute.For<IDashboardRepository>();
+      var iLanguageSub = Substitute.For<ILanguageRepository>();
 			var iClassroomSub = Substitute.For<IClassroomRepository>();
 			services.AddScoped<ITokenRepository>(_ => itokenRepoSub);
 			services.AddScoped<IUserRepository>(_ => iUserRepo);
@@ -52,6 +54,7 @@ public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<TProgra
 			services.AddScoped<ISolutionRepository>(_ => iSolutionSub);
 			services.AddScoped<ILanguageRepository>(_ => iLanguageSub);
 			services.AddScoped<IClassroomRepository>(_ => iClassroomSub);
+			services.AddScoped<IDashboardRepository>(_ => iDashboardSub);
 		});
 		
 		return base.CreateHost(builder);
