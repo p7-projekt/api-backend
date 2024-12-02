@@ -14,9 +14,9 @@ public class GetClassroomSessionResponseDto
     public int Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public int AuthorId { get; set; }
+    public int Author { get; set; }
     public bool Active { get; set; }
-    public List<SolvedExercise> ExerciseIds { get; set; } = new ();
+    public List<SolvedExercise> Exercises { get; set; } = new ();
     public List<Language> Languages { get; set; } = new ();
 }
 
