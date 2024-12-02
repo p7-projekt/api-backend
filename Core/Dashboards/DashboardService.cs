@@ -28,33 +28,24 @@ public class DashboardService : IDashboardService
             return Result.Fail("User does not have access to session");
         }
         var inClassroom = await _dashboardRepository.CheckSessionInClassroomAsync(sessionId);
-        
+        int usersConnected;
+
         if (!inClassroom)
         {
-            var usersConnected = await _dashboardRepository.GetConnectedTimedUsersAsync(sessionId);
-
-            var exercises = await _dashboardRepository.GetExercisesInTimedSessionBySessionIdAsync(sessionId);
-            if (exercises == null || exercises.Count() == 0)
-            {
-                _logger.LogInformation("No Exercises in classroom session: {sessionID}", sessionId);
-                return Result.Fail("Exercises not found");
-            }
-
-            return Result.Ok(TransformExercisesInSessionDto(exercises, usersConnected));
+            usersConnected = await _dashboardRepository.GetConnectedTimedUsersAsync(sessionId);
         }
         else
         {
-            var usersConnected = await _dashboardRepository.GetConnectedUsersClassAsync(sessionId);
-
-            var exercises = await _dashboardRepository.GetExercisesInClassSessionBySessionIdAsync(sessionId);
-            if (exercises == null || exercises.Count() == 0)
-            {
-                _logger.LogInformation("No Exercises in timed session: {sessionID}", sessionId);
-                return Result.Fail("Exercises not found");
-            }
-
-            return Result.Ok(TransformExercisesInSessionDto(exercises, usersConnected));
+            usersConnected = await _dashboardRepository.GetConnectedUsersClassAsync(sessionId);
         }
+        
+        var exercises = await _dashboardRepository.GetExercisesInSessionBySessionIdAsync(sessionId);
+        if (exercises == null || exercises.Count() == 0)
+        {
+            _logger.LogInformation("No Exercises in timed session: {sessionID}", sessionId);
+            return Result.Fail("Exercises not found");
+        }
+        return Result.Ok(TransformExercisesInSessionDto(exercises, usersConnected));
 
     }
 

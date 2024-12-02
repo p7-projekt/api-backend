@@ -40,7 +40,7 @@ public class DashboardEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
         sessionSub!.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
         var returnValue = createExerciseResponse();
         dashboardSub!.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(false);
-        dashboardSub!.GetExercisesInTimedSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
+        dashboardSub!.GetExercisesInSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
         dashboardSub!.GetConnectedTimedUsersAsync(Arg.Any<int>()).Returns(21);
 
         var userId = 1;
@@ -78,7 +78,7 @@ public class DashboardEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
         sessionSub!.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         var returnValue = createExerciseResponse();
         dashboardSub!.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(true);
-        dashboardSub!.GetExercisesInClassSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
+        dashboardSub!.GetExercisesInSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
         dashboardSub!.GetConnectedUsersClassAsync(Arg.Any<int>()).Returns(4);
 
         var userId = 1;
@@ -98,7 +98,7 @@ public class DashboardEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
         sessionSub!.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         var returnValue = createExerciseResponse();
         dashboardSub!.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(false);
-        dashboardSub!.GetExercisesInTimedSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
+        dashboardSub!.GetExercisesInSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
         dashboardSub!.GetConnectedTimedUsersAsync(Arg.Any<int>()).Returns(4);
 
         var userId = 1;
@@ -118,7 +118,7 @@ public class DashboardEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
         sessionSub!.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         var returnValue = createExerciseResponse();
         dashboardSub!.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(false);
-        dashboardSub!.GetExercisesInTimedSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
+        dashboardSub!.GetExercisesInSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
         dashboardSub!.GetConnectedTimedUsersAsync(Arg.Any<int>()).Returns(4);
 
         var userId = 1;
@@ -162,7 +162,7 @@ public class DashboardEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
             Names = new[] { "Dave", "Eve" }
         } };
         dashboardSub!.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(false);
-        dashboardSub!.GetExercisesInTimedSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
+        dashboardSub!.GetExercisesInSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
         dashboardSub!.GetConnectedTimedUsersAsync(Arg.Any<int>()).Returns(4);
 
         var userId = 1;
@@ -187,7 +187,7 @@ public class DashboardEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
         sessionSub!.VerifyAuthor(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         var returnValue = createExerciseResponse();
         dashboardSub!.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(true);
-        dashboardSub!.GetExercisesInClassSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
+        dashboardSub!.GetExercisesInSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
         dashboardSub!.GetConnectedUsersClassAsync(Arg.Any<int>()).Returns(4);
 
         var userId = 1;
@@ -231,7 +231,7 @@ public class DashboardEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
             Names = new[] { "Dave", "Eve" }
         } };
         dashboardSub!.CheckSessionInClassroomAsync(Arg.Any<int>()).Returns(true);
-        dashboardSub!.GetExercisesInClassSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
+        dashboardSub!.GetExercisesInSessionBySessionIdAsync(Arg.Any<int>()).Returns(returnValue);
         dashboardSub!.GetConnectedUsersClassAsync(Arg.Any<int>()).Returns(4);
 
         var userId = 1;
