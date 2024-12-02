@@ -345,9 +345,15 @@ public class ClassroomRepository : IClassroomRepository
 
         session.Exercises = (await _sessionRepository.GetExercisesOfSessionAsync(sessionId, con));
 
-        var languageQuery = "SELECT language_id FROM language_in_session WHERE session_id = @SessionId;";
+        var languageQuery = """
+                            SELECT ls.language_id AS languageId, ls.language 
+                            FROM language_in_session AS lis
+                            JOIN language_support AS ls 
+                                ON lis.language_id = ls.language_id
+                            WHERE session_id = @SessionId;
+                            """;
 
-        var languages = await con.QueryAsync<Language>(languageQuery, new { SessionId = sessionId });
+        var languages = await con.QueryAsync<GetLanguagesResponseDto>(languageQuery, new { SessionId = sessionId });
         session.Languages = languages.ToList();
 
         return session;
