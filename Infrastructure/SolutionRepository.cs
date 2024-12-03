@@ -71,14 +71,25 @@ public class SolutionRepository : ISolutionRepository
 		}
 	}
 
-	public async Task<bool> CheckAnonUserExistsInSessionAsync(int userId, int sessionId)
+	public async Task<bool> CheckUserAssociationToSessionAsync(int userId, int sessionId)
 	{
 		using var con = await _dbConnection.CreateConnectionAsync();
-		var query = """
+		
+		var timedSessionQuery = """
 		            SELECT Count(*) FROM user_in_timedsession WHERE user_id = @UserID AND session_id = @SessionId
 		            """;
-		var result = await con.ExecuteScalarAsync<int>(query, new { UserId = userId, SessionId = sessionId });
-		return result > 0;
+		var timedSessionResult = await con.ExecuteScalarAsync<int>(timedSessionQuery, new { UserId = userId, SessionId = sessionId });
+
+		var classroomSessionQuery = """
+									SELECT Count(*)
+									FROM student_in_classroom as stud
+									JOIN session_in_classroom AS ses
+										ON stud.classroom_id = ses.classroom_id
+									WHERE student_id = @UserID AND session_id = @SessionId
+									""";
+		var classroomSessionResult = await con.ExecuteScalarAsync<int>(classroomSessionQuery, new { UserId = userId, SessionId = sessionId });
+
+		return (timedSessionResult > 0) || (classroomSessionResult > 0);
 	}
 
 	public async Task<LanguageSupport?> GetSolutionLanguageBySession(int languageId, int sessionId)

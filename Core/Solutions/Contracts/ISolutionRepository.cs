@@ -7,7 +7,7 @@ namespace Core.Solutions.Contracts;
 public interface ISolutionRepository
 {
 	Task<List<Testcase>?> GetTestCasesByExerciseIdAsync(int exerciseId);
-	Task<bool> CheckAnonUserExistsInSessionAsync(int userId, int sessionId);
+	Task<bool> CheckUserAssociationToSessionAsync(int userId, int sessionId);
 	Task<bool> InsertSolvedRelation(int userId, int exerciseId, int sessionId);
 	
 	Task<LanguageSupport?> GetSolutionLanguageBySession(int languageId, int sessionId);

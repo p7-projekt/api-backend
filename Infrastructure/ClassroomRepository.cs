@@ -1,5 +1,6 @@
 ﻿using Core.Classrooms.Contracts;
 using Core.Classrooms.Models;
+using Core.Exercises.Models;
 using Core.Languages.Models;
 using Core.Sessions.Contracts;
 using Core.Sessions.Models;
@@ -334,20 +335,29 @@ public class ClassroomRepository : IClassroomRepository
                         s.session_id AS id,
                         s.title AS title,
                         s.description AS description,
-                        s.author_id AS authorid,
+                        s.author_id AS authorId,
+                        u.name AS author,
                         sic.active AS active
                     FROM session s
                     JOIN session_in_classroom sic ON sic.session_id = s.session_id
+                    JOIN users as u ON u.id = s.author_id
                     WHERE s.session_id = @SessionId
                     """;
 
         var session = await con.QuerySingleAsync<GetClassroomSessionResponseDto>(query, new { SessionId = sessionId });
 
-        session.ExerciseIds = (await _sessionRepository.GetExercisesOfSessionAsync(sessionId, con));
+        var tempExercises = await _sessionRepository.GetExercisesOfSessionAsync(sessionId, con);
+        session.Exercises = tempExercises.Select(x => new SolvedExerciseDto(x.ExerciseId, x.ExerciseTitle, x.Solved)).ToList();
 
-        var languageQuery = "SELECT language_id FROM language_in_session WHERE session_id = @SessionId;";
+        var languageQuery = """
+                            SELECT ls.language_id AS languageId, ls.language 
+                            FROM language_in_session AS lis
+                            JOIN language_support AS ls 
+                                ON lis.language_id = ls.language_id
+                            WHERE session_id = @SessionId;
+                            """;
 
-        var languages = await con.QueryAsync<Language>(languageQuery, new { SessionId = sessionId });
+        var languages = await con.QueryAsync<GetLanguagesResponseDto>(languageQuery, new { SessionId = sessionId });
         session.Languages = languages.ToList();
 
         return session;
