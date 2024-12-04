@@ -349,7 +349,7 @@ public class ClassroomEndpointsTest : IClassFixture<TestWebApplicationFactory<Pr
         var classroomRepoSub = scope.ServiceProvider.GetService<IClassroomRepository>();
 
         var classroomResponse = new GetClassroomSessionResponseDto { Id = 5 };
-        classroomRepoSub.GetClassroomSessionByIdAsync(Arg.Any<int>()).Returns(classroomResponse);
+        classroomRepoSub.GetClassroomSessionByIdAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(classroomResponse);
 
         var userId = 1;
         var roles = new List<Roles> { Roles.Instructor };

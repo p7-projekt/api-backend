@@ -130,9 +130,9 @@ public class ClassroomService : IClassroomService
         return await _classroomRepository.LeaveClassroomAsync(classroomId, studentId);
     }
 
-    public async Task<GetClassroomSessionResponseDto> GetClassroomSessionById(int sessionId)
+    public async Task<GetClassroomSessionResponseDto> GetClassroomSessionById(int sessionId, int userId)
     {
-        return await _classroomRepository.GetClassroomSessionByIdAsync(sessionId);
+        return await _classroomRepository.GetClassroomSessionByIdAsync(sessionId, userId);
     }
 
     private string GenerateClassroomCode()

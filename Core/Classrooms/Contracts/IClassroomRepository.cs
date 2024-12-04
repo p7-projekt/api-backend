@@ -20,7 +20,7 @@ public interface IClassroomRepository
     Task<Result> UpdateClassroomSessionAsync(UpdateClassroomSessionDto dto);
     Task<Result<int>> JoinClassroomAsync(int studentId, string roomcode);
     Task DeleteClassroomSessionAsync(int sessionId);
-    Task<GetClassroomSessionResponseDto> GetClassroomSessionByIdAsync(int sessionId);
+    Task<GetClassroomSessionResponseDto> GetClassroomSessionByIdAsync(int sessionId, int userId);
     Task<Result> LeaveClassroomAsync(int classroomId, int studentId);
     Task<bool> VerifyStudentInClassroom(int classroomId, int studentId);
     Task<bool> VerifyClassroomAuthor(int classroomId, int authorId);
