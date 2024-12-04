@@ -7,7 +7,6 @@ services:
       POSTGRES_DB: api-dev
       POSTGRES_USER: api-user
       POSTGRES_PASSWORD: api-pass
-      PERFORMANCE_TEST: true
     ports:
       - 5200:5432
 
