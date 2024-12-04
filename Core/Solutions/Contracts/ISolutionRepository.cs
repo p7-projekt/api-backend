@@ -12,5 +12,4 @@ public interface ISolutionRepository
 	Task<LanguageSupport?> GetSolutionLanguageBySession(int languageId, int sessionId);
 	Task<bool> VerifyExerciseInSessionAsync(int sessionId, int exerciseId);
     Task<bool> InsertSubmissionRelation(Submission submission);
-
 }
