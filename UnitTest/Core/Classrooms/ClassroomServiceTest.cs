@@ -484,9 +484,9 @@ public class ClassroomServiceTest
         var classroomService = new ClassroomService(logger, classroomRepoSub, sessionRepoSub);
 
         var responseDto = new GetClassroomSessionResponseDto { Active = true };
-        classroomRepoSub.GetClassroomSessionByIdAsync(Arg.Any<int>()).Returns(responseDto);
+        classroomRepoSub.GetClassroomSessionByIdAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(responseDto);
 
-        var result = await classroomService.GetClassroomSessionById(1);
+        var result = await classroomService.GetClassroomSessionById(1, 1);
 
         Assert.IsType<GetClassroomSessionResponseDto>(result);
         Assert.True(result.Active);

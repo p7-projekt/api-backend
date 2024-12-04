@@ -326,7 +326,7 @@ public class ClassroomRepository : IClassroomRepository
         await con.ExecuteAsync(query, new { SessionId = sessionId });
     }
 
-    public async Task<GetClassroomSessionResponseDto> GetClassroomSessionByIdAsync(int sessionId)
+    public async Task<GetClassroomSessionResponseDto> GetClassroomSessionByIdAsync(int sessionId, int userId)
     {
         using var con = await _connection.CreateConnectionAsync();
 
@@ -346,7 +346,22 @@ public class ClassroomRepository : IClassroomRepository
 
         var session = await con.QuerySingleAsync<GetClassroomSessionResponseDto>(query, new { SessionId = sessionId });
 
-        var tempExercises = await _sessionRepository.GetExercisesOfSessionAsync(sessionId, con);
+        var exercisesQuery = """
+                             SELECT e.exercise_id AS exerciseid,
+                                    title AS exercisetitle,
+                                    CASE
+                                        WHEN s.solved IS NULL OR s.solved = false THEN false
+                                        ELSE true
+                                    END AS solved
+                             FROM exercise AS e
+                             JOIN exercise_in_session AS eis
+                                ON e.exercise_id = eis.exercise_id
+                             LEFT JOIN submission AS s
+                                ON e.exercise_id = s.exercise_id AND s.user_id = @UserId
+                             WHERE eis.session_id = @SessionId;
+                             """;
+
+        var tempExercises = await con.QueryAsync<SolvedExercise>(exercisesQuery, new { UserID = userId, SessionId = sessionId});
         session.Exercises = tempExercises.Select(x => new SolvedExerciseDto(x.ExerciseId, x.ExerciseTitle, x.Solved)).ToList();
 
         var languageQuery = """

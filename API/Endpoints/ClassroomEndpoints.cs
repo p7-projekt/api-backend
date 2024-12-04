@@ -137,9 +137,11 @@ public static class ClassroomEndpoints
 
         }).RequireAuthorization(nameof(Roles.Instructor));
 
-        classroomV2.MapGet("/session/{sessionId:int}", async Task<Ok<GetClassroomSessionResponseDto>> (int sessionId, IClassroomService service) =>
+        classroomV2.MapGet("/session/{sessionId:int}", async Task<Ok<GetClassroomSessionResponseDto>> (int sessionId, ClaimsPrincipal principal, IClassroomService service) =>
         {
-            var result = await service.GetClassroomSessionById(sessionId);
+            var userId = principal.Claims.First(c => c.Type == ClaimTypes.UserData).Value;
+
+            var result = await service.GetClassroomSessionById(sessionId, Convert.ToInt32(userId));
 
             return TypedResults.Ok(result);
 
