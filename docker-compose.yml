@@ -6,13 +6,14 @@
       context: .
       dockerfile: API/Dockerfile
     ports:
-      - ${API_PORT}:8080
+      - ${API_PORT}:8082
     depends_on:
       db:
         condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       CONNECTIONSTRING: Host=${POSTGRES_HOST};Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};
+      PERFORMANCE_TEST: false
   db:
     container_name: p7-api-db
     image: postgres:16
@@ -29,5 +30,19 @@
       - ${POSTGRES_PORT}:5432
     volumes:
       - db:/var/lib/postgresql/data
+
+  mozart-haskell:
+    container_name: p7-mozart-haskell
+    image: p7project/mozart-haskell:2.0rc2
+    restart: on-failure
+    ports:
+      - 8080:8080
+  mozart-python:
+    container_name: p7-mozart-python
+    image: p7project/mozart-python:2.0rc2
+    restart: on-failure
+    ports:
+      - 8081:8080
+
 volumes:
   db:

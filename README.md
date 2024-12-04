@@ -1,6 +1,7 @@
 # api-backend
 
 ## Production
+
 Database have to be a postgres instance.
 
 ```env
@@ -14,6 +15,7 @@ ADMIN_MAIL="someEmail@email.dk"
 ADMIN_PASS="YourPass!1231"
 #
 CONNECTIONSTRING=Host=X;Port=X;Database=X;Username=X;Password=X;
+PERFORMANCE_TEST=false
 ```
 
 ## Development

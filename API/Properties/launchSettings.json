@@ -22,8 +22,8 @@
         "MOZART_PYTHON": "localhost:8081",
         "SEED_ADMIN": "true",
         "ADMIN_MAIL": "admin@p7.dk",
-        "ADMIN_PASS": "Admin!1234"
-        
+        "ADMIN_PASS": "Admin!1234",
+        "PERFORMANCE_TEST": "false"
       }
     },
     "https": {
