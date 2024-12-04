@@ -25,6 +25,9 @@ public class TokenService : ITokenService
     }
     public string GenerateJwt(int userId, List<Roles> roles)
     {
+        var env = Environment.GetEnvironmentVariable("PERFORMANCE_TEST");
+        bool performanceTest = env != null && string.Equals("true", env, StringComparison.OrdinalIgnoreCase);
+        _logger.LogInformation("Performance test env: {performancetest}", performanceTest);
         var claims = new List<Claim>();
         claims.Add(new Claim(ClaimTypes.UserData, userId.ToString()));
         foreach (var role in roles)
@@ -35,9 +38,9 @@ public class TokenService : ITokenService
             issuer: AuthConstants.Issuer,
             audience: AuthConstants.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(AuthConstants.JwtExpirationInMinutes),
+            expires: performanceTest ? DateTime.UtcNow.AddHours(12) : DateTime.UtcNow.AddMinutes(AuthConstants.JwtExpirationInMinutes),
             signingCredentials: GetSigningCredentials()
-            );
+        );
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
