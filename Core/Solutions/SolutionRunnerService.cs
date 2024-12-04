@@ -16,13 +16,18 @@ public class SolutionRunnerService : ISolutionRunnerService
     public SolutionRunnerService(ILogger<SolutionRunnerService> logger, ISolutionRepository solutionRepository, IMozartService iMozartService)
     {
         _logger = logger;
-        
         _solutionRepository = solutionRepository;
         _iMozartService = iMozartService;
     }
 
     public async Task<Result<string>> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId)
     {
+        var exerciseInSession = await _solutionRepository.VerifyExerciseInSessionAsync(dto.SessionId, exerciseId);
+        if (!exerciseInSession)
+        {
+            _logger.LogWarning("User {UserId} atempted to solve Exercise {Exerciseid} not in Session {SessionId}", userId, exerciseId, dto.SessionId);
+            return Result.Fail("Exercise not in session");
+        }
         // validate anon user is part of a given session
         // Short circuit if user is not part of the session
         var userExistsInSession = await _solutionRepository.CheckUserAssociationToSessionAsync(userId, dto.SessionId);
