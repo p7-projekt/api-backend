@@ -57,7 +57,7 @@ public class ExerciseService : IExerciseService
             return Result.Fail("Failed to retreive exercise");
         }
         exercise.InputParameterType = tempTestcases.First().Input.Select(x => x.ParameterType).ToList();
-        exercise.OutputParamaterType = tempTestcases.First().Output.Select(x => x.ParameterType).ToList();
+        exercise.OutputParameterType = tempTestcases.First().Output.Select(x => x.ParameterType).ToList();
 
         return Result.Ok(exercise);
     }

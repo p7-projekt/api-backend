@@ -36,7 +36,7 @@ public record SubmissionDto
             var outputParams = new List<Parameter>();
             for (int j = 0; j < testCase.OutputParams.Length; j++)
             {
-                outputParams.Add(new Parameter(dto.OutputParamaterType[j], testCase.OutputParams[j]));
+                outputParams.Add(new Parameter(dto.OutputParameterType[j], testCase.OutputParams[j]));
             }
 
             TestCases.Add(new SubmissionTestCase(i, inputParams, outputParams));

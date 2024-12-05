@@ -201,7 +201,7 @@ namespace Infrastructure
                 // Combines the order of the paramater, with the respective type and value in a shared list.
                 // Reason being that they are iterated over together in the subsequent query.
                 var InputParamDataStructure = ConstructTestcaseParameterQueryArgument(dto.Testcases.ElementAt(i), dto.InputParameterType, IsOutput: false);
-                var OutputParamDataStructure = ConstructTestcaseParameterQueryArgument(dto.Testcases.ElementAt(i), dto.OutputParamaterType, IsOutput: true);
+                var OutputParamDataStructure = ConstructTestcaseParameterQueryArgument(dto.Testcases.ElementAt(i), dto.OutputParameterType, IsOutput: true);
                 insertedParameters += await con.ExecuteAsync(insertParameterQuery,
                     InputParamDataStructure.Select(x => new
                     {

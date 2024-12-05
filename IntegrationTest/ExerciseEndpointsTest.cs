@@ -589,7 +589,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
             Description = "A function that calculates the sum of two integers.",
             Solution = "solution x =\n  if x < 0\n     x * (-1)\n    else x",
             InputParameterType = new[] { "int" },
-            OutputParamaterType = new[] { "int" },
+            OutputParameterType = new[] { "int" },
             Testcases = new[]
             {
                 new { InputParams = new[] { "1" }, OutputParams = new[] { "1" }, PublicVisible = true },
