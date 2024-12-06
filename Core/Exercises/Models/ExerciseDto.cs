@@ -8,6 +8,6 @@ public record ExerciseDto(
     string Solution,
     int SolutionLanguage,
     string[] InputParameterType,
-    string[] OutputParamaterType,
+    string[] OutputParameterType,
     List<TestcaseDto> Testcases
 );

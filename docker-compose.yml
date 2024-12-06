@@ -13,6 +13,12 @@
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       CONNECTIONSTRING: Host=${POSTGRES_HOST};Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};
+      MOZART_HASKELL: mozart-haskell:8080
+      MOZART_PYTHON: mozart-python:8081
+      SEED_ADMIN: true
+      ADMIN_MAIL: someEmail@email.dk
+      ADMIN_PASS: YourPass!1231
+
       PERFORMANCE_TEST: false
   db:
     container_name: p7-api-db

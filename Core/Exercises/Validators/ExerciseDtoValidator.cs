@@ -19,8 +19,8 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
         RuleFor(x => x.Solution).MaximumLength(10000).WithMessage("The proposed solution is too long");
         RuleFor(x => x.InputParameterType).NotEmpty().WithMessage("Type of input parameter must be provided");
         RuleFor(x => x.InputParameterType).Must(ParametersAreValidType).WithMessage("Input parameter must be of a valid type");
-        RuleFor(x => x.OutputParamaterType).NotEmpty().WithMessage("Type of output parameter must be provided");
-        RuleFor(x => x.OutputParamaterType).Must(ParametersAreValidType).WithMessage("Output parameter must be of a valid type");
+        RuleFor(x => x.OutputParameterType).NotEmpty().WithMessage("Type of output parameter must be provided");
+        RuleFor(x => x.OutputParameterType).Must(ParametersAreValidType).WithMessage("Output parameter must be of a valid type");
         RuleFor(x => x.Testcases).NotEmpty().WithMessage("Test cases must be provided");
         RuleFor(x => x.Testcases).Must(HaveAllParameters).WithMessage("All testcases must have both input and output");
         RuleFor(x => x.Testcases).Must(HasSameParameterAmount).WithMessage("All testcases must have the same amount of parameters");
@@ -117,9 +117,9 @@ public class ExerciseDtoValidator : AbstractValidator<ExerciseDto>
                         default: _logger.LogInformation("Invalid input"); return false;
                     }
                 }
-                for (int i = 0; i < dto.OutputParamaterType.Length; i++)
+                for (int i = 0; i < dto.OutputParameterType.Length; i++)
                 {
-                    switch (dto.OutputParamaterType[i].ToLower())
+                    switch (dto.OutputParameterType[i].ToLower())
                     {
                         case "bool": var tempOutBool = bool.Parse(testcase.OutputParams[i]); break;
                         case "int": var tempOutInt = Int64.Parse(testcase.OutputParams[i]); break;

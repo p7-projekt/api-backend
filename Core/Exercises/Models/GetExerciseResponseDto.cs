@@ -13,7 +13,7 @@ public class GetExerciseResponseDto
     public string Title { get; set; } = string.Empty;
     public string Solution {  get; set; } = string.Empty;
     public List<string> InputParameterType { get; set; } = new();
-    public List<string> OutputParamaterType { get; set; } = new();
+    public List<string> OutputParameterType { get; set; } = new();
     public List<TestcaseDto> TestCases { get; set; } = new();
 
     public int LanguageId { get; set; }
