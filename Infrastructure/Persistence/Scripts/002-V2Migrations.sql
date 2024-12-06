@@ -36,6 +36,11 @@ ALTER TABLE submission
     ADD COLUMN solution TEXT,
     ADD COLUMN language_id INTEGER REFERENCES language_support(language_id) NOT NULL DEFAULT 9999999,
     ADD COLUMN solved BOOLEAN NOT NULL DEFAULT false;
+BEGIN;
+ALTER TABLE submission DROP CONSTRAINT solved_pkey;
+ALTER TABLE submission ADD CONSTRAINT solved_pkey PRIMARY KEY (user_id, exercise_id, session_id);
+COMMIT;
+
 
 CREATE TABLE language_in_session (
     session_id INTEGER REFERENCES session(session_id) ON DELETE CASCADE,

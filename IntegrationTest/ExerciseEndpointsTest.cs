@@ -439,6 +439,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var solutionRepoSub = scope.ServiceProvider.GetService<ISolutionRepository>();
         var mozartServiceSub = scope.ServiceProvider.GetService<IMozartService>();
 
+        solutionRepoSub.VerifyExerciseInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         solutionRepoSub.CheckUserAssociationToSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         var language = new LanguageSupport { Id = 1 };
         solutionRepoSub.GetSolutionLanguageBySession(Arg.Any<int>(), Arg.Any<int>()).Returns(language);
@@ -465,6 +466,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var solutionRepoSub = scope.ServiceProvider.GetService<ISolutionRepository>();
         var mozartServiceSub = scope.ServiceProvider.GetService<IMozartService>();
 
+        solutionRepoSub.VerifyExerciseInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         solutionRepoSub.CheckUserAssociationToSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         var language = new LanguageSupport { Id = 2 };
         solutionRepoSub.GetSolutionLanguageBySession(Arg.Any<int>(), Arg.Any<int>()).Returns(language);
@@ -491,6 +493,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var solutionRepoSub = scope.ServiceProvider.GetService<ISolutionRepository>();
         var mozartServiceSub = scope.ServiceProvider.GetService<IMozartService>();
 
+        solutionRepoSub.VerifyExerciseInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         solutionRepoSub!.CheckUserAssociationToSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         mozartServiceSub!.SubmitSubmission(Arg.Any<SubmissionDto>(), (Language)99)
             .Returns(Task.FromException<Result<SolutionRunnerResponse>>(
@@ -514,6 +517,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var solutionRepoSub = scope.ServiceProvider.GetService<ISolutionRepository>();
         var mozartServiceSub = scope.ServiceProvider.GetService<IMozartService>();
 
+        solutionRepoSub.VerifyExerciseInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         solutionRepoSub.CheckUserAssociationToSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         var language = new LanguageSupport { Id = 1 };
         solutionRepoSub.GetSolutionLanguageBySession(Arg.Any<int>(), Arg.Any<int>()).Returns(language);
@@ -543,6 +547,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var solutionRepoSub = scope.ServiceProvider.GetService<ISolutionRepository>();
         var mozartServiceSub = scope.ServiceProvider.GetService<IMozartService>();
 
+        solutionRepoSub.VerifyExerciseInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         solutionRepoSub.CheckUserAssociationToSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(false);
         var testcasesResponse = new List<Testcase> { new Testcase { TestCaseId = 1, IsPublicVisible = true, Input = { new TestParameter { ParameterType = "int", ParameterValue = "1" } }, Output = { new TestParameter { ParameterType = "int", ParameterValue = "1" } } } };
         solutionRepoSub.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(testcasesResponse);
@@ -567,6 +572,7 @@ public class ExerciseEndpointsTest : IClassFixture<TestWebApplicationFactory<Pro
         var solutionRepoSub = scope.ServiceProvider.GetService<ISolutionRepository>();
         var mozartServiceSub = scope.ServiceProvider.GetService<IMozartService>();
 
+        solutionRepoSub.VerifyExerciseInSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         solutionRepoSub.CheckUserAssociationToSessionAsync(Arg.Any<int>(), Arg.Any<int>()).Returns(true);
         var testcasesResponse = new List<Testcase> { new Testcase { TestCaseId = 1, IsPublicVisible = true, Input = { new TestParameter { ParameterType = "int", ParameterValue = "1" } }, Output = { new TestParameter { ParameterType = "int", ParameterValue = "1" } } } };
         solutionRepoSub.GetTestCasesByExerciseIdAsync(Arg.Any<int>()).Returns(testcasesResponse);
