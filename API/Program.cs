@@ -5,11 +5,11 @@ using Asp.Versioning.Builder;
 using Core;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
-using Core.Solutions.Services;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Serilog;
 using System.Reflection;
+using Infrastructure.Mozart;
 
 namespace API;
 

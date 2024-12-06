@@ -1,6 +1,6 @@
 using Core.Solutions.Contracts;
 
-namespace Core.Solutions.Strategies;
+namespace Infrastructure.Mozart.Strategies;
 
 public class PythonStrategy : IMozartStrategy
 {
