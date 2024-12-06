@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Core.Languages.Models;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
@@ -39,8 +41,12 @@ public class MozartService : IMozartService
         var mozartResponse = new SolutionRunnerResponse();
         if (response.IsSuccessStatusCode)
         {
-        var responseAction = await response.Content.ReadFromJsonAsync<SolutionResponseDto>();
-            switch (responseAction?.Result)
+
+            
+            var responseObj = await response.Content.ReadFromJsonAsync<SolutionResponseDto>();
+            var str = await response.Content.ReadAsStringAsync();
+            var obj = JsonSerializer.Deserialize<dynamic>(str);
+            switch (responseObj?.Result)
             {
                 case "pass": 
                     mozartResponse.Action = ResponseCode.Pass;
@@ -54,10 +60,11 @@ public class MozartService : IMozartService
                     mozartResponse.Action = ResponseCode.Error;
                     break;
                 default:
-                    _logger.LogError("Unknown result received from solution runner: {response}", responseAction);
+                    _logger.LogError("Unknown result received from solution runner: {response}", "err");
                     throw new Exception("Unknown result received from solution runner");
             }
-            mozartResponse.ResponseBody = await response.Content.ReadAsStringAsync();
+
+            mozartResponse.ResponseBody = obj;
             return mozartResponse;
         }
         if (response.StatusCode == HttpStatusCode.UnprocessableContent)

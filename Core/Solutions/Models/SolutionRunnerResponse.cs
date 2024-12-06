@@ -9,7 +9,7 @@ public class SolutionRunnerResponse
 {
 	public ResponseCode Action { get; set; }
 
-	public string ResponseBody { get; set; } = string.Empty;
+	public dynamic? ResponseBody { get; set; }
 }
 
 public enum ResponseCode

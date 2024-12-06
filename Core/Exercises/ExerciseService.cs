@@ -104,7 +104,7 @@ public class ExerciseService : IExerciseService
         return submissionResult;
     }
 
-    public async Task<Result<string>> CreateExercise(ExerciseDto dto, int authorId)
+    public async Task<Result<dynamic>> CreateExercise(ExerciseDto dto, int authorId)
     {
         var result = await _mozartService.SubmitSubmission(new SubmissionDto(dto), (Language)dto.SolutionLanguage);
         if (result.IsFailed)

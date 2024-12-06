@@ -30,7 +30,7 @@ public static class ExerciseEndpoints
                 return TypedResults.Problem(statusCode: 500, title: "Internal server error");
             }
 
-            if(result.Value != null)
+            if (result.Value is JsonElement element && element.ValueKind != JsonValueKind.Undefined && element.ValueKind != JsonValueKind.Null)
             {
                 return TypedResults.BadRequest(result.Value);
             }

@@ -20,7 +20,7 @@ public class SolutionRunnerService : ISolutionRunnerService
         _iMozartService = iMozartService;
     }
 
-    public async Task<Result<string>> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId)
+    public async Task<Result<dynamic?>> SubmitSolutionAsync(SubmitSolutionDto dto, int exerciseId, int userId)
     {
         var exerciseInSession = await _solutionRepository.VerifyExerciseInSessionAsync(dto.SessionId, exerciseId);
         if (!exerciseInSession)
@@ -76,7 +76,7 @@ public class SolutionRunnerService : ISolutionRunnerService
         return Result.Ok();
     }
 
-    private async Task<Result<string>> ValidateInMozart(List<Testcase> testcases, SubmitSolutionDto dto)
+    private async Task<Result<dynamic?>> ValidateInMozart(List<Testcase> testcases, SubmitSolutionDto dto)
     {
         var submission = SubmissionMapper.ToSubmission(testcases, dto.Solution);
         var result = await _iMozartService.SubmitSubmission(submission, (Language)dto.LanguageId);
@@ -87,7 +87,7 @@ public class SolutionRunnerService : ISolutionRunnerService
 
         if (result.Value.Action is ResponseCode.Failure or ResponseCode.Error)
         {
-            return result.Value.ResponseBody;
+            return result.Value.ResponseBody!;
         }
 
         return Result.Ok();
