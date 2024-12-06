@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "dgSpecHash": "1LEK08BJnz4=",
+  "success": true,
+  "projectFilePath": "/home/runner/work/api-backend/api-backend/Core/Core.csproj",
+  "expectedPackageFiles": [
+    "/home/runner/.nuget/packages/fluentresults/3.16.0/fluentresults.3.16.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/fluentvalidation/11.10.0/fluentvalidation.11.10.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/fluentvalidation.dependencyinjectionextensions/11.10.0/fluentvalidation.dependencyinjectionextensions.11.10.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/microsoft.extensions.configuration.abstractions/8.0.0/microsoft.extensions.configuration.abstractions.8.0.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/microsoft.extensions.dependencyinjection/8.0.0/microsoft.extensions.dependencyinjection.8.0.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.0/microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/microsoft.extensions.diagnostics.abstractions/8.0.0/microsoft.extensions.diagnostics.abstractions.8.0.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/microsoft.extensions.fileproviders.abstractions/8.0.0/microsoft.extensions.fileproviders.abstractions.8.0.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/microsoft.extensions.hosting.abstractions/8.0.0/microsoft.extensions.hosting.abstractions.8.0.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/microsoft.extensions.logging.abstractions/8.0.0/microsoft.extensions.logging.abstractions.8.0.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/microsoft.extensions.options/8.0.0/microsoft.extensions.options.8.0.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/microsoft.extensions.primitives/8.0.0/microsoft.extensions.primitives.8.0.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/quartz/3.13.0/quartz.3.13.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/quartz.extensions.dependencyinjection/3.13.0/quartz.extensions.dependencyinjection.3.13.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/quartz.extensions.hosting/3.13.0/quartz.extensions.hosting.3.13.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/system.diagnostics.diagnosticsource/8.0.0/system.diagnostics.diagnosticsource.8.0.0.nupkg.sha512",
+    "/home/runner/.nuget/packages/system.threading.tasks.extensions/4.5.4/system.threading.tasks.extensions.4.5.4.nupkg.sha512"
+  ],
+  "logs": []
+}
