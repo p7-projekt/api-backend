@@ -6,7 +6,7 @@ using Core.Languages.Models;
 using Core.Solutions;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
-using Core.Solutions.Services;
+using Infrastructure.Mozart;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestPlatform.Common.Interfaces;
 using NSubstitute;

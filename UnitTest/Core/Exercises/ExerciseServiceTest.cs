@@ -3,7 +3,6 @@ using Core.Exercises.Contracts;
 using Core.Exercises.Models;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
-using Core.Solutions.Services;
 using FluentResults;
 using Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +15,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Infrastructure.Mozart;
 using UnitTest.Core.Solutions;
 
 namespace UnitTest.Core.Exercises;

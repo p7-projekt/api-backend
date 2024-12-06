@@ -3,11 +3,11 @@ using System.Net.Http.Json;
 using Core.Languages.Models;
 using Core.Solutions.Contracts;
 using Core.Solutions.Models;
-using Core.Solutions.Strategies;
 using FluentResults;
+using Infrastructure.Mozart.Strategies;
 using Microsoft.Extensions.Logging;
 
-namespace Core.Solutions.Services;
+namespace Infrastructure.Mozart;
 
 public class MozartService : IMozartService
 {

@@ -4,7 +4,7 @@ using System.Text;
 using Core.Exercises.Models;
 using Core.Languages.Models;
 using Core.Solutions.Models;
-using Core.Solutions.Services;
+using Infrastructure.Mozart;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using UnitTest.Setup;
