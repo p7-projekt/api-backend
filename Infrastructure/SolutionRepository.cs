@@ -191,6 +191,16 @@ public class SolutionRepository : ISolutionRepository
 		return true;
 	}
 	
+	public async Task<bool> VerifyExerciseInSessionAsync(int sessionId, int exerciseId)
+	{
+		using var con = await _dbConnection.CreateConnectionAsync();
+
+		var query = "SELECT COUNT(*) FROM exercise_in_session WHERE session_id = @SessionId AND exercise_id = @ExerciseId";
+
+		var result = await con.QuerySingleAsync<int>(query, new { SessionId = sessionId, ExerciseId = exerciseId });
+
+		return result > 0;
+	}
 	
 	public async Task<bool> InsertSolvedRelation(int userId, int exerciseId, int sessionId)
 	{
