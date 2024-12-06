@@ -38,7 +38,7 @@ public class TokenService : ITokenService
             issuer: AuthConstants.Issuer,
             audience: AuthConstants.Audience,
             claims: claims,
-            expires: performanceTest ? DateTime.UtcNow.AddHours(12) : DateTime.UtcNow.AddMinutes(AuthConstants.JwtExpirationInMinutes),
+            expires: performanceTest ? DateTime.UtcNow.AddDays(7) : DateTime.UtcNow.AddMinutes(AuthConstants.JwtExpirationInMinutes),
             signingCredentials: GetSigningCredentials()
         );
         return new JwtSecurityTokenHandler().WriteToken(token);
