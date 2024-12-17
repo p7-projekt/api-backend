@@ -1,0 +1,16 @@
+/home/runner/work/api-backend/api-backend/Infrastructure/bin/Debug/net8.0/Infrastructure.deps.json
+/home/runner/work/api-backend/api-backend/Infrastructure/bin/Debug/net8.0/Infrastructure.dll
+/home/runner/work/api-backend/api-backend/Infrastructure/bin/Debug/net8.0/Infrastructure.pdb
+/home/runner/work/api-backend/api-backend/Infrastructure/bin/Debug/net8.0/Core.dll
+/home/runner/work/api-backend/api-backend/Infrastructure/bin/Debug/net8.0/Core.pdb
+/home/runner/work/api-backend/api-backend/Infrastructure/obj/Debug/net8.0/Infrastructure.csproj.AssemblyReference.cache
+/home/runner/work/api-backend/api-backend/Infrastructure/obj/Debug/net8.0/Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+/home/runner/work/api-backend/api-backend/Infrastructure/obj/Debug/net8.0/Infrastructure.AssemblyInfoInputs.cache
+/home/runner/work/api-backend/api-backend/Infrastructure/obj/Debug/net8.0/Infrastructure.AssemblyInfo.cs
+/home/runner/work/api-backend/api-backend/Infrastructure/obj/Debug/net8.0/Infrastructure.csproj.CoreCompileInputs.cache
+/home/runner/work/api-backend/api-backend/Infrastructure/obj/Debug/net8.0/Infrastructure.sourcelink.json
+/home/runner/work/api-backend/api-backend/Infrastructure/obj/Debug/net8.0/Infrastr.15EFFBFE.Up2Date
+/home/runner/work/api-backend/api-backend/Infrastructure/obj/Debug/net8.0/Infrastructure.dll
+/home/runner/work/api-backend/api-backend/Infrastructure/obj/Debug/net8.0/refint/Infrastructure.dll
+/home/runner/work/api-backend/api-backend/Infrastructure/obj/Debug/net8.0/Infrastructure.pdb
+/home/runner/work/api-backend/api-backend/Infrastructure/obj/Debug/net8.0/ref/Infrastructure.dll
